@@ -11,12 +11,13 @@ Instead of grouping solutions by ephemeral project names, case studies are organ
 ```
 .
 ├── 01-networking-and-io/              # Socket framing, protocol engines, raw I/O
-├── 02-security-and-sandboxing/        # Mid-flight pause, SSRF, seccomp, WebAuthn, archive limits
-├── 03-concurrency-and-race-conditions/# Advisory locks, distributed mutexes, hardware yield
+├── 02-security-and-sandboxing/        # Mid-flight pause, SSRF, seccomp, WebAuthn, envelope encryption
+├── 03-concurrency-and-race-conditions/# Advisory locks, distributed mutexes, sliding window upserts
 ├── 04-memory-and-performance/         # Zero-copy parsing, RAM reverse-scraping, GC mitigation
 ├── 05-os-and-process-architecture/    # Subprocess lifecycle, SQLite file-lock bypasses, DPAPI
 ├── 06-autonomous-agents-and-automation/# Atomic intent macros, deterministic DOM geometry
-└── 07-fintech-and-billing-invariants/ # Partial unique indexes, setup leases, audit atomicity
+├── 07-fintech-and-billing-invariants/ # Partial unique indexes, timing-safe webhooks, audit atomicity
+└── 08-devops-and-disaster-recovery/   # Automated ephemeral database restore verification
 ```
 
 ---
@@ -59,6 +60,16 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Atomic per-user locking around passkey deletion, serializing requests and rejecting the final key with `409 ADMIN_FINAL_PASSKEY_REQUIRED`. 10 CSPRNG recovery codes shown once and stored strictly as HMAC-SHA256 hashes, invalidating prior step-up markers upon use.
   * **Metrics & Results:** 0 administrator lockouts, phishing-resistant WebAuthn enforcement, zero plaintext recovery codes in storage.
 
+* ### [👉 How to stream AES-256-GCM envelope encryption for multi-gigabyte source archives without V8 heap exhaustion?](./02-security-and-sandboxing/streaming-aes-gcm-envelope-encryption-at-rest)
+  * **The Challenge:** Reading large source archives into Node.js Buffers to encrypt at rest duplicates payloads across V8 heap memory, crashing containers via Linux OOM killers. Storing unauthenticated ciphertext risks bit-flipping attacks.
+  * **The Engineering Fix:** Streaming authenticated envelope encryption with a custom 32-byte binary header (`WPA1` magic bytes, 12-byte CSPRNG IV, and 16-byte GCM MAC tag). Pipelines directly through crypto ciphers to disk with `0o600` permissions.
+  * **Metrics & Results:** Constant 32-byte RAM overhead regardless of file size, 100% cryptographic integrity authentication, zero persistent plaintext.
+
+* ### [👉 How to sanitize credentials and session secrets leaked in dynamically rendered SPA DOM links and console diagnostics?](./02-security-and-sandboxing/dynamic-spa-rendered-credential-leak-redaction)
+  * **The Challenge:** Headless crawlers inspecting client-rendered Single Page Applications extract URLs carrying sensitive query parameters (`?token=...`, `?api_key=...`, `?code=...`). Storing these in reports leaks customer session secrets.
+  * **The Engineering Fix:** In-browser query parameter regex filter (`RENDERED_LINK_SENSITIVE_PARAMETER`) stripping dynamic credential parameters. Diagnostic log sanitizer redacting authorization headers, cookies, and local OS paths before report persistence.
+  * **Metrics & Results:** 100% credential parameter stripping, safe public report sharing, zero customer token leakage.
+
 ---
 
 ### ⚡ 3. Concurrency & Race Conditions
@@ -81,6 +92,16 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Challenge:** Parallel workers bombarding a centralized OWASP ZAP scanner exhaust memory and cross-pollute scan session states. Adding Redis Redlock adds operational complexity and cluster failure modes.
   * **The Engineering Fix:** Asynchronous distributed mutex built directly on PostgreSQL connection pool via `SELECT pg_try_advisory_lock(hashtext('wpa-zap-baseline'))`, with backoff polling, AbortSignal cancellation, and automatic lock release on socket close.
   * **Metrics & Results:** 0 external daemons, cluster-wide scanner serialization, automatic recovery upon worker OOM/crash.
+
+* ### [👉 How to implement atomic sliding window rate limiting in PostgreSQL without Redis or Lua scripts?](./03-concurrency-and-race-conditions/postgres-atomic-sliding-window-rate-limit)
+  * **The Challenge:** Multi-pod API rate limiting typically forces teams to deploy Redis clusters with complex Lua scripts. In-memory maps fail behind load balancers.
+  * **The Engineering Fix:** Single-query PostgreSQL atomic `INSERT ... ON CONFLICT (namespace, key) DO UPDATE` calculating elapsed sliding windows inside SQL `CASE` expressions in 1 roundtrip.
+  * **Metrics & Results:** Zero Redis clusters, 100% cluster-wide consistency, sub-millisecond execution.
+
+* ### [👉 How to fence zombie worker overwrites during long-running distributed analysis tasks using heartbeat leases and CAS?](./03-concurrency-and-race-conditions/distributed-job-lease-heartbeat-cas-settlement)
+  * **The Challenge:** Workers undergoing CPU freezes or temporary network partitions get dropped by queues and reassigned. When the original worker revives, it overwrites the new worker's results with stale data (Zombie Worker).
+  * **The Engineering Fix:** Periodic background heartbeat loop extending lease duration in PostgreSQL, paired with Compare-And-Swap (CAS) completion queries verifying lease tokens before persisting results.
+  * **Metrics & Results:** Zero zombie worker data corruptions, support for arbitrary-length crawl tasks, sandboxed path traversal cleanup.
 
 ---
 
@@ -113,6 +134,19 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Challenge:** User double-clicks or multi-tab checkout interactions spawn duplicate provider sessions and ghost subscriptions. Asynchronous audit logging risks committing commercial mutations without audit trails if disk or network fails.
   * **The Engineering Fix:** PostgreSQL partial unique index `CREATE UNIQUE INDEX ... ON wpa_checkout_acceptances(workspace_id) WHERE status IN ('accepted','checkout_created')`. Bounded setup lease tokens (`setup_lease_owner`, `setup_lease_token`). Mandatory audit atomicity: if `INSERT INTO wpa_audit_log` fails, the transaction immediately issues `ROLLBACK`.
   * **Metrics & Results:** 0 duplicate checkout sessions, strict transactional rollback on audit log failure.
+
+* ### [👉 How to prevent billing webhook timing attacks and out-of-order state regression with replay fencing?](./07-fintech-and-billing-invariants/timing-safe-webhook-replay-fencing)
+  * **The Challenge:** Comparing webhook HMAC signatures with standard string equality exposes endpoints to side-channel timing attacks. Unbounded timestamp verification allows captured webhooks to be replayed to steal subscriptions.
+  * **The Engineering Fix:** Constant-time verification using `crypto.timingSafeEqual()`, strict 5-second replay fence, and monotonic `occurred_at` sequencing ensuring delayed webhooks never regress active subscriptions.
+  * **Metrics & Results:** Zero timing leak surface, replay-proof billing verification, monotonic state consistency.
+
+---
+
+### 🚀 8. DevOps & Disaster Recovery
+* ### [👉 How to guarantee disaster recovery readiness by automatically verifying encrypted database restores in disposable containers?](./08-devops-and-disaster-recovery/automated-ephemeral-database-restore-validation)
+  * **The Challenge:** Backups that are never restored are unverified hypotheses. Corrupted archives, rotated encryption keys, or migration bugs are only discovered during actual production loss.
+  * **The Engineering Fix:** POSIX disaster recovery validation harness executing with `set -eu` and `umask 077`. Validates SHA-256 sums, decrypts `age` encrypted dumps, provisions an ephemeral database (`wpa_restore_check_${timestamp}`), executes restore with `--exit-on-error`, validates row counts across core tables, and shreds all temporary state via shell traps.
+  * **Metrics & Results:** Continuous mathematical proof of DR readiness, zero disk residue on completion or failure.
 
 ---
 
