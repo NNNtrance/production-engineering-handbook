@@ -70,6 +70,16 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** In-browser query parameter regex filter (`RENDERED_LINK_SENSITIVE_PARAMETER`) stripping dynamic credential parameters. Diagnostic log sanitizer redacting authorization headers, cookies, and local OS paths before report persistence.
   * **Metrics & Results:** 100% credential parameter stripping, safe public report sharing, zero customer token leakage.
 
+* ### [👉 How to prevent lateral movement from compromised worker containers using 5-tier Docker bridge segmentation?](./02-security-and-sandboxing/multi-network-bridge-segmentation-least-privilege)
+  * **The Challenge:** Placing microservices and browser workers on a shared Docker bridge network allows an attacker exploiting a Chromium zero-day to port-scan PostgreSQL or harvest AI and billing secrets from adjacent services.
+  * **The Engineering Fix:** 5 segregated bridge networks with Linux iptables enforcement: `app-internal` and `data-internal` air-gapped without internet routing (`internal: true`). Analysis workers attached exclusively to `analysis-egress` without route to payment or AI secret environments.
+  * **Metrics & Results:** 0 cross-network routes, lateral movement physically blocked by iptables, zero billing/AI keys exposed in analysis workers.
+
+* ### [👉 How to enforce database least-privilege role separation and fail-closed worker startup attestation?](./02-security-and-sandboxing/least-privilege-database-role-separation-at-startup)
+  * **The Challenge:** Connecting web backends with a single God-mode `postgres` user grants compromised worker containers authority to delete user records, wipe audit ledgers, or alter schema tables.
+  * **The Engineering Fix:** 5 segregated PostgreSQL roles (`wpa_owner`, `wpa_migrator`, `wpa_runtime`, `wpa_worker`, `wpa_maintenance`). Browser worker role has 0 DELETE grants. On startup, workers attest active role via `SELECT current_user AS role` and fail closed if role mismatches expected config.
+  * **Metrics & Results:** Zero worker DELETE permissions, fail-closed startup validation, guaranteed audit log immutability against worker exploits.
+
 ---
 
 ### ⚡ 3. Concurrency & Race Conditions
@@ -111,6 +121,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Hooking CDP `Network.getResponseBody` to extract uncompressed REST/GraphQL JSON responses directly from Chrome's RAM cache before HTML DOM rendering.
   * **Metrics & Results:** 0 prompt tokens burned on HTML markup, extraction latency drops from 4000ms to `<10ms`, 100% authoritative data.
 
+* ### [👉 How to audit responsive UI collisions and WCAG contrast in <50ms without vision models or screenshots?](./04-memory-and-performance/in-browser-aabb-collision-and-wcag-luminance-math)
+  * **The Challenge:** Multi-modal vision models inspecting responsive layouts for overlapping elements and low-contrast text are slow (3-8s), expensive ($0.05/page), non-deterministic, and fail on dynamic viewports.
+  * **The Engineering Fix:** Axis-Aligned Bounding Box (AABB) 2D geometry collision detection with DOM ancestry exclusion (`!a.contains(b)`) paired with recursive parent luminance bubbling implementing the W3C sRGB gamma expansion formula directly inside Chrome V8 memory.
+  * **Metrics & Results:** 0 vision tokens burned, <50ms execution roundtrip, 100% deterministic pixel math.
+
 ---
 
 ### 💻 5. Operating System & Process Management
@@ -126,6 +141,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Challenge:** Brute-force N-turn agent loops take 5 separate LLM turns (20-30s latency, $0.20+ token cost) and break on dynamic Single Page Applications.
   * **The Engineering Fix:** Client-side atomic intent macros (`searchAndSelect`) that detect platform target inputs and evaluate layout geometry (`getBoundingClientRect()` and `offsetParent !== null`) to execute search, centering, and click dispatch in a single evaluation tick.
   * **Metrics & Results:** LLM turns cut from 5 to 1, latency dropped from 22s to `1.2s`, token consumption reduced by 90%.
+
+* ### [👉 How to neutralize crawler traps, infinite calendars, and combinatorial query explosions with bounded limits?](./06-autonomous-agents-and-automation/crawler-trap-and-combinatorial-explosion-defense)
+  * **The Challenge:** Autonomous crawlers get trapped in adversarial website topologies: infinite forward-clicking calendar widgets (`/events/2099/12`), faceted search filter matrix explosions generating millions of permutations, and recursive sitemap bombs.
+  * **The Engineering Fix:** Mathematical boundary invariants: `maxCalendarYearDrift: 5` severs infinite date links, path depth clamped to 16, query parameter variants capped at 5 per unique path, and sitemap streams bounded to 8 MB and depth 3.
+  * **Metrics & Results:** Zero crawler OOM crashes, strictly bounded execution runtime, O(1) crawler memory footprint.
 
 ---
 
@@ -147,6 +167,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Challenge:** Backups that are never restored are unverified hypotheses. Corrupted archives, rotated encryption keys, or migration bugs are only discovered during actual production loss.
   * **The Engineering Fix:** POSIX disaster recovery validation harness executing with `set -eu` and `umask 077`. Validates SHA-256 sums, decrypts `age` encrypted dumps, provisions an ephemeral database (`wpa_restore_check_${timestamp}`), executes restore with `--exit-on-error`, validates row counts across core tables, and shreds all temporary state via shell traps.
   * **Metrics & Results:** Continuous mathematical proof of DR readiness, zero disk residue on completion or failure.
+
+* ### [👉 How to mathematically verify container runtime drift and database migration checksums using SHA-256 Merkle trees?](./08-devops-and-disaster-recovery/production-runtime-drift-merkle-tree-verification)
+  * **The Challenge:** Deploying Docker images without deterministic verification introduces silent container drift: hot-fixes applied via `docker exec`, omitted configuration files, or database migration files altered post-deployment.
+  * **The Engineering Fix:** Recursive SHA-256 Merkle tree manifest audit comparing source vs container runtime directories, classified by `.dockerignore` rule buckets, paired with cryptographic verification of live PostgreSQL `wpa_schema_migrations` checksum ledgers.
+  * **Metrics & Results:** 100% deterministic drift detection, zero untracked code modifications surviving in production, guaranteed SQL migration ledger integrity.
 
 ---
 

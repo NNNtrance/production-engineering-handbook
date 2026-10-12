@@ -1,0 +1,14 @@
+networks:
+  app-internal:    { internal: true } # Frontend <-> API <-> Isolated microservices
+  data-internal:   { internal: true } # API / Workers <-> PostgreSQL
+  analysis-egress: {}                 # Only analysis-worker has public internet access
+  ai-egress:       {}                 # Only ai-service can reach OpenRouter
+  email-egress:    {}                 # Only email-service can reach Resend
+
+services:
+  api:
+    networks: [app-internal, data-internal] # Zero analysis egress; no Chromium
+  analysis-worker:
+    networks: [data-internal, analysis-egress] # Zero auth/Stripe/AI secrets; cap_drop: ALL
+  ai-service:
+    networks: [app-internal, ai-egress] # Isolated AI provider token; no database access
