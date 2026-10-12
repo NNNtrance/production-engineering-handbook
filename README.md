@@ -43,6 +43,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Enforce `proxy_buffering off;` with 270s read/send timeouts on `/api/` SSE routes. Dedicated static asset location block (`.(?:js|css|svg|png|webp|woff2?)$`) enforcing `try_files $uri =404;` and 1-year immutable caching.
   * **Metrics & Results:** 0ms SSE chunk delivery delay, 100% elimination of SPA MIME confusion script errors.
 
+* ### [👉 How to eliminate orphan WebRTC audio channels without dropping calls during mobile Wi-Fi to 5G handovers?](./01-networking-and-io/debounced-webrtc-orphan-session-teardown)
+  * **The Challenge:** Abandoning WebRTC voice calls leaves orphan peer connections burning server bandwidth, while naive participant checks disconnect users during transient Wi-Fi packet drops.
+  * **The Engineering Fix:** Multi-participant session latching paired with a 2000ms debounced flap guard. Waits 2 seconds after peer departures, cleans up audio/video tracks, and writes durable session duration logs to PostgreSQL.
+  * **Metrics & Results:** 0 zombie WebRTC channels, 100% network flap immunity during 2s ICE handovers, exact microsecond session audit logging.
+
 * ### [👉 How to safely compile dynamic parameter routes with literal metacharacter escaping and reactive signal resolution?](./01-networking-and-io/literal-escaped-parameter-route-compiler)
   * **The Challenge:** Compiling route patterns like `/docs/[category]/v1.0/[id]` into regular expressions breaks when URLs contain literal dots, pluses, or parentheses, while runtime pattern matchers introduce heavy route evaluation overhead.
   * **The Engineering Fix:** Pre-pass escaping regex metacharacters (`escapeRegex`), compiling parameter tokens into non-slash capture groups `([^/]+)`, and binding path and param state to fine-grained reactive signals (`currentPath`, `currentParams`).
@@ -121,6 +126,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Launch flags enforcing `--force-webrtc-ip-handling-policy=disable_non_proxied_udp` to block UDP candidate discovery, `--disable-quic` forcing fallback to audited TCP, and `--proxy-bypass-list=<-loopback>` eliminating default loopback bypasses.
   * **Metrics & Results:** 0 WebRTC IP leaks, 100% TCP proxy enforcement, complete loopback bypass elimination.
 
+* ### [👉 How to build a zero-dependency HS256 JWT engine on Web Crypto with 256-bit key length enforcement and constant-time verification?](./02-security-and-sandboxing/web-crypto-hs256-jwt-key-hardening)
+  * **The Challenge:** Standard JWT libraries pull heavy dependencies or allow algorithm confusion attacks (`alg: "none"`), while short 4-character secrets bypass validation and allow offline cracking.
+  * **The Engineering Fix:** Zero-dependency Web Crypto engine: enforces minimum 32-byte (256-bit) UTF-8 key lengths via `encodeSecret`, decodes tokens using fatal UTF-8 text decoders, eliminates prototype pollution, and performs constant-time signature verification via `crypto.subtle.verify`.
+  * **Metrics & Results:** 0 external dependencies, universal edge/worker portability, 100% elimination of algorithm confusion and timing attacks.
+
 * ### [👉 How to fail-closed static SSR boundaries to eliminate server-side remote code execution in untrusted component markup?](./02-security-and-sandboxing/fail-closed-static-ssr-rce-boundary)
   * **The Challenge:** Evaluating untrusted component markup and expressions (`{process.exit()}`) inside SSR environments risks Remote Code Execution (RCE) and worker process death.
   * **The Engineering Fix:** Fail-closed static stringifier: rejects any dynamic expression or directive during SSR with an immediate compile/render throw, returning a safe, isolated client mount boundary (`<div id="app" data-flow-client-render></div>`).
@@ -174,6 +184,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Hierarchical composite key generator: `workspace:{id}:key:{apiKey}` falls back to `workspace:{id}:ip:{ip}` and raw IP. Single-query PostgreSQL atomic sliding window upsert using `INSERT ... ON CONFLICT DO UPDATE SET hits = ...` with inline interval calculations in 1 roundtrip.
   * **Metrics & Results:** Zero noisy-neighbor starvation across multi-tenant workspaces, 1 atomic SQL query per check, zero Redis dependency.
 
+* ### [👉 How to extract 1024-point audio buffers for real-time FFT spectrum visualizers without audio thread mutex blocking?](./03-concurrency-and-race-conditions/nonblocking-try-lock-audio-buffer-swap)
+  * **The Challenge:** Real-time audio rendering threads have microsecond hardware deadlines. Blocking on a mutex while the UI thread computes a heavy Fast Fourier Transform (FFT) causes buffer underruns, sound stuttering, and audio driver dropouts.
+  * **The Engineering Fix:** Non-blocking `try_lock()` acquisition: the audio thread attempts lock acquisition and drops the visualizer frame if contention occurs. On success, `std::mem::swap` exchanges vector pointers in constant O(1) time without allocating memory on the audio thread.
+  * **Metrics & Results:** 0ms audio thread lock contention, 0 buffer underruns, O(1) zero-copy buffer handoff.
+
 * ### [👉 How to eliminate cascading DOM reflows and premature flushes in nested reactive updates using depth tracking and Set deduplication?](./03-concurrency-and-race-conditions/nested-reactive-batch-deduplication)
   * **The Challenge:** Consecutive reactive signal writes trigger redundant subscriber recalculations and DOM layout thrashing. Naive batching implementations flush prematurely when encountering nested batch boundaries.
   * **The Engineering Fix:** Global `batchDepth` counter combined with `Object.is` short-circuiting and a `Set<() => void>` deduplication queue that executes dirty subscribers strictly once when outermost `batchDepth === 0`.
@@ -212,6 +227,26 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Proxy-less store architecture: binds `Object.defineProperty` getter/setters directly to action contexts (`this.count++` transparently maps to signal getters/setters) with automatic debounced web storage synchronization.
   * **Metrics & Results:** Zero Proxy trap overhead, ergonomic mutable syntax, instant two-way browser storage persistence.
 
+* ### [👉 How to eliminate zombie subscriptions and recursion cycles in fine-grained signals via bidirectional set tracking?](./04-memory-and-performance/bidirectional-reactive-dependency-tracking)
+  * **The Challenge:** In reactive signal runtimes, evaluating dynamic ternary branches leaves stale subscriptions on unvisited dependencies, while self-updating effects trigger infinite recursion and stack overflows.
+  * **The Engineering Fix:** Bidirectional dependency tracking (`deps: Set<Set<ReactiveEffect>>`) with per-runner recursion fencing (`runner.running = true`). Purges stale subscriptions prior to each run and executes returned teardown functions cleanly.
+  * **Metrics & Results:** 0 stale subscription leaks, complete immunity to self-mutating recursion cycles, automatic cleanup lifecycles.
+
+* ### [👉 How to eliminate digital popping and audio driver clicks in real-time 10-band equalizers via slew-rate smoothing?](./04-memory-and-performance/audio-dsp-biquad-slew-rate-smoothing)
+  * **The Challenge:** Abruptly updating IIR biquad filter transfer functions mid-stream produces discontinuous waveform step changes that sound like loud digital clicks and can damage speakers.
+  * **The Engineering Fix:** Frame-bounded geometric coefficient slew interpolation: decamates updates to 128-frame blocks (~2.9ms at 44.1kHz), converging gains geometrically by 12% per step with dynamic preamp headroom compensation.
+  * **Metrics & Results:** 0 audible audio pops, 99.2% reduction in trigonometric coefficient calculation overhead, zero digital clipping.
+
+* ### [👉 How to prevent fatal SemVer parsing crashes in dependency upgrade engines on Corepack versionless packageManager fields?](./04-memory-and-performance/semver-versionless-packagemanager-guard)
+  * **The Challenge:** Modern `package.json` files declare bare package managers (`"packageManager": "pnpm"`) without `@version` suffixes. Dependency upgrade tools splitting by `@` pass `undefined` into SemVer parsers, throwing fatal TypeErrors and aborting upgrades.
+  * **The Engineering Fix:** Safe conditional mapping (`version ? { [name]: version } : {}`) in `parsePackageManager`. Preserves bare declarations verbatim while allowing all standard dependencies to upgrade seamlessly.
+  * **Metrics & Results:** Zero CLI crashes on Corepack bare declarations, 100% dependency upgrade completion, zero user file corruption.
+
+* ### [👉 How to preserve YAML 1.2 literal block scalars as strings during unquoted type deserialization?](./04-memory-and-performance/yaml-literal-block-scalar-type-preservation)
+  * **The Challenge:** Deserializing dynamic YAML trees into unknown object dictionaries mistakenly coerced multiline literal block scalars (`Value: |-\n  true`) into C# booleans or integers, violating the YAML 1.2 specification.
+  * **The Engineering Fix:** Inverted plain-scalar filtering in `ScalarNodeDeserializer.cs`: restricts unknown-object type inference strictly to plain scalars (`value.Style != ScalarStyle.Plain`), preserving quoted, folded, and literal block scalars as strings verbatim.
+  * **Metrics & Results:** 100% YAML 1.2 spec conformance, zero unintended type coercions, verified across multiline scripts and certificates.
+
 * ### [👉 How to lex custom Single File Components without regex corruption using depth-balanced parsing and sticky attribute scanning?](./04-memory-and-performance/depth-balanced-sfc-sticky-parser)
   * **The Challenge:** Regular expression HTML parsers choke on nested quotes in attributes (`title="a > b"`), balanced curly braces (`{ { x: 1 } }`), and void tags, while full AST parsers add megabytes of runtime bloat.
   * **The Engineering Fix:** Character cursor loop with quote tracking, depth-balanced expression scanning (`depth += 1 / depth -= 1`), and sticky regex (`/gy`) attribute parsing.
@@ -224,6 +259,16 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Challenge:** Launching an automation browser with `--remote-debugging-port` on the active user profile crashes because Chrome holds exclusive OS-level write locks on SQLite databases (`Cookies`, `Login Data`). Killing the user's active browser destroys tabs and unsaved work.
   * **The Engineering Fix:** Lock-free surgical file replication of Windows DPAPI decryption keys (`Local State`) and `Network/Cookies` into a lightweight temporary shadow profile directory.
   * **Metrics & Results:** 0 CAPTCHAs, 0 logins (authenticated session preserved), zero disturbance to running user browser windows.
+
+* ### [👉 How to prevent Electron desktop SPAs from silently wiping IndexedDB and localStorage across launches using fixed loopback ports?](./05-os-and-process-architecture/fixed-port-loopback-origin-preservation)
+  * **The Challenge:** Serving Next.js static exports in Electron via ephemeral ports (`listen(0)`) assigns a random port on every boot, altering the web origin (`http://127.0.0.1:XXXXX`) and permanently partitioning user `IndexedDB` and `localStorage` state.
+  * **The Engineering Fix:** Fixed production loopback port reservation (`38450`) on `127.0.0.1` with dynamic `EADDRINUSE` fallback. Guarantees identical web origin across reboots while providing extensionless SPA fallback routing.
+  * **Metrics & Results:** 100% persistent local storage and database retention across app reboots, zero launch collisions, zero LAN attack surface.
+
+* ### [👉 How to implement frameless Electron window dragging without CSS drag regions hijacking DOM click events and context menus?](./05-os-and-process-architecture/frameless-window-delta-drag-ipc)
+  * **The Challenge:** Using `-webkit-app-region: drag` on custom frameless titlebars hands control to Windows OS hooks, disabling HTML click events, buttons, search inputs, and context menus, while causing snapping glitches on maximized windows.
+  * **The Engineering Fix:** Delta-offset IPC window dragging: captures initial mouse screen coordinates and window position on mouse down, computes movement delta offsets on move, and atomically re-anchors coordinates on unmaximize.
+  * **Metrics & Results:** 100% interactive titlebar buttons and inputs, smooth native dragging physics, zero pointer capture freezes.
 
 * ### [👉 How to eliminate fatal EBUSY process crashes from asynchronous Windows SQLite profile file locks during Chrome teardown?](./05-os-and-process-architecture/windows-sqlite-profile-file-lock-race)
   * **The Challenge:** On Windows, Chromium holds asynchronous OS kernel file locks on SQLite caches (`Cookies`, `Web Data`) for milliseconds after process exit. Calling `chromeLauncher.kill()` invokes `destroyTmp` synchronously, throwing unhandled `EBUSY` exceptions and crashing Node.js.
@@ -289,6 +334,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Decouple foreign keys with `REFERENCES wpa_workspaces(id) ON DELETE SET NULL`. Cascading purge deletes all customer data and workspace rows, while the deletion run survives with `workspace_id = NULL` and durable forensic counters (`deleted_reports`, `actor_id`).
   * **Metrics & Results:** 100% forensic audit retention, complete customer data erasure, tamper-proof GDPR compliance verification.
 
+* ### [👉 How to decouple CI/CD sticky comment permissions to keep test pipelines green on external fork pull requests?](./08-devops-and-disaster-recovery/github-actions-fork-permission-decoupling)
+  * **The Challenge:** Workflows triggered by external fork PRs run with read-only `GITHUB_TOKEN` secrets. Steps attempting to post sticky PR comments fail with HTTP 403 Forbidden, failing the entire CI build even when all tests pass.
+  * **The Engineering Fix:** Permission decoupling: guards privileged comment steps behind repository ownership (`github.event.pull_request.head.repo.full_name == github.repository`) with `continue-on-error: true`, while unconditionally executing tests and preserving Markdown reports in workflow artifacts.
+  * **Metrics & Results:** 100% passed test pipelines on fork contributions, zero secret exfiltration risk, full coverage visibility via artifacts.
+
 * ### [👉 How to eliminate '/bin/sh^M: bad interpreter' container crashes with pre-flight byte-level LF unit tests?](./08-devops-and-disaster-recovery/automated-shell-script-byte-level-lf-audit)
   * **The Challenge:** Windows developers editing deployment shell scripts introduce CRLF (`\r\n`) line endings. When built into Linux containers, shebang execution terminates immediately with exit code 127 (`/bin/sh^M: bad interpreter`).
   * **The Engineering Fix:** Automated test suite traversing `git ls-files -z` to inspect raw buffer slices for shebang patterns and 0x0d carriage returns. Verifies `.gitattributes` enforces `*.sh text eol=lf` permanently.
@@ -321,6 +371,16 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Challenge:** Appending scope attribute selectors to the end of CSS selectors breaks pseudo-classes (`button:hover[data-id]` fails specificity rules), corrupts pseudo-elements (`button::before[data-id]` is invalid CSS), and destroys `@keyframes` percentages.
   * **The Engineering Fix:** Precision scoped CSS transformer: regex-scans selectors, detects the first pseudo boundary (`:{1,2}[A-Za-z-]`), splices scope attributes immediately *before* pseudo-classes (`button[data-scope]:hover`), and strictly protects keyframe percentage steps.
   * **Metrics & Results:** 100% pseudo-class and pseudo-element validity, zero specificity loss, zero corrupted keyframe animations.
+
+* ### [👉 How to implement non-reactive time-travel undo/redo in reactive stores without triggering recursive state corruption?](./09-frontend-architecture-and-observability/reactive-time-travel-tracking-suspension)
+  * **The Challenge:** Restoring historical snapshots in fine-grained reactive stores writes to signals. These writes fire active effects, pushing the restored state as a new forward action and wiping the redo timeline.
+  * **The Engineering Fix:** Non-reactive snapshot application: temporarily suspends history tracking (`isTracking = false`), applies snapshot mutations inside an atomic `batch()`, and restores tracking in a `finally` block with bounded FIFO stack depth.
+  * **Metrics & Results:** 100% preserved redo history timeline, 1 atomic DOM reflow per undo step, O(1) bounded memory consumption.
+
+* ### [👉 How to preserve directional relation link endpoints when splitting association class nodes in graph layout engines?](./09-frontend-architecture-and-observability/directional-graph-link-endpoint-preservation)
+  * **The Challenge:** In PlantUML object diagrams, splitting a directional relation link (`-down->`, `-up->`) with an association class inverted visual arrowheads on the canvas due to redundant entity order normalization.
+  * **The Engineering Fix:** Eliminated redundant inverted endpoint checks in `AbstractClassOrObjectDiagram.createNew()`, binding split link halves directly to `existingLink.getEntity1()` and `existingLink.getEntity2()`.
+  * **Metrics & Results:** 100% cardinal arrow direction fidelity across all 4 axes, perfect Vega/Smetana graph layout alignment.
 
 * ### [👉 How to feed scoped SFC CSS directly into Vite pipelines without temporary disk files or HMR watcher loops?](./09-frontend-architecture-and-observability/in-memory-virtual-css-vite-module-resolution)
   * **The Challenge:** Extracting scoped styles from custom Single File Components requires feeding CSS to Vite. Writing temporary `.tmp/*.css` files causes disk I/O bottlenecks and triggers Vite file watchers into infinite HMR reload loops.

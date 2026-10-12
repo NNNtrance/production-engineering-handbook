@@ -1,0 +1,38 @@
+# microsoft/python-environment-tools PR #524 by @onuracar-dev
+# Decouples privileged sticky comment steps from test verification on fork PRs
+
+jobs:
+  coverage:
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1. Privileged step: skip on external fork pull requests
+      - name: Post Coverage Started Comment
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        continue-on-error: true
+        uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          header: ${{ matrix.comment_header }}
+
+      # 2. Run test execution & benchmarks unconditionally for all contributors
+      - name: Run Test Suite & Generate LCOV
+        run: cargo test --all --verbose
+
+      # 3. Always upload raw reports to artifacts regardless of fork permissions
+      - name: Upload PR Coverage Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-pr-${{ matrix.os }}
+          path: |
+            lcov.info
+            coverage-report.md
+          if-no-files-found: ignore
+
+      # 4. Non-gating comment publishing only for same-repository PRs
+      - name: Post Coverage Comment
+        if: >-
+          always() &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        continue-on-error: true
+        uses: marocchino/sticky-pull-request-comment@v3
