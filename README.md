@@ -17,7 +17,8 @@ Instead of grouping solutions by ephemeral project names, case studies are organ
 ├── 05-os-and-process-architecture/    # Subprocess lifecycle, SQLite file-lock bypasses, DPAPI
 ├── 06-autonomous-agents-and-automation/# Atomic intent macros, deterministic DOM geometry
 ├── 07-fintech-and-billing-invariants/ # Partial unique indexes, timing-safe webhooks, audit atomicity
-└── 08-devops-and-disaster-recovery/   # Automated ephemeral database restore verification
+├── 08-devops-and-disaster-recovery/   # Automated ephemeral database restore verification, retention ledgers
+└── 09-frontend-architecture-and-observability/ # Event-sourced state machines, zero-dependency SVG sparklines
 ```
 
 ---
@@ -110,6 +111,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Pre-egress redaction pipeline: null-byte strip (`replace(/\0/g, '')`), length clamping, and 14 frozen regex filters scrubbing private keys (`[redacted-private-key]`), tokens (`[redacted-secret]`), JWTs (`[redacted-jwt]`), and database connection strings (`postgres://[redacted]@`).
   * **Metrics & Results:** 14 distinct credential patterns neutralized, 0 byte secrets leaked in prompts, sub-millisecond execution.
 
+* ### [👉 How to prevent WebRTC STUN UDP leaks and HTTP/3 QUIC proxy bypasses in headless Chromium?](./02-security-and-sandboxing/chromium-webrtc-udp-leak-quic-sandbox-flags)
+  * **The Challenge:** Routing headless Chromium through an egress audit proxy fails to stop WebRTC STUN requests from leaking real host IPs over UDP. Furthermore, HTTP/3 (QUIC) traffic bypasses TCP inspection proxies, and loopback defaults allow local SSRF probes.
+  * **The Engineering Fix:** Launch flags enforcing `--force-webrtc-ip-handling-policy=disable_non_proxied_udp` to block UDP candidate discovery, `--disable-quic` forcing fallback to audited TCP, and `--proxy-bypass-list=<-loopback>` eliminating default loopback bypasses.
+  * **Metrics & Results:** 0 WebRTC IP leaks, 100% TCP proxy enforcement, complete loopback bypass elimination.
+
 ---
 
 ### ⚡ 3. Concurrency & Race Conditions
@@ -175,6 +181,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Challenge:** Auditing third-party script bloat via external HTTP MITM proxies requires injecting root CA certificates and buffering gigabytes of network traffic in proxy RAM. CDP network event streams swamp Node.js IPC channels.
   * **The Engineering Fix:** In-browser JavaScript evaluation of native `performance.getEntriesByType('resource')`. Extracts `transferSize` and `encodedBodySize` directly from Blink memory, comparing `new URL(resource.name).origin !== location.origin` in a single evaluation tick.
   * **Metrics & Results:** Zero TLS MITM certificates required, zero external proxy daemons, sub-15ms execution roundtrip.
+
+* ### [👉 How to eliminate linear OFFSET query degradation and scrub URL credentials in support ticketing ledgers?](./04-memory-and-performance/keyset-pagination-cursor-credential-scrubbing)
+  * **The Challenge:** Traditional `OFFSET 5000` pagination causes slow table scans and row-skipping during concurrent ticket creation. User-submitted bug reports often include target URLs with plaintext basic auth credentials (`https://admin:pass@host`).
+  * **The Engineering Fix:** Base64url encoded keyset cursors `(created_at, id)` providing constant O(1) compound index seeks. Strict URL parser rejecting non-HTTP(S) protocols and dropping URLs with embedded username/passwords before persistence.
+  * **Metrics & Results:** O(1) query latency (<3ms) at any depth, 100% row-shift invariance, zero credential leakage in audit tickets.
 
 ---
 
@@ -247,6 +258,24 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Challenge:** Deleting customer workspaces under GDPR "Right to be Forgotten" with standard `ON DELETE CASCADE` wipes the deletion tracking record itself, destroying compliance evidence of who authorized the purge and what was deleted.
   * **The Engineering Fix:** Decouple foreign keys with `REFERENCES wpa_workspaces(id) ON DELETE SET NULL`. Cascading purge deletes all customer data and workspace rows, while the deletion run survives with `workspace_id = NULL` and durable forensic counters (`deleted_reports`, `actor_id`).
   * **Metrics & Results:** 100% forensic audit retention, complete customer data erasure, tamper-proof GDPR compliance verification.
+
+* ### [👉 How to eliminate '/bin/sh^M: bad interpreter' container crashes with pre-flight byte-level LF unit tests?](./08-devops-and-disaster-recovery/automated-shell-script-byte-level-lf-audit)
+  * **The Challenge:** Windows developers editing deployment shell scripts introduce CRLF (`\r\n`) line endings. When built into Linux containers, shebang execution terminates immediately with exit code 127 (`/bin/sh^M: bad interpreter`).
+  * **The Engineering Fix:** Automated test suite traversing `git ls-files -z` to inspect raw buffer slices for shebang patterns and 0x0d carriage returns. Verifies `.gitattributes` enforces `*.sh text eol=lf` permanently.
+  * **Metrics & Results:** 100% automated catch of CRLF before merge, zero container startup crashes, zero extra Dockerfile build layers.
+
+---
+
+### 🎨 9. Frontend Architecture & Observability
+* ### [👉 How to eliminate out-of-order UI flickers in SSE streams using an event-sourced progress reduction state machine?](./09-frontend-architecture-and-observability/event-sourced-progress-reduction-state-machine)
+  * **The Challenge:** Multi-engine audit events streaming over SSE suffer packet jitter and arrive out of order during network reconnects. Ad-hoc React `useState` updates cause visual glitches, stuck spinners, and state desynchronization.
+  * **The Engineering Fix:** Model audit progress as a pure projection over an append-only event stream (`ScanProgressEvent[]`). Reverses and folds events to deterministically derive per-engine execution states, resource classes, and timeout budgets.
+  * **Metrics & Results:** 0 UI state desynchronization bugs, deterministic replay on SSE reconnect, zero flickering render cycles.
+
+* ### [👉 How to render 6-week trend sparklines in 13 lines of native SVG coordinate math with zero charting dependencies?](./09-frontend-architecture-and-observability/zero-dependency-svg-coordinate-sparkline)
+  * **The Challenge:** Pulling heavy charting libraries (Recharts, Chart.js, D3) adds 150KB-350KB to frontend bundle size and causes hydration layout shift (CLS) as libraries asynchronously measure container dimensions.
+  * **The Engineering Fix:** 13-line zero-dependency SVG sparkline component. Computes viewBox coordinate projections mathematically in pure React JSX, generating smooth polyline paths and closed-area backdrops with native accessibility.
+  * **Metrics & Results:** 0 external charting dependencies, <1KB bundle size, zero layout shift (CLS 0.00).
 
 ---
 

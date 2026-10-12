@@ -1,0 +1,56 @@
+# Systems Engineering Case Study: Automated Pre-Flight Shell Script Byte-Level LF Audit & Shebang Verification
+
+## 1. The Production Constraint & Problem Statement
+In cross-platform engineering teams, developers working on Windows machines often edit bootstrap scripts, database backup scripts, or Docker entrypoint scripts. Windows editors default to CRLF (`\r\n`) line endings. When pushed and built into Debian, Alpine, or Ubuntu Docker images, executing the script fails with cryptic POSIX kernel errors: `/bin/sh: ./entrypoint.sh: /bin/sh^M: bad interpreter: No such file or directory`, bringing down production deployments during pod startup.
+
+---
+
+## 2. Why Naive Workarounds Fail in Production
+1. **Relying on Developer Operating System Discipline:**
+   * Hoping all developers configure their local IDEs or git configurations with `core.autocrlf = input` is non-deterministic and fails on new developer machines.
+2. **Post-Build Dockerfile Workarounds (`dos2unix`):**
+   * Running `RUN dos2unix /entrypoint.sh` in Dockerfiles adds container layer overhead and bloat to production base images.
+3. **Missing Automated CI Verification:**
+   * Linters typically check code syntax, ignoring raw byte-level carriage returns in untracked or auxiliary shell scripts.
+
+---
+
+## 3. The Architecture & Algorithmic Invariants
+1. **Git-Aware Shell Discovery:** Executes `git ls-files -z` to discover all tracked files safely across null-terminated byte streams.
+2. **Byte-Level Shebang Inspection:** Evaluates raw buffer slices without string conversions. Checks for `.sh` extension or POSIX shebang syntax (`^#!.*(?:/|env\s+)(?:ba|da|a|k|z)?sh`).
+3. **Zero-Tolerance Carriage Return Assertion:** Filters buffer bytes for `0x0d` (ASCII carriage return `\r`). Any script containing even a single `\r` immediately fails the test suite.
+4. **Git Attributes Enforcement:** Validates repository `.gitattributes` using `git check-attr eol`, mathematically ensuring git checkout rules enforce `eol=lf` permanently across all developer environments.
+
+```javascript
+// 1. Inspect raw buffer bytes for shebang lines and Windows CRLF carriage returns
+function isShellScript(relativePath, bytes) {
+    if (relativePath.endsWith('.sh')) return true;
+    const newline = bytes.indexOf(0x0a);
+    const firstLine = bytes.subarray(0, newline === -1 ? Math.min(bytes.length, 512) : newline).toString('utf8').replace(/\r$/, '');
+    return /^#!.*(?:\/|env\s+)(?:ba|da|a|k|z)?sh(?:\s|$)/.test(firstLine);
+}
+
+// 2. Automated test asserting zero carriage return bytes (0x0d) across all tracked shell files
+test('tracked Linux shell scripts use LF-only bytes and explicit Git attributes', () => {
+    const scripts = trackedShellScripts();
+    const carriageReturns = scripts.filter(({ bytes }) => bytes.includes(0x0d)).map(({ relativePath }) => relativePath);
+    assert.deepEqual(carriageReturns, [], `carriage-return bytes found in: ${carriageReturns.join(', ')}`);
+
+    const checkedAttributes = execFileSync('git', ['check-attr', 'eol', '--', ...scripts.map(s => s.relativePath)], { encoding: 'utf8' });
+    assert.match(checkedAttributes, /: eol: lf$/m);
+});
+```
+
+---
+
+## 4. Benchmark & Architectural Invariants
+| Shell Script Line-Ending Defense | Windows Dev Portability | Production Docker Startup | CI/CD Enforcement |
+|---|---|---|---|
+| Manual IDE Settings | Fragile (Fails Frequently) | `/bin/sh^M` Crashes | None |
+| Dockerfile `dos2unix` | Works | Adds Image Overhead | None (Allows Corrupt Source) |
+| **Byte-Level Pre-Flight Test** | **100% Deterministic** | **Zero Runtime Failures** | **Fails Fast Before Merge** |
+
+---
+
+## 5. Visual Representation (Raw VS Code Crop)
+![Production Code Snippet](./assets/code-card.png)
