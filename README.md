@@ -37,6 +37,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Hook `req.once('aborted')` and `res.once('close')` into an `AbortController`. Splice queued jobs immediately out of concurrency arrays (`queue.splice(index, 1)`) and propagate cascading abort signals to terminate child Chromium workers via `SIGKILL` with HTTP 499 `CLIENT_DISCONNECTED`.
   * **Metrics & Results:** 0 CPU wasted on closed tabs, immediate queue slot reclamation, instant worker teardown.
 
+* ### [👉 How to eliminate Nginx SSE streaming buffer latency and prevent SPA MIME-type confusion on missing assets?](./01-networking-and-io/nginx-sse-nobuffer-spa-mime-confusion-defense)
+  * **The Challenge:** Nginx default proxy buffering stalls real-time Server-Sent Events (SSE) updates until buffers fill, causing UI freezes. Meanwhile, naive SPA `try_files $uri $uri/ /index.html` causes missing hashed JS files to return HTML, triggering `Uncaught SyntaxError: Unexpected token '<'` MIME confusion crashes.
+  * **The Engineering Fix:** Enforce `proxy_buffering off;` with 270s read/send timeouts on `/api/` SSE routes. Dedicated static asset location block (`.(?:js|css|svg|png|webp|woff2?)$`) enforcing `try_files $uri =404;` and 1-year immutable caching.
+  * **Metrics & Results:** 0ms SSE chunk delivery delay, 100% elimination of SPA MIME confusion script errors.
+
 ---
 
 ### 🛡️ 2. Security & Sandboxing
@@ -148,6 +153,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Bind explicit top-level `this.boss.on('error')` listeners to absorb transient disconnects. Enforce `migrate: false` in application workers, restricting DDL to deployment releases. Validate all queue dispatches against canonical definitions and fail closed if unprovisioned.
   * **Metrics & Results:** Zero process crashes on transient PostgreSQL restarts, 100% deterministic queue dispatch validation, zero runtime DDL deadlocks.
 
+* ### [👉 How to eliminate corporate NAT rate-limit starvation and implement atomic sliding windows in PostgreSQL?](./03-concurrency-and-race-conditions/hierarchical-composite-rate-limit-partitioning)
+  * **The Challenge:** IP-based rate limiting blocks entire corporate offices behind shared NAT gateways. API-key-only limits allow single scripts to exhaust team quotas. Deploying Redis adds infrastructure overhead and cluster failure modes.
+  * **The Engineering Fix:** Hierarchical composite key generator: `workspace:{id}:key:{apiKey}` falls back to `workspace:{id}:ip:{ip}` and raw IP. Single-query PostgreSQL atomic sliding window upsert using `INSERT ... ON CONFLICT DO UPDATE SET hits = ...` with inline interval calculations in 1 roundtrip.
+  * **Metrics & Results:** Zero noisy-neighbor starvation across multi-tenant workspaces, 1 atomic SQL query per check, zero Redis dependency.
+
 ---
 
 ### 🧠 4. Memory & Performance
@@ -160,6 +170,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Challenge:** Multi-modal vision models inspecting responsive layouts for overlapping elements and low-contrast text are slow (3-8s), expensive ($0.05/page), non-deterministic, and fail on dynamic viewports.
   * **The Engineering Fix:** Axis-Aligned Bounding Box (AABB) 2D geometry collision detection with DOM ancestry exclusion (`!a.contains(b)`) paired with recursive parent luminance bubbling implementing the W3C sRGB gamma expansion formula directly inside Chrome V8 memory.
   * **Metrics & Results:** 0 vision tokens burned, <50ms execution roundtrip, 100% deterministic pixel math.
+
+* ### [👉 How to extract third-party network weight in <15ms directly from browser memory without TLS interception proxies?](./04-memory-and-performance/in-browser-resource-timing-memory-extractor)
+  * **The Challenge:** Auditing third-party script bloat via external HTTP MITM proxies requires injecting root CA certificates and buffering gigabytes of network traffic in proxy RAM. CDP network event streams swamp Node.js IPC channels.
+  * **The Engineering Fix:** In-browser JavaScript evaluation of native `performance.getEntriesByType('resource')`. Extracts `transferSize` and `encodedBodySize` directly from Blink memory, comparing `new URL(resource.name).origin !== location.origin` in a single evaluation tick.
+  * **Metrics & Results:** Zero TLS MITM certificates required, zero external proxy daemons, sub-15ms execution roundtrip.
 
 ---
 
@@ -210,6 +225,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Dedicated append-only transition ledger `wpa_user_plan_changes` recording `before_plan_id`, `after_plan_id`, and `created_by`. Enforces `UNIQUE(user_id, idempotency_key)` against duplicate webhook dispatches. PostgreSQL engine-level `BEFORE UPDATE OR DELETE` trigger immediately raises SQLSTATE `55000` (`WPA_USER_PLAN_CHANGES_APPEND_ONLY`), preventing even database administrators from modifying historical billing records.
   * **Metrics & Results:** 100% tamper-proof billing provenance, zero webhook replay mutations, database engine enforced immutability.
 
+* ### [👉 How to prevent test-mode Stripe webhook replays and cross-account spoofing from granting unearned subscriptions?](./07-fintech-and-billing-invariants/stripe-webhook-environment-catalog-fencing)
+  * **The Challenge:** Validating webhook HMAC signatures only proves the payload was signed. Replaying test-mode events (`livemode: false`) against production or misrouting Stripe Connect accounts can inadvertently grant unearned paid subscriptions.
+  * **The Engineering Fix:** Derive expected livemode from secret key prefixes (`sk_live_` vs `sk_test_`). Reject production mismatches with HTTP 400 `BILLING_PROVIDER_ENVIRONMENT_MISMATCH`. Verify `event.account` strictly matches `catalog.accountId` before granting entitlements.
+  * **Metrics & Results:** 100% test-mode spoofing elimination, strict account attestation, zero unauthorized subscription elevations.
+
 ---
 
 ### 🚀 8. DevOps & Disaster Recovery
@@ -222,6 +242,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Challenge:** Deploying Docker images without deterministic verification introduces silent container drift: hot-fixes applied via `docker exec`, omitted configuration files, or database migration files altered post-deployment.
   * **The Engineering Fix:** Recursive SHA-256 Merkle tree manifest audit comparing source vs container runtime directories, classified by `.dockerignore` rule buckets, paired with cryptographic verification of live PostgreSQL `wpa_schema_migrations` checksum ledgers.
   * **Metrics & Results:** 100% deterministic drift detection, zero untracked code modifications surviving in production, guaranteed SQL migration ledger integrity.
+
+* ### [👉 How to retain durable forensic proof of GDPR tenant deletions using ON DELETE SET NULL decoupling?](./08-devops-and-disaster-recovery/durable-post-purge-audit-ledger-foreign-keys)
+  * **The Challenge:** Deleting customer workspaces under GDPR "Right to be Forgotten" with standard `ON DELETE CASCADE` wipes the deletion tracking record itself, destroying compliance evidence of who authorized the purge and what was deleted.
+  * **The Engineering Fix:** Decouple foreign keys with `REFERENCES wpa_workspaces(id) ON DELETE SET NULL`. Cascading purge deletes all customer data and workspace rows, while the deletion run survives with `workspace_id = NULL` and durable forensic counters (`deleted_reports`, `actor_id`).
+  * **Metrics & Results:** 100% forensic audit retention, complete customer data erasure, tamper-proof GDPR compliance verification.
 
 ---
 
