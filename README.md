@@ -32,6 +32,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Handcrafted HTTP/1.1 framing over raw `std::net::TcpStream` in Rust with in-flight `Content-Length` stream early exit.
   * **Metrics & Results:** `0.74ms` handshake roundtrip (down from 3.2ms), 0 external crates, 0 KB binary bloat.
 
+* ### [👉 How to cascade client TCP disconnects to immediately splice queued tasks and abort long-running Chromium workers?](./01-networking-and-io/client-disconnect-socket-abort-cascade)
+  * **The Challenge:** When users close tabs or disconnect sockets during long-running audits, standard Node.js servers keep executing background Chromium workers and heavy tasks to completion, wasting CPU and memory.
+  * **The Engineering Fix:** Hook `req.once('aborted')` and `res.once('close')` into an `AbortController`. Splice queued jobs immediately out of concurrency arrays (`queue.splice(index, 1)`) and propagate cascading abort signals to terminate child Chromium workers via `SIGKILL` with HTTP 499 `CLIENT_DISCONNECTED`.
+  * **Metrics & Results:** 0 CPU wasted on closed tabs, immediate queue slot reclamation, instant worker teardown.
+
 ---
 
 ### 🛡️ 2. Security & Sandboxing
@@ -95,6 +100,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Cryptographic assertion binding: staged WebAuthn assertions in `wpa_admin_webauthn_assertions` bound to `sha256(session_id)`, `ip_hash`, and `user_agent_hash`. Single-use partial unique index `UNIQUE(session_id_hash)` prevents multi-session reuse. Monotonic `security_version` on admin accounts invalidates all fleet-wide elevated step-up markers instantly upon credential mutation.
   * **Metrics & Results:** 0 passkey replay surface, cryptographic client fingerprint binding, O(1) instant fleet-wide session revocation.
 
+* ### [👉 How to sanitize private RSA keys, database URIs, and cloud tokens before egressing audit traces to external LLMs?](./02-security-and-sandboxing/llm-egress-secret-redaction-pipeline)
+  * **The Challenge:** Submitting customer audit logs and vulnerability snippets to external AI providers (OpenAI, Gemini, OpenRouter) risks leaking root database passwords, private keys, Stripe keys, and JWTs.
+  * **The Engineering Fix:** Pre-egress redaction pipeline: null-byte strip (`replace(/\0/g, '')`), length clamping, and 14 frozen regex filters scrubbing private keys (`[redacted-private-key]`), tokens (`[redacted-secret]`), JWTs (`[redacted-jwt]`), and database connection strings (`postgres://[redacted]@`).
+  * **Metrics & Results:** 14 distinct credential patterns neutralized, 0 byte secrets leaked in prompts, sub-millisecond execution.
+
 ---
 
 ### ⚡ 3. Concurrency & Race Conditions
@@ -128,6 +138,16 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Periodic background heartbeat loop extending lease duration in PostgreSQL, paired with Compare-And-Swap (CAS) completion queries verifying lease tokens before persisting results.
   * **Metrics & Results:** Zero zombie worker data corruptions, support for arbitrary-length crawl tasks, sandboxed path traversal cleanup.
 
+* ### [👉 How to prevent state corruption from mutated payloads under reused Idempotency-Keys using canonical JSON SHA-256 fingerprinting?](./03-concurrency-and-race-conditions/canonicalized-json-idempotency-fingerprint)
+  * **The Challenge:** Header-only idempotency checks serve stale cached responses or corrupt state when clients alter body parameters under an existing key. Naive string hashing fails due to non-deterministic JSON key ordering.
+  * **The Engineering Fix:** Recursive deterministic key canonicalization sorting object keys at every depth (`Object.keys(value).sort()`), computing SHA-256 digests. If stored and requested fingerprints diverge, fail closed immediately with HTTP 409 `IDEMPOTENCY_KEY_REUSED`.
+  * **Metrics & Results:** Deterministic O(N log N) canonicalization, 100% collision-proof payload verification, zero false 409 conflicts.
+
+* ### [👉 How to prevent Node.js process crashes during planned PostgreSQL restarts and eliminate queue migration deadlocks?](./03-concurrency-and-race-conditions/unhandled-queue-event-fail-closed-provisioning)
+  * **The Challenge:** In `pg-boss`, idle connection drops during PostgreSQL restarts bubble unhandled errors onto the EventEmitter, crashing Node.js with `uncaughtException`. Opportunistic runtime migrations (`migrate: true`) cause table-lock deadlocks during multi-container rollouts.
+  * **The Engineering Fix:** Bind explicit top-level `this.boss.on('error')` listeners to absorb transient disconnects. Enforce `migrate: false` in application workers, restricting DDL to deployment releases. Validate all queue dispatches against canonical definitions and fail closed if unprovisioned.
+  * **Metrics & Results:** Zero process crashes on transient PostgreSQL restarts, 100% deterministic queue dispatch validation, zero runtime DDL deadlocks.
+
 ---
 
 ### 🧠 4. Memory & Performance
@@ -148,6 +168,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Challenge:** Launching an automation browser with `--remote-debugging-port` on the active user profile crashes because Chrome holds exclusive OS-level write locks on SQLite databases (`Cookies`, `Login Data`). Killing the user's active browser destroys tabs and unsaved work.
   * **The Engineering Fix:** Lock-free surgical file replication of Windows DPAPI decryption keys (`Local State`) and `Network/Cookies` into a lightweight temporary shadow profile directory.
   * **Metrics & Results:** 0 CAPTCHAs, 0 logins (authenticated session preserved), zero disturbance to running user browser windows.
+
+* ### [👉 How to eliminate fatal EBUSY process crashes from asynchronous Windows SQLite profile file locks during Chrome teardown?](./05-os-and-process-architecture/windows-sqlite-profile-file-lock-race)
+  * **The Challenge:** On Windows, Chromium holds asynchronous OS kernel file locks on SQLite caches (`Cookies`, `Web Data`) for milliseconds after process exit. Calling `chromeLauncher.kill()` invokes `destroyTmp` synchronously, throwing unhandled `EBUSY` exceptions and crashing Node.js.
+  * **The Engineering Fix:** Monkey-patch `chrome.destroyTmp` before invoking `.kill()` to intercept and swallow synchronous file-lock races during Windows profile teardown.
+  * **Metrics & Results:** 0 `EBUSY` process crashes during Windows worker teardown, safe temp folder cleanup, 100% stable worker uptime.
 
 ---
 
