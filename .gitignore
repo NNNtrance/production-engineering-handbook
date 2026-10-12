@@ -1,0 +1,12 @@
+# Build artifacts
+target/
+dist/
+node_modules/
+
+# OS Junk
+Thumbs.db
+.DS_Store
+
+# Temporary scratch files
+*.tmp
+.scratch/
