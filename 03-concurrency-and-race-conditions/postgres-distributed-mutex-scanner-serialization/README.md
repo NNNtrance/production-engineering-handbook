@@ -1,0 +1,48 @@
+# Case Study 12: PostgreSQL Session Advisory Lock for Heavy Scanner Queue Serialization
+
+> **Domain:** Concurrency & Race Conditions  
+> **Source Project:** `WebPageAnalyz (Security Engine)`  
+> **Language:** Node.js / PostgreSQL  
+> **Key Metric:** `0 external dependencies (no Redis), polling mutex with AbortSignal`  
+
+---
+
+## 1. The Constraint
+
+Dynamic security scanners like OWASP ZAP are stateful and CPU/RAM heavy. When multiple worker containers process crawl queues concurrently, bombarding a single ZAP daemon causes session cross-pollution, crashed daemon processes, and corrupted scan reports.
+
+---
+
+## 2. Why Naive Workarounds Fail
+
+1. **Spinning Up External Redis Mutexes (Redlock):**
+   * Adds operational complexity, network failure modes, separate cluster health checks, and memory management for a single serialized task.
+2. **Application Process Mutexes:**
+   * In-memory Node.js mutexes only serialize threads within a single container; they cannot coordinate across multiple containerized worker instances.
+3. **Queue Concurrency = 1:**
+   * Restricting entire worker queues to concurrency: 1 starves other lightweight non-ZAP tasks (Lighthouse, Axe, broken link checks).
+
+---
+
+## 3. The Architecture
+
+1. **Postgres Session Advisory Lock:** Uses `SELECT pg_try_advisory_lock(hashtext('wpa-zap-baseline'))` on a dedicated database pool client.
+2. **Dedicated Connection Retain:** The acquired connection is held open for the exact duration of the scan, tying the advisory lock lifetime directly to the TCP socket.
+3. **AbortSignal & Timeout Integration:** Propagates client cancellations and job timeouts via `signal.throwIfAborted()`, ensuring clean socket release without hung locks.
+4. **Idempotent Cleanup Hook:** Returns an asynchronous release function that unlocks the advisory mutex and releases the client back to the pool.
+
+---
+
+## 4. Code Implementation
+
+See [`src/zap_lock.js`](./src/zap_lock.js) for the isolated implementation.
+
+---
+
+## 5. Benchmarks & Results
+
+| Locking Architecture | Cross-Container Coordination | Infrastructure Footprint | Crash Resilience |
+|---|---|---|---|
+| In-Memory Mutex | None (Single Process Only) | 0 KB | N/A |
+| Redis Redlock | Yes | +Redis Cluster / Sentinel | Complex (TTL Expiry Race) |
+| **PostgreSQL Advisory Lock** | **Yes (Cluster-Wide)** | **Zero (Existing Pool)** | **Automatic on Socket Close** |

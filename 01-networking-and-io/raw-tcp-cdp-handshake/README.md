@@ -77,7 +77,6 @@ if let Some(pos) = resp_str.find("\r\n\r\n") {
 
 ---
 
-## 6. Social Media Assets
+## 6. Visual Asset
 
-* **Visual Asset:** [`assets/code-card.png`](./assets/code-card.png) (Retina VS Code Dark Mode)
-* **Publication Drafts:** [`post.md`](./post.md) (X / Twitter & LinkedIn Copy)
+* **Retina Visual Card:** [`assets/code-card.png`](./assets/code-card.png)
