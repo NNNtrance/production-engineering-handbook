@@ -1,0 +1,8 @@
+[package]
+name = "raw-tcp-cdp-handshake"
+version = "0.1.0"
+edition = "2021"
+description = "Zero-dependency raw TCP framing for Chromium DevTools Protocol (CDP) endpoints"
+
+[dependencies]
+# Zero runtime dependencies. Standard library only.
