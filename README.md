@@ -43,6 +43,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Enforce `proxy_buffering off;` with 270s read/send timeouts on `/api/` SSE routes. Dedicated static asset location block (`.(?:js|css|svg|png|webp|woff2?)$`) enforcing `try_files $uri =404;` and 1-year immutable caching.
   * **Metrics & Results:** 0ms SSE chunk delivery delay, 100% elimination of SPA MIME confusion script errors.
 
+* ### [👉 How to safely compile dynamic parameter routes with literal metacharacter escaping and reactive signal resolution?](./01-networking-and-io/literal-escaped-parameter-route-compiler)
+  * **The Challenge:** Compiling route patterns like `/docs/[category]/v1.0/[id]` into regular expressions breaks when URLs contain literal dots, pluses, or parentheses, while runtime pattern matchers introduce heavy route evaluation overhead.
+  * **The Engineering Fix:** Pre-pass escaping regex metacharacters (`escapeRegex`), compiling parameter tokens into non-slash capture groups `([^/]+)`, and binding path and param state to fine-grained reactive signals (`currentPath`, `currentParams`).
+  * **Metrics & Results:** 0 regex injection bugs, exact matching across special characters, O(1) route lookup with zero runtime overhead.
+
 ---
 
 ### 🛡️ 2. Security & Sandboxing
@@ -116,6 +121,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Launch flags enforcing `--force-webrtc-ip-handling-policy=disable_non_proxied_udp` to block UDP candidate discovery, `--disable-quic` forcing fallback to audited TCP, and `--proxy-bypass-list=<-loopback>` eliminating default loopback bypasses.
   * **Metrics & Results:** 0 WebRTC IP leaks, 100% TCP proxy enforcement, complete loopback bypass elimination.
 
+* ### [👉 How to fail-closed static SSR boundaries to eliminate server-side remote code execution in untrusted component markup?](./02-security-and-sandboxing/fail-closed-static-ssr-rce-boundary)
+  * **The Challenge:** Evaluating untrusted component markup and expressions (`{process.exit()}`) inside SSR environments risks Remote Code Execution (RCE) and worker process death.
+  * **The Engineering Fix:** Fail-closed static stringifier: rejects any dynamic expression or directive during SSR with an immediate compile/render throw, returning a safe, isolated client mount boundary (`<div id="app" data-flow-client-render></div>`).
+  * **Metrics & Results:** 0 server-side expression execution surface, guaranteed RCE immunity, 100% deterministic client fallback.
+
 ---
 
 ### ⚡ 3. Concurrency & Race Conditions
@@ -164,6 +174,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Hierarchical composite key generator: `workspace:{id}:key:{apiKey}` falls back to `workspace:{id}:ip:{ip}` and raw IP. Single-query PostgreSQL atomic sliding window upsert using `INSERT ... ON CONFLICT DO UPDATE SET hits = ...` with inline interval calculations in 1 roundtrip.
   * **Metrics & Results:** Zero noisy-neighbor starvation across multi-tenant workspaces, 1 atomic SQL query per check, zero Redis dependency.
 
+* ### [👉 How to eliminate cascading DOM reflows and premature flushes in nested reactive updates using depth tracking and Set deduplication?](./03-concurrency-and-race-conditions/nested-reactive-batch-deduplication)
+  * **The Challenge:** Consecutive reactive signal writes trigger redundant subscriber recalculations and DOM layout thrashing. Naive batching implementations flush prematurely when encountering nested batch boundaries.
+  * **The Engineering Fix:** Global `batchDepth` counter combined with `Object.is` short-circuiting and a `Set<() => void>` deduplication queue that executes dirty subscribers strictly once when outermost `batchDepth === 0`.
+  * **Metrics & Results:** Up to 90% reduction in redundant subscriber executions, zero premature inner-scope flushes, 100% deterministic batch ordering.
+
 ---
 
 ### 🧠 4. Memory & Performance
@@ -186,6 +201,21 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Challenge:** Traditional `OFFSET 5000` pagination causes slow table scans and row-skipping during concurrent ticket creation. User-submitted bug reports often include target URLs with plaintext basic auth credentials (`https://admin:pass@host`).
   * **The Engineering Fix:** Base64url encoded keyset cursors `(created_at, id)` providing constant O(1) compound index seeks. Strict URL parser rejecting non-HTTP(S) protocols and dropping URLs with embedded username/passwords before persistence.
   * **Metrics & Results:** O(1) query latency (<3ms) at any depth, 100% row-shift invariance, zero credential leakage in audit tickets.
+
+* ### [👉 How to eliminate zombie computations and memory leaks in fine-grained signals via dynamic dependency pruning?](./04-memory-and-performance/reactive-signal-dependency-pruning)
+  * **The Challenge:** Dynamic conditional branching (`cond() ? a() : b()`) leaves stale subscriptions in unvisited signal dependencies, causing ghost calculations, memory leaks, and CPU thrashing.
+  * **The Engineering Fix:** Dynamic subscription pruning: each effect execution purges its active subscriptions from signal subscriber sets (`subscribers.delete(effectFn)`), dynamically re-records active signals during evaluation, and unregisters cleanly on teardown.
+  * **Metrics & Results:** 0 zombie computations, 0 memory leaks across dynamic branches, automatic subscription lifecycle management.
+
+* ### [👉 How to eliminate Proxy trap overhead in reactive stores using Object.defineProperty descriptors and auto-syncing storage?](./04-memory-and-performance/proxyless-reactive-store-descriptors)
+  * **The Challenge:** ES6 Proxies introduce runtime trap overhead in hot loops and prevent optimization in older engines. Redux-style architectures require massive boilerplate reducers and manual immutability.
+  * **The Engineering Fix:** Proxy-less store architecture: binds `Object.defineProperty` getter/setters directly to action contexts (`this.count++` transparently maps to signal getters/setters) with automatic debounced web storage synchronization.
+  * **Metrics & Results:** Zero Proxy trap overhead, ergonomic mutable syntax, instant two-way browser storage persistence.
+
+* ### [👉 How to lex custom Single File Components without regex corruption using depth-balanced parsing and sticky attribute scanning?](./04-memory-and-performance/depth-balanced-sfc-sticky-parser)
+  * **The Challenge:** Regular expression HTML parsers choke on nested quotes in attributes (`title="a > b"`), balanced curly braces (`{ { x: 1 } }`), and void tags, while full AST parsers add megabytes of runtime bloat.
+  * **The Engineering Fix:** Character cursor loop with quote tracking, depth-balanced expression scanning (`depth += 1 / depth -= 1`), and sticky regex (`/gy`) attribute parsing.
+  * **Metrics & Results:** 0 parsing truncation bugs, zero external AST parser dependencies, sub-millisecond Single File Component lexing.
 
 ---
 
@@ -276,6 +306,26 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Challenge:** Pulling heavy charting libraries (Recharts, Chart.js, D3) adds 150KB-350KB to frontend bundle size and causes hydration layout shift (CLS) as libraries asynchronously measure container dimensions.
   * **The Engineering Fix:** 13-line zero-dependency SVG sparkline component. Computes viewBox coordinate projections mathematically in pure React JSX, generating smooth polyline paths and closed-area backdrops with native accessibility.
   * **Metrics & Results:** 0 external charting dependencies, <1KB bundle size, zero layout shift (CLS 0.00).
+
+* ### [👉 How to bypass Virtual DOM diffing overhead by compiling reactive templates directly into imperative DOM operations?](./09-frontend-architecture-and-observability/compiler-direct-dom-codegen)
+  * **The Challenge:** Virtual DOM frameworks allocate ephemeral tree structures and recursively diff virtual nodes on every state update, burning memory and CPU cycles on static elements.
+  * **The Engineering Fix:** Direct-to-DOM compilation: templates compile ahead-of-time into native DOM factory calls (`document.createElement`), binding reactive expressions directly into fine-grained `createEffect` closures updating targeted Text nodes and attributes.
+  * **Metrics & Results:** 0 Virtual DOM allocations, zero tree diffing passes, O(1) surgical DOM mutations on state change.
+
+* ### [👉 How to automatically resolve SSG, SSR, and CSR rendering strategies using ahead-of-time static AST inspection?](./09-frontend-architecture-and-observability/static-ast-render-strategy-resolution)
+  * **The Challenge:** Requiring developers to manually configure rendering directives (`use client`, `ssr: false`) leads to hydration mismatches, server crashes from browser APIs, and suboptimal caching.
+  * **The Engineering Fix:** Static AST inspection: traverses template AST nodes to detect browser globals (`window`, `document`) and DOM event listeners to mark CSR, identifies reactive signals and async loaders for SSR, and automatically promotes static components to SSG.
+  * **Metrics & Results:** Zero manual rendering configuration, zero hydration crashes, optimal edge caching out of the box.
+
+* ### [👉 How to preserve pseudo-class specificity and prevent CSS animation corruption during scoped component style compilation?](./09-frontend-architecture-and-observability/scoped-css-pseudo-class-splicing)
+  * **The Challenge:** Appending scope attribute selectors to the end of CSS selectors breaks pseudo-classes (`button:hover[data-id]` fails specificity rules), corrupts pseudo-elements (`button::before[data-id]` is invalid CSS), and destroys `@keyframes` percentages.
+  * **The Engineering Fix:** Precision scoped CSS transformer: regex-scans selectors, detects the first pseudo boundary (`:{1,2}[A-Za-z-]`), splices scope attributes immediately *before* pseudo-classes (`button[data-scope]:hover`), and strictly protects keyframe percentage steps.
+  * **Metrics & Results:** 100% pseudo-class and pseudo-element validity, zero specificity loss, zero corrupted keyframe animations.
+
+* ### [👉 How to feed scoped SFC CSS directly into Vite pipelines without temporary disk files or HMR watcher loops?](./09-frontend-architecture-and-observability/in-memory-virtual-css-vite-module-resolution)
+  * **The Challenge:** Extracting scoped styles from custom Single File Components requires feeding CSS to Vite. Writing temporary `.tmp/*.css` files causes disk I/O bottlenecks and triggers Vite file watchers into infinite HMR reload loops.
+  * **The Engineering Fix:** In-memory virtual module architecture: maps scoped CSS to an in-memory `Map<string, string>()`, uses Rollup null-byte convention (`\0${id}.css`) in `resolveId`, and serves styles directly from RAM through Vite's native CSS pipeline.
+  * **Metrics & Results:** Zero disk I/O, zero file watcher HMR loops, 100% in-memory RAM compilation with native PostCSS/Tailwind support.
 
 ---
 

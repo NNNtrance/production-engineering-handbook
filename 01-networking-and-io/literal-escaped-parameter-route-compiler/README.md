@@ -1,0 +1,62 @@
+# Systems Engineering Case Study: Dynamic Parameter Route Compiler with Literal Metacharacter Escaping
+
+## 1. The Production Constraint & Problem Statement
+Client-side Single Page Application routers that support file-system-style parameter routes (such as Next.js/SvelteKit `/users/[userId]/posts/[postId]`) compile paths into regular expressions. If static path segments contain literal regex characters—such as version dots (`/docs/v1.0/[slug]`) or parentheses (`/releases/(draft)/[id]`)—naive string substitution produces unescaped regular expressions, causing wildcard injection, unintended matches, or syntax crashes.
+
+---
+
+## 2. Why Naive Workarounds Fail in Production
+1. **Unescaped Dot Wildcards:**
+   * `/docs/v1.0/[slug]` compiles to `/docs/v1.0/([^/]+)`. Because `.` is an unescaped regex wildcard, `/docs/v1x0/slug` falsely matches!
+2. **Parentheses Capture Group Corruption:**
+   * Literal parentheses `/(draft)/` alter regex capture group numbering, shifting parameter extraction indices.
+3. **Query String Contamination:**
+   * Matching raw `window.location.href` without pathname isolation causes query parameters (`?preview=true`) to pollute dynamic route parameters.
+
+---
+
+## 3. The Architecture & Algorithmic Invariants
+1. **Metacharacter Escaping Pass:** `escapeRegex()` replaces all special characters (`.*+?^${}()|[]\`) with escaped literals (`\\`).
+2. **Bracket Parameter Tokenization:** Scans route paths for bracket tokens (`/[([^]]+)]/g`). Each token compiles into `([^/]+)` while its identifier is pushed to `paramNames`.
+3. **URL Pathname Isolation:** Normalizes URLs via `new URL(url, 'http://localhost').pathname`, cleanly stripping query strings and hash anchors before route evaluation.
+4. **Reactive Navigation Signals:** Successfully matched routes update `currentPath` and `currentParams` signals, waking only subscribed UI components.
+
+```typescript
+// 1. Literal regex metacharacter escaping pass
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// 2. Compiling [param] paths into safe regular expressions
+function compileRoutePath(path: string): { regex: RegExp; paramNames: string[] } {
+  const paramNames: string[] = [];
+  const parameterPattern = /\[([^\]]+)\]/g;
+  let regexPath = '';
+  let cursor = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = parameterPattern.exec(path)) !== null) {
+    regexPath += escapeRegex(path.slice(cursor, match.index));
+    regexPath += '([^/]+)';
+    paramNames.push(match[1]);
+    cursor = match.index + match[0].length;
+  }
+
+  regexPath += escapeRegex(path.slice(cursor));
+  return { regex: new RegExp(`^${regexPath}$`), paramNames };
+}
+```
+
+---
+
+## 4. Benchmark & Architectural Invariants
+| Route Pattern Matching | Version Dots (`/v1.0/`) | Parentheses (`/(draft)/`) | Parameter Extraction |
+|---|---|---|---|
+| Naive String Replace | Matches `v1x0` (Wildcard Dot) | Broken Capture Groups | Mismatched Indices |
+| Path-to-Regexp (Heavy) | Escaped | Escaped | Requires Extra Dependency |
+| **FluxDOM Route Compiler** | **Strict Literal (`v1\.0`)** | **Strict Literal (`\(draft\)`)** | **100% Deterministic** |
+
+---
+
+## 5. Visual Representation (Raw VS Code Crop)
+![Production Code Snippet](./assets/code-card.png)
