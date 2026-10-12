@@ -80,6 +80,21 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** 5 segregated PostgreSQL roles (`wpa_owner`, `wpa_migrator`, `wpa_runtime`, `wpa_worker`, `wpa_maintenance`). Browser worker role has 0 DELETE grants. On startup, workers attest active role via `SELECT current_user AS role` and fail closed if role mismatches expected config.
   * **Metrics & Results:** Zero worker DELETE permissions, fail-closed startup validation, guaranteed audit log immutability against worker exploits.
 
+* ### [👉 How to isolate untrusted native CLI security scanners and prevent host credential leakage?](./02-security-and-sandboxing/subprocess-isolation-boundary-untrusted-native-scanners)
+  * **The Challenge:** Running third-party dependency scanners (`osv-scanner`) against untrusted repositories risks leaking host developer secrets (`~/.ssh/id_rsa`, `.env`), spawning orphaned zombie processes, and unbounded stdout memory inflation.
+  * **The Engineering Fix:** Subprocess boundary enforced through an `isolationRunner` sandbox policy. Environment stripped to `HOME: '/nonexistent'` and `NO_COLOR: '1'`. Spawns with `detached: true` on POSIX to kill the entire process tree via `process.kill(-child.pid, 'SIGKILL')` on timeout. Stdout capped at 25 MB. Memory buffers zero-filled with `fill(0)` immediately after archive extraction.
+  * **Metrics & Results:** Zero credential leakage surface, 100% clean process tree termination, instant RAM wiping of customer code.
+
+* ### [👉 How to fail-closed destructive maintenance workers and verify forbidden secret absence on boot?](./02-security-and-sandboxing/fail-closed-maintenance-boundary-forbidden-secrets)
+  * **The Challenge:** Running destructive retention pruners and GDPR tenant purge workers inside standard API containers exposes database DELETE authority and external provider secrets (Stripe, AI keys) to lateral compromise.
+  * **The Engineering Fix:** Dedicated maintenance container boundary asserting `assertMaintenanceBoundary`: scans `process.env` against 28 prohibited credentials (`BETTER_AUTH_SECRET`, `STRIPE_SECRET_KEY`, `POSTGRES_ADMIN_PASSWORD`) and crashes on boot if any are present. Enforces all browser/source engines disabled. Attests active PostgreSQL role is strictly `wpa_maintenance`.
+  * **Metrics & Results:** 0 external provider secrets exposed, zero browser execution capability, mathematically verified least-privilege boundary.
+
+* ### [👉 How to prevent administrative step-up replay attacks using cryptographic WebAuthn assertion binding?](./02-security-and-sandboxing/webauthn-assertion-binding-and-monotonic-security-version)
+  * **The Challenge:** In privileged administrative portals, stealing an active session cookie allows attackers to inherit elevated passkey step-up status if step-up markers are stored as generic session booleans or unpinned Redis keys.
+  * **The Engineering Fix:** Cryptographic assertion binding: staged WebAuthn assertions in `wpa_admin_webauthn_assertions` bound to `sha256(session_id)`, `ip_hash`, and `user_agent_hash`. Single-use partial unique index `UNIQUE(session_id_hash)` prevents multi-session reuse. Monotonic `security_version` on admin accounts invalidates all fleet-wide elevated step-up markers instantly upon credential mutation.
+  * **Metrics & Results:** 0 passkey replay surface, cryptographic client fingerprint binding, O(1) instant fleet-wide session revocation.
+
 ---
 
 ### ⚡ 3. Concurrency & Race Conditions
@@ -147,6 +162,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Engineering Fix:** Mathematical boundary invariants: `maxCalendarYearDrift: 5` severs infinite date links, path depth clamped to 16, query parameter variants capped at 5 per unique path, and sitemap streams bounded to 8 MB and depth 3.
   * **Metrics & Results:** Zero crawler OOM crashes, strictly bounded execution runtime, O(1) crawler memory footprint.
 
+* ### [👉 How to build a fail-closed synthetic browser journey sandbox with network route interception and click mutation guards?](./06-autonomous-agents-and-automation/browser-synthetic-journey-sandbox-route-interception)
+  * **The Challenge:** Executing automated synthetic user journeys against live customer websites introduces catastrophic safety risks: synthetic scripts can inadvertently click form submit buttons that process real financial transactions, delete production data, or navigate to malicious cross-origin URLs.
+  * **The Engineering Fix:** Fail-closed route interception (`page.route('**/*', ...)`): allows only `GET`, `HEAD`, `OPTIONS` and immediately aborts mutating requests (`POST`, `PUT`, `DELETE`) and cross-origin destinations via `blockedbyclient`. In-DOM click mutation guard: checks target properties before dispatch, allowing only same-origin links and non-submit `<button type="button">` elements.
+  * **Metrics & Results:** 100% form submit button rejection, zero accidental financial or destructive mutations, zero cross-origin data leakage.
+
 ---
 
 ### 💳 7. Fintech & Billing Invariants
@@ -159,6 +179,11 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **The Challenge:** Comparing webhook HMAC signatures with standard string equality exposes endpoints to side-channel timing attacks. Unbounded timestamp verification allows captured webhooks to be replayed to steal subscriptions.
   * **The Engineering Fix:** Constant-time verification using `crypto.timingSafeEqual()`, strict 5-second replay fence, and monotonic `occurred_at` sequencing ensuring delayed webhooks never regress active subscriptions.
   * **Metrics & Results:** Zero timing leak surface, replay-proof billing verification, monotonic state consistency.
+
+* ### [👉 How to enforce immutable commercial plan change ledgers using PostgreSQL engine triggers?](./07-fintech-and-billing-invariants/append-only-commercial-plan-ledger-immutability-trigger)
+  * **The Challenge:** Updating SaaS subscriptions via standard `UPDATE workspaces SET plan_id` destroys historical billing provenance, bypasses application-layer audit logging, and makes customer refund or quota disputes impossible to reconstruct.
+  * **The Engineering Fix:** Dedicated append-only transition ledger `wpa_user_plan_changes` recording `before_plan_id`, `after_plan_id`, and `created_by`. Enforces `UNIQUE(user_id, idempotency_key)` against duplicate webhook dispatches. PostgreSQL engine-level `BEFORE UPDATE OR DELETE` trigger immediately raises SQLSTATE `55000` (`WPA_USER_PLAN_CHANGES_APPEND_ONLY`), preventing even database administrators from modifying historical billing records.
+  * **Metrics & Results:** 100% tamper-proof billing provenance, zero webhook replay mutations, database engine enforced immutability.
 
 ---
 
