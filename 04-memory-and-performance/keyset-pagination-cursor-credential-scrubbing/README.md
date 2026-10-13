@@ -3,7 +3,7 @@
 ## 1. The Production Constraint & Problem Statement
 In customer support and ticketing backends, two problems frequently occur:
 1. **Offset Pagination Degradation:** Using `OFFSET 10000` causes linear performance degradation and full table scans. Furthermore, concurrent ticket creation shifts row offsets, causing users to see duplicate items or miss newly created tickets.
-2. **Credential Leaks in User Bug Reports:** Users copying and pasting internal URLs into support tickets often paste authenticated URLs containing embedded credentials (`https://admin:supersecret@internal.corp/debug`). Storing these in plain text risks exposing sensitive internal passwords to support staff and logging pipelines.
+2. **Credential Leaks in User Bug Reports:** Users copying and pasting internal URLs into support tickets often paste authenticated URLs containing embedded credentials (`https://{user}:{password}@internal.corp/debug`). Storing these in plain text risks exposing sensitive internal passwords to support staff and logging pipelines.
 
 ---
 

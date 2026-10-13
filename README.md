@@ -352,7 +352,7 @@ Click on any engineering challenge below to jump directly to the case study, arc
 
 <a id="keyset-pagination-cursor-credential-scrubbing"></a>
 * ### [👉 How to eliminate linear OFFSET query degradation and scrub URL credentials in support ticketing ledgers?](./04-memory-and-performance/keyset-pagination-cursor-credential-scrubbing)
-  * **The Challenge:** Traditional `OFFSET 5000` pagination causes slow table scans and row-skipping during concurrent ticket creation. User-submitted bug reports often include target URLs with plaintext basic auth credentials (`https://admin:pass@host`).
+  * **The Challenge:** Traditional `OFFSET 5000` pagination causes slow table scans and row-skipping during concurrent ticket creation. User-submitted bug reports often include target URLs with plaintext basic auth credentials (`https://{user}:{password}@host`).
   * **The Engineering Fix:** Base64url encoded keyset cursors `(created_at, id)` providing constant O(1) compound index seeks. Strict URL parser rejecting non-HTTP(S) protocols and dropping URLs with embedded username/passwords before persistence.
   * **Metrics & Results:** O(1) query latency (<3ms) at any depth, 100% row-shift invariance, zero credential leakage in audit tickets.
 
