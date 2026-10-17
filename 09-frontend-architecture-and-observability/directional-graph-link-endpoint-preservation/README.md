@@ -15,12 +15,16 @@
 2. **Direct Entity Binding:** `entity1real` and `entity2real` are extracted directly via `existingLink.getEntity1()` and `existingLink.getEntity2()`, preserving the exact visual vector of the directional relation.
 3. **Golden Snapshot Testing:** Validated via automated Vega/Smetana regression tests across all 4 cardinal directions (up, down, left, right).
 
-## 4. Benchmarks & Validation
+## 4. Behavior Comparison
 | Diagram Link Splitting Strategy | Cardinal Arrow Direction Accuracy | Graphviz Layout Curve Integrity | Regression Test Coverage |
 |---|---|---|---|
 | Inverted Ternary Normalization | Broken (Flipped Directions) | Degraded | Failed |
 | Arrowhead Post-Processing Flip | Inconsistent | Broken Curve Paths | Untested |
-| **Direct Endpoint Preservation** | **100% Cardinal Alignment** | **Perfect Smetana/Vega Layout** | **All 4 Cardinal Directions** |
+| **Direct Endpoint Preservation** | **Preserved cardinal direction** | **Consistent layout curve paths** | **All 4 Cardinal Directions** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
 
 ## 5. Implementation
 See production-grade implementation in [`src/association_link_normalizer.java`](./src/association_link_normalizer.java).

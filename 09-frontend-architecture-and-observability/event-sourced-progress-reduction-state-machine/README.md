@@ -53,12 +53,14 @@ function rowsFor(snapshot: ScanProgressSnapshot): { rows: EngineRow[]; page?: Sc
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Progress UI Architecture | Reconnect State Integrity | Out-of-Order Event Handling | Render Jitter |
 |---|---|---|---|
 | Ad-Hoc `useState` Callbacks | Corrupted / Stuck Progress | Desynchronized UI | High (Cascading Rerenders) |
 | Imperative DOM Mutation | Lost on Component Remount | Fragile | Visual Glitches |
-| **Pure Event Fold State Machine** | **100% Deterministic Replay** | **Naturally Resolved (Reverse Fold)** | **Zero (Atomic Projection)** |
+| **Pure Event Fold State Machine** | **Deterministic state replay** | **Naturally Resolved (Reverse Fold)** | **Minimal (Atomic snapshot projection)** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

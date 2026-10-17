@@ -15,12 +15,16 @@
 2. **Bounded FIFO Stack (`maxHistory` Clamping):** Past states are clamped using `past.shift()`, keeping memory usage strictly O(1) regardless of session duration.
 3. **State Equality Short-Circuiting:** Consecutive identical states are discarded via JSON serialization equality checks before stack pushing.
 
-## 4. Benchmarks & Validation
+## 4. Behavior Comparison
 | Time-Travel Architecture | Redo Stack Preservation | DOM Reflows per Undo | Memory Footprint |
 |---|---|---|---|
 | Unchecked Reactive Write | Corrupted (Redo Wiped) | N (Per Property Write) | Unbounded Growth |
 | Manual Event Triggers | Fragile (Misses Writes) | 1 (If Batched) | Unbounded Growth |
-| **Suspended Tracking + Batch** | **100% Preserved Timeline** | **1 (Atomic Microtask Batch)** | **O(1) (Bounded Stack Limit)** |
+| **Suspended Tracking + Batch** | **Preserved timeline (No redo wipe)** | **1 (Atomic microtask batch)** | **Bounded by configured maxHistory limit** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
 
 ## 5. Implementation
 See production-grade implementation in [`src/history_controller.ts`](./src/history_controller.ts).

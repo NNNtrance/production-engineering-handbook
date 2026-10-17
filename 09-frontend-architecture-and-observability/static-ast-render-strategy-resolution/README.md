@@ -54,12 +54,14 @@ if (hasSideEffects || templateAnalysis.hasEvents) {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Strategy Selection | Human Configuration Overhead | Hydration Crash Risk | Server Resource Optimization |
 |---|---|---|---|
 | Manual Directives (`use client`) | High (Manual per file) | Frequent (Forgotten Directives) | Sub-optimal |
 | Pure Runtime Fallback | Medium | Layout Shift (CLS) | Poor |
-| **Static AST Resolution** | **Zero (Automated Compiler)** | **Zero (Compiler Verified)** | **100% Optimal (Auto-SSG)** |
+| **Static AST Resolution** | **Automated compiler classification** | **Eliminated (Compiler Verified)** | **Automatic SSG promotion** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

@@ -51,12 +51,14 @@ export function transformStyle(styleContent: string, hash: string): string {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Scoped CSS Strategy | Pseudo-Class Output (`:hover`) | Pseudo-Element (`::before`) | Keyframe Animations |
 |---|---|---|---|
 | Naive Suffix Append | `button:hover[data-scope]` (Weaker Specificity) | `button::before[data-scope]` (Syntax Error) | Broken (`50%[scope]`) |
 | CSS Modules | Mangled Classnames | Works | Requires Class Remap |
-| **Pre-Pseudo Splicing** | **`button[data-scope]:hover`** | **`button[data-scope]::before`** | **100% Preserved** |
+| **Pre-Pseudo Splicing** | **`button[data-scope]:hover`** | **`button[data-scope]::before`** | **Preserved (Keyframe rules untouched)** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

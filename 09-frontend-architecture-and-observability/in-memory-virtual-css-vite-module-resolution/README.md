@@ -60,12 +60,14 @@ return {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Single File Component CSS Pipeline | Disk I/O Overhead | Vite HMR File Watcher Loops | Memory Footprint |
 |---|---|---|---|
 | Disk Temporary Files (`.tmp/*.css`) | Heavy (Disk Writes per Keystroke) | Vulnerable (Watches Temp Dirs) | Disk + Heap |
 | Inline Injected Style Tags | Bypasses PostCSS/Minifier | Broken (No CSS Extraction) | Low |
-| **Rollup `\0` Virtual Module Cache** | **Zero (100% In-Memory RAM)** | **Zero (Ignored by Disk Watcher)** | **Microscopic (Map Strings)** |
+| **Rollup `\0` Virtual Module Cache** | **In-memory RAM buffer (No disk writes)** | **Ignored by physical disk watcher** | **Bounded (Process-level string Map)** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

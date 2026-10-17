@@ -43,12 +43,14 @@ export default function TrendChart({ data }: { data: Array<{ at: string; count: 
 
 ---
 
-## 4. Benchmark & Architectural Invariants
-| Chart Rendering Approach | Bundle Size Impact | Hydration Layout Shift (CLS) | External Dependencies |
+## 4. Behavior Comparison
+| Chart Rendering Approach | Bundle Size Impact | Layout Shift Behavior | External Dependencies |
 |---|---|---|---|
-| Recharts / D3 | 160 KB - 380 KB | 0.08 - 0.15 (Async Measure) | 12+ Packages |
-| Chart.js (Canvas) | 180 KB | 0.05 | Canvas Context |
-| **Native SVG Math Coordinate Component** | **< 1 KB (13 Lines)** | **0.00 (Zero Layout Shift)** | **0 Dependencies** |
+| Recharts / D3 | Heavy charting bundle | Async ResizeObserver measurement | Multiple third-party packages |
+| Chart.js (Canvas) | Heavy charting bundle | Asynchronous canvas initialization | Canvas context lifecycle |
+| **Native SVG Math Coordinate Component** | **Single 13-line component** | **Immediate viewBox aspect ratio reservation** | **No external dependencies** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

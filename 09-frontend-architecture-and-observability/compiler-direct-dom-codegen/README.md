@@ -42,12 +42,14 @@ insert(el, expr);
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Frontend Architecture | Update Complexity | Ephemeral VNode Allocations | Component Re-renders |
 |---|---|---|---|
 | Virtual DOM (React) | O(Component Tree) | High (New VNodes per Render) | Entire Component |
 | Svelte (Invalidation Arrays) | O(Dirty Mask) | Low | Component Scope |
-| **FluxDOM Direct-to-DOM Signals** | **O(1) Surgical Mutation** | **Zero VNodes (Direct Text/Attr)** | **Zero Re-renders** |
+| **FluxDOM Direct-to-DOM Signals** | **Direct DOM node mutation via signals** | **No intermediate VNodes (Direct DOM nodes)** | **Fine-grained signal effect execution** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 
