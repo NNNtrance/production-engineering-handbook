@@ -42,12 +42,14 @@ async function killChrome(chrome) {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Headless Chrome Teardown | Windows OS Stability | EBUSY Exception Handling | Worker Process Survivability |
 |---|---|---|---|
 | Unpatched `chromeLauncher.kill()` | Fails (Periodic EBUSY Crashes) | Unhandled Exception | Process Terminates |
-| Delay Hack (`sleep(500ms)`) | Brittle (Still races on slow disk) | Partial | Adds 500ms Latency per Run |
-| **Monkey-Patched `destroyTmp`** | **100% Stable on Windows & POSIX** | **Safely Absorbed** | **Zero Worker Crashes** |
+| Delay Hack (`sleep(500ms)`) | Brittle (Still races on slow disk) | Partial | Adds arbitrary delay per run |
+| **Monkey-Patched `destroyTmp`** | **Stable on Windows & POSIX** | **Safely Absorbed** | **Absorbs EBUSY errors on profile deletion** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

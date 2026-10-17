@@ -15,12 +15,14 @@
 2. **Graceful `EADDRINUSE` Fallback:** Hooks `staticServer.once('error')` to dynamically fall back to an ephemeral port if another instance is already running, preventing crashes.
 3. **Surgical SPA Path Resolution:** Inspects requested URL paths and automatically resolves extensionless routes to `.html` or fallback `index.html`.
 
-## 4. Benchmarks & Validation
+## 4. Behavior Comparison
 | Electron SPA Serving Strategy | IndexedDB / Storage Persistence | Multi-Gigabyte Stream Performance | LAN Attack Surface |
 |---|---|---|---|
-| Ephemeral Port (`listen(0)`) | Wiped Every Reboot (New Origin) | High | Zero (127.0.0.1) |
+| Ephemeral Port (`listen(0)`) | Wiped Every Reboot (New Origin) | High | Minimal (127.0.0.1) |
 | `file://` Protocol | Restricted (CORS / Workers Blocked) | Low (No HTTP Range Streams) | High (File Access) |
-| **Fixed Loopback Port (38450)** | **100% Persistent Origin Retention** | **High (Native HTTP Streaming)** | **Zero (Strict 127.0.0.1 Loopback)** |
+| **Fixed Loopback Port (38450)** | **Persistent origin retention across boots** | **High (Native HTTP Streaming)** | **Bound strictly to 127.0.0.1 loopback** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ## 5. Implementation
-See production-grade implementation in [`src/loopback_server.ts`](./src/loopback_server.ts).
+See implementation in [`src/loopback_server.ts`](./src/loopback_server.ts).

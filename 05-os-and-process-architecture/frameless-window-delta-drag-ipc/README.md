@@ -15,12 +15,14 @@
 2. **Atomic Unmaximize Coordinate Re-Anchoring:** When dragging a maximized window, `unmaximize()` is invoked, and the origin offsets are instantly reset to the cursor position to prevent teleportation.
 3. **Full Web Renderer Control:** All dragging occurs via lightweight IPC events, allowing web buttons, dropdowns, and search bars to remain fully interactive inside the custom titlebar.
 
-## 4. Benchmarks & Validation
+## 4. Behavior Comparison
 | Frameless Window Dragging Mechanism | DOM Click / Button Responsiveness | Maximized Drag Smoothness | Pointer Capture Stability |
 |---|---|---|---|
 | CSS `-webkit-app-region: drag` | Broken (Swallows DOM Events) | Glitchy (OS Snap Freezes) | Unstable on Windows |
 | Polling Timer (`setInterval`) | High Latency (Jitter) | Poor (Drifts from Cursor) | High CPU Overhead |
-| **Delta-Offset IPC Messaging** | **100% Interactive Titlebar** | **Smooth (Re-Anchored Coordinates)** | **100% Stable Native Physics** |
+| **Delta-Offset IPC Messaging** | **Interactive titlebar (DOM events preserved)** | **Smooth (Re-Anchored Coordinates)** | **Stable coordinate calculation** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ## 5. Implementation
-See production-grade implementation in [`src/window_dragging_ipc.ts`](./src/window_dragging_ipc.ts).
+See implementation in [`src/window_dragging_ipc.ts`](./src/window_dragging_ipc.ts).
