@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Shelf from './Shelf.jsx';
+import Reader from './Reader.jsx';
+import { useBook } from './useBook.js';
 import { REPO, ROMAN } from './config.js';
 
 export default function App() {
@@ -13,6 +15,8 @@ export default function App() {
       return '';
     }
   });
+
+  const book = useBook({ books, setCurBook });
 
   useEffect(() => {
     if (theme) {
@@ -34,7 +38,8 @@ export default function App() {
   };
 
   useEffect(() => {
-    fetch('/data/index.json')
+    const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+    fetch(`${base}/data/index.json`)
       .then((res) => res.json())
       .then((data) => setBooks(data))
       .catch((err) => console.error('Failed to load index.json:', err));
@@ -44,11 +49,6 @@ export default function App() {
     if (books[i]) {
       setCaption(`${ROMAN[i]} · ${books[i].name}, ${books[i].cases.length} problems`);
     }
-  };
-
-  const handleOpenBook = (i) => {
-    setCurBook(i);
-    // In Faz 3, this triggers Reader openBook flow
   };
 
   const totalCases = books.reduce((acc, b) => acc + (b.cases?.length || 0), 0);
@@ -90,7 +90,7 @@ export default function App() {
         <Shelf
           books={books}
           curBook={curBook}
-          onOpenBook={handleOpenBook}
+          onOpenBook={book.openBook}
           onHoverBook={handleHoverBook}
         />
 
@@ -106,6 +106,8 @@ export default function App() {
           , so nothing here is written twice.
         </p>
       </main>
+
+      <Reader book={book} />
     </>
   );
 }
