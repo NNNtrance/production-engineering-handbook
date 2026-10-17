@@ -2,6 +2,7 @@
 target/
 dist/
 node_modules/
+site/public/data/
 
 # OS Junk
 Thumbs.db
