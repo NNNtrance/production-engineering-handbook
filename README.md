@@ -4,11 +4,13 @@
 
 A curated, domain-driven cookbook of low-level systems engineering solutions, non-trivial architectural decisions, and working implementations drawn from my own projects (such as WebPageAnalyz and FluxDOM) and open-source contributions (such as PlantUML, npm-check-updates, and YamlDotNet).
 
+📖 **Read it as a book:** [handbook.onuracar.dev](https://handbook.onuracar.dev) renders these same READMEs as nine books on a shelf. The site is built from this repo's markdown ([`site/`](./site)), so nothing is written twice.
+
 ---
 
 ## 📌 Architecture & Domain Taxonomy
 
-Instead of grouping solutions by ephemeral project names, case studies are organized by **engineering domain**. Each topic contains an isolated implementation, deep post-mortem analysis, and verified behavioral guarantees.
+Instead of grouping solutions by ephemeral project names, case studies are organized by **engineering domain**. Each case study contains an isolated implementation, a post-mortem of what failed first, and a behavior comparison. Six of them also ship a runnable check under `test/`.
 
 ```
 .
@@ -595,6 +597,7 @@ Have you solved a hard, non-trivial systems engineering problem? We welcome cont
 ## 🛠 Directory Layout Standard
 
 Every case study directory follows this strict layout:
-* `README.md` — Deep technical breakdown: *The Constraint*, *Why Naive Workarounds Fail*, *The Architecture*, and *Behavior Comparison*.
-* `src/` — Self-contained, runnable or verifiable source code.
-* `assets/code-card.png` — Authentic, raw VS Code editor crop visual.
+* `README.md` — Sections in this order: *Problem*, *Why Naive Approaches Fail*, *Architecture*, *Behavior Comparison*, *Implementation*, optional *How to Verify*, *Visual Representation*. The site build reads these headings, so keep them exact.
+* `src/` — Self-contained source code linked from *Implementation*.
+* `test/` (optional) — A runnable check whose real output is pasted into *How to Verify*.
+* `assets/code-card.png` — Raw VS Code editor crop of the key code.

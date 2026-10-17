@@ -1,64 +1,56 @@
-# Production Engineering Handbook — Site
+# Handbook site
 
-Interactive companion website for the Production Engineering Handbook. Displays nine books on an SVG shelf, opening into an interactive book reader with 3D page turns, measured table of contents pagination, and synchronized URL hash routing.
+The reading view for this handbook, published at [handbook.onuracar.dev](https://handbook.onuracar.dev). Nine books sit on an SVG shelf, one per domain, and each spine is as thick as the number of problems inside it. Opening a book shows its contents. Each problem is a two-page spread: the left page has the problem and the approaches that failed first, the right page has the fix, its source and, where one exists, the verified test output.
 
-## Geliştirme ve Çalıştırma
+React 18 + Vite. There are no other runtime dependencies: page turns are CSS 3D transforms, markdown is rendered by a small parser in `src/markdown.js`, and routing uses the URL hash (`#/<domain-folder>/<case-slug>`).
 
-### Gereksinimler
-- Node.js 22+
-- npm
+## Run it
 
-### Kurulum
+Requires Node 22+.
+
 ```bash
 npm install
-```
-
-### Lokal Geliştirme
-```bash
 npm run dev
 ```
-`predev` adımı otomatik olarak `scripts/build-data.mjs` betiğini çalıştırıp `public/data/` altındaki veri dosyalarını üretir, ardından Vite geliştirme sunucusunu başlatır.
 
-### Üretim Derlemesi
-```bash
-npm run build
-```
-`prebuild` adımı verileri derler, ardından Vite statik bundle'ı `dist/` klasörüne çıkarır.
+`npm run build` writes the static site to `dist/`, and `npm run preview` serves that build.
 
-### Önizleme
-```bash
-npm run preview
-```
+## Where the content comes from
 
-## Veri Akışı (Data Pipeline)
+Nothing in `site/` duplicates the handbook. `scripts/build-data.mjs` runs before `dev` and `build`:
 
-Site üzerindeki tüm kitaplar ve vakalar doğrudan repodaki markdown dosyalarından üretilir; veriler elle iki kez yazılmaz.
+1. It reads the **Quick Problem Index** in the root `README.md` to get the books, their order, and the question for each case.
+2. For every case it parses `<domain>/<case>/README.md` by heading: *Problem*, *Why Naive Approaches Fail*, *Architecture*, *Implementation* and the optional *How to Verify*.
+3. It writes `public/data/index.json` (shelf and contents) and one `public/data/book-<n>.json` per book (loaded when the book is opened). Both are generated and git-ignored.
 
-1. **Quick Problem Index**: `scripts/build-data.mjs`, kök dizindeki ana `README.md` dosyasındaki Quick Problem Index tablosunu okuyarak kitap ve vaka listesini, sırasını ve başlıklarını belirler.
-2. **Vaka İçerikleri**: Her vaka için ilgili klasördeki (`XX-domain/case-slug/README.md`) dosya taranarak aşağıdaki bölümler ayrıştırılır:
-   - *The Problem* (Sorun tanımı)
-   - *First Tries* (Başarısız ilk denemeler, üzeri çizili adımlar ve el yazısı notlar)
-   - *What Held* (Kalıcı çözüm ve mimari analiz)
-   - *Verified* (Doğrulama adımları ve test komutları)
-   - *Source Link* (Kaynak kod bağlantısı)
-3. **Bütünlük Doğrulaması**:
-   - Quick Index'te yer alan bir vakanın klasörü veya `README.md` dosyası eksikse derleme hata verir.
-   - Vakada belirtilen `src` dosyasının diskte fiziki olarak var olduğu kontrol edilir; dosya yoksa derleme kırılır.
-   - `src/config.js` içerisindeki `SPINE` girdilerinin her kitap için tanımlı olduğu doğrulanır.
-4. **Çıktı**:
-   - `public/data/index.json`: Kitap üst verileri ve vaka başlıkları (raf ve içindekiler için).
-   - `public/data/book-<n>.json`: İlgili kitaba ait detaylı vaka içerikleri (kitap açıldığında isteğe bağlı yüklenir).
-   - `public/data/` dizini `.gitignore` içerisindedir ve versiyon kontrolüne dahil edilmez.
+The build fails instead of publishing a broken page when:
 
-## Cloudflare Pages Dağıtım Ayarları
+- a case listed in the index has no folder or no `README.md`,
+- a required section is missing or empty,
+- the file linked from *Implementation* does not exist,
+- a book has no `SPINE` / `HEIGHTS` entry in `src/config.js`.
 
-Dağıtım Cloudflare Pages üzerinden yapılır:
+So a new case study shows up on the site after the next deploy, as long as it follows the [contributing guide](../CONTRIBUTING.md) and is added to the Quick Problem Index. A new domain also needs one line in `src/config.js` for its spine colour and height.
 
-| Ayar | Değer |
+## Layout
+
+| Path | What it does |
 |---|---|
-| **Framework preset** | `Vite` (veya `None`) |
-| **Root directory** | `site` |
-| **Build command** | `npm run build` |
-| **Build output directory** | `dist` |
-| **Node.js version** | `22` (Environment variable: `NODE_VERSION: 22`) |
-| **Custom domain** | `handbook.onuracar.dev` |
+| `src/Shelf.jsx` | The SVG shelf: spines, bookend, plant, hover label |
+| `src/Reader.jsx` | Top bar, the two-page spread, corner page-turn buttons |
+| `src/useBook.js` | Builds the pages, measures the contents into pages, runs the page-turn animation, hash routing |
+| `src/markdown.js` | Minimal markdown to HTML for the case content |
+| `src/config.js` | Spine colours, heights, roman numerals, repo URL |
+| `prototype/` | The original single-file prototype the site was ported from, kept for reference |
+
+## Deploy (Cloudflare Pages)
+
+| Setting | Value |
+|---|---|
+| Root directory | `site` |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Environment variable | `NODE_VERSION=22` |
+| Custom domain | `handbook.onuracar.dev` |
+
+The build reads files outside `site/` (the root README and the domain folders), which works because Pages clones the whole repository.

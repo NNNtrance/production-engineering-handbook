@@ -61,7 +61,10 @@ Your case study's `README.md` must adhere strictly to these sections:
 Explain the hard technical problem, edge cases, and real-world failure mode under load. Use numbered lists.
 
 ## 2. Why Naive Approaches Fail
-Analyze why common high-level developer workarounds break (e.g. timeout races, memory leaks, unhandled exceptions, security vulnerabilities).
+Analyze why common high-level developer workarounds break (e.g. timeout races, memory leaks, unhandled exceptions, security vulnerabilities). Use exactly this shape, because the site renders each item as a crossed-out first attempt with its note:
+
+1. **Name of the naive approach:**
+   * One or two sentences on why it fails.
 
 ## 3. Architecture
 Detail the low-level architectural fix with code snippets, algorithms, and invariant guarantees.
@@ -74,7 +77,10 @@ Provide a Markdown table comparing the naive approach vs your architecture acros
 Link directly to the runnable source code in `src/`:
 See implementation in [`src/<file-name>`](./src/<file-name>).
 
-## 6. Visual Representation
+## 6. How to Verify (optional)
+The command that runs your check in `test/`, its real output, and the environment (OS, runtime version, date).
+
+## 7. Visual Representation
 ![Visual Architecture Card](./assets/code-card.png)
 ```
 
