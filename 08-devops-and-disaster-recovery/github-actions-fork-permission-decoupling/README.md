@@ -15,12 +15,16 @@
 2. **Unconditional Artifact Preservation:** Generated Markdown summaries and `lcov.info` files are always uploaded via `actions/upload-artifact`, allowing maintainers to inspect coverage reports without elevated permissions.
 3. **Non-Gating Reporting:** Even on internal branches, comment steps use `continue-on-error: true`, ensuring transient GitHub API rate limits never fail green code merges.
 
-## 4. Benchmarks & Validation
+## 4. Behavior Comparison
 | CI/CD Fork Workflow Architecture | Fork PR Pipeline Status | Secret Exfiltration Risk | Maintainer Coverage Visibility |
 |---|---|---|---|
-| Unconditioned Sticky Comment | Failed (HTTP 403 Forbidden) | Zero | None (Aborted) |
+| Unconditioned Sticky Comment | Failed (HTTP 403 Forbidden) | Minimal | None (Aborted) |
 | Elevated `pull_request_target` | Passed | Severe (Secrets Exposed) | Visible via Comment |
-| **Decoupled Permission Fencing** | **100% Passed (Clean Tests)** | **Zero (Read-Only Token)** | **Full (Preserved in Artifacts)** |
+| **Decoupled Permission Fencing** | **Passed (Clean test run)** | **Restricted (Read-Only Token)** | **Full (Preserved in Artifacts)** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
 
 ## 5. Implementation
 See production-grade implementation in [`src/fork_permission_pipeline.yml`](./src/fork_permission_pipeline.yml).

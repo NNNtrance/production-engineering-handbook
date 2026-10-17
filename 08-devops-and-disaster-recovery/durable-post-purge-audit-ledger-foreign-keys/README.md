@@ -48,12 +48,14 @@ CREATE INDEX IF NOT EXISTS wpa_workspace_deletion_runs_status_idx
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Deletion Audit Architecture | Customer Data Purge | Forensic Audit Retention | GDPR / SOC 2 Compliance |
 |---|---|---|---|
 | Soft Delete (`is_deleted = true`) | Incomplete (Data Retained) | Retained | Non-Compliant (PII Survives) |
 | Hard Delete with `CASCADE` | Complete | Destroyed (Log Row Wiped) | Non-Compliant (No Audit Proof) |
-| **`ON DELETE SET NULL` Decoupling** | **Complete Physical Erasure** | **100% Durable Forensic Proof** | **Fully Compliant** |
+| **`ON DELETE SET NULL` Decoupling** | **Physical erasure of tenant rows** | **Survives cascade with nullified foreign key** | **Retains audit provenance** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

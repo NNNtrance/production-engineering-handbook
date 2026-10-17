@@ -43,12 +43,14 @@ test('tracked Linux shell scripts use LF-only bytes and explicit Git attributes'
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Shell Script Line-Ending Defense | Windows Dev Portability | Production Docker Startup | CI/CD Enforcement |
 |---|---|---|---|
 | Manual IDE Settings | Fragile (Fails Frequently) | `/bin/sh^M` Crashes | None |
 | Dockerfile `dos2unix` | Works | Adds Image Overhead | None (Allows Corrupt Source) |
-| **Byte-Level Pre-Flight Test** | **100% Deterministic** | **Zero Runtime Failures** | **Fails Fast Before Merge** |
+| **Byte-Level Pre-Flight Test** | **Deterministic (.gitattributes eol=lf)** | **Protected (Rejects \r bytes in CI)** | **Fails Fast Before Merge** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

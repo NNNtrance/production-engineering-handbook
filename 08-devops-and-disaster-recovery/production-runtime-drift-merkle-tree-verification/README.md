@@ -39,10 +39,12 @@ See [`src/runtime_drift.js`](./src/runtime_drift.js) for the isolated implementa
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Deployment Verification Model | Tampered File Detection | Migration Checksum Verification | .dockerignore Awareness |
 |---|---|---|---|
 | Image Tag Inspection | None (Blind Trust) | None | None |
 | Container Hash Inspection | Coarse (Image ID only) | None | None |
-| **Merkle Tree Drift Verifier** | **100% Deterministic (Per-File SHA-256)** | **Verified against SQL Ledger** | **Rule-Based Classification** |
+| **Merkle Tree Drift Verifier** | **Cryptographic detection (Per-File SHA-256)** | **Verified against SQL Ledger** | **Rule-Based Classification** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

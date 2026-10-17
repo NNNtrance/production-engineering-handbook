@@ -3,7 +3,7 @@
 > **Domain:** DevOps & Disaster Recovery  
 > **Source Project:** `WebPageAnalyz (Infra Automation)`  
 > **Language:** POSIX Shell / PostgreSQL / age  
-> **Key Metric:** `Automated SHA-256 check, age decryption, ephemeral database creation, zero disk residue`  
+> **Key Metric:** `Automated SHA-256 check, age decryption, ephemeral database creation, trap-based cleanup`  
 
 ---
 
@@ -40,10 +40,12 @@ See [`src/restore_check.sh`](./src/restore_check.sh) for the isolated implementa
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Backup Strategy | Integrity Verification | Key Decryption Test | Schema Compatibility Test |
 |---|---|---|---|
 | Unmonitored Cron Dump | None (Blind Faith) | None | None |
 | Periodic Manual Drill | Occasional | Manual | Manual |
 | **Automated Ephemeral Restore Rig** | **SHA-256 Verified** | **Automated age Decrypt** | **Full Restore + Table Assertions** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
