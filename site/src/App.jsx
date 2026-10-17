@@ -48,6 +48,7 @@ export default function App() {
   const handleHoverBook = (i) => {
     if (books[i]) {
       setCaption(`${ROMAN[i]} · ${books[i].name}, ${books[i].cases.length} problems`);
+      book.prefetchBook(i);
     }
   };
 

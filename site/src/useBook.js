@@ -24,8 +24,10 @@ export function useBook({ books, setCurBook }) {
   const folio = (idx) => `<span class="folio">${idx + 1}</span>`;
 
   const titlePage = (b, i) => {
+    const totalRoman =
+      books && books.length > 0 && ROMAN[books.length - 1] ? ROMAN[books.length - 1] : 'IX';
     return `<div class="pg title">
-      <p class="eyebrow">Book ${ROMAN[i]} of IX</p>
+      <p class="eyebrow">Book ${ROMAN[i]} of ${totalRoman}</p>
       <h1>${esc(b.name)}</h1>
       <p class="blurb">${esc(b.blurb)}</p>
       <div class="orn"></div>
@@ -412,58 +414,86 @@ export function useBook({ books, setCurBook }) {
     [books, setCurBook]
   );
 
-  const closeBook = useCallback(() => {
-    if (busyRef.current || curRef.current < 0) return;
-    busyRef.current = true;
-    const closingIdx = curRef.current;
-    const b = activeBookRef.current;
-    const reader = readerRef.current;
-    const wrap = wrapRef.current;
-    const L = pageLRef.current;
-    const R = pageRRef.current;
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const isSingle = singleRef.current;
-    const pages = pagesRef.current;
-    const pos = posRef.current;
+  const closeBook = useCallback(
+    (onClosed) => {
+      if (busyRef.current || curRef.current < 0) return;
+      busyRef.current = true;
+      const closingIdx = curRef.current;
+      const b = activeBookRef.current;
+      const reader = readerRef.current;
+      const wrap = wrapRef.current;
+      const L = pageLRef.current;
+      const R = pageRRef.current;
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const isSingle = singleRef.current;
+      const pages = pagesRef.current;
+      const pos = posRef.current;
 
-    let lf;
-    if (isSingle) {
-      lf = leaf('in single', cover(b, closingIdx), 'cover', null);
-    } else {
-      lf = leaf('back', pages[2 * pos], 'left', cover(b, closingIdx), 'cover');
-      L.style.visibility = 'hidden';
-      wrap.classList.add('closed');
-    }
+      let lf;
+      if (isSingle) {
+        lf = leaf('in single', cover(b, closingIdx), 'cover', null);
+      } else {
+        lf = leaf('back', pages[2 * pos], 'left', cover(b, closingIdx), 'cover');
+        L.style.visibility = 'hidden';
+        wrap.classList.add('closed');
+      }
 
-    turn(lf, () => {
-      reader.classList.remove('show');
-      setTimeout(
-        () => {
-          reader.hidden = true;
-          lf.remove();
-          L.innerHTML = R.innerHTML = '';
-          L.style.visibility = '';
-          wrap.classList.remove('closed');
+      turn(lf, () => {
+        reader.classList.remove('show');
+        setTimeout(
+          () => {
+            reader.hidden = true;
+            lf.remove();
+            L.innerHTML = R.innerHTML = '';
+            L.style.visibility = '';
+            wrap.classList.remove('closed');
 
-          const mainEl = document.getElementById('main');
-          if (mainEl) mainEl.inert = false;
+            const mainEl = document.getElementById('main');
+            if (mainEl) mainEl.inert = false;
 
-          const spineEl = document.querySelector(`.book[data-book="${closingIdx}"]`);
-          spineEl?.classList.remove('pulled');
-          spineEl?.focus({ preventScroll: true });
+            const spineEl = document.querySelector(`.book[data-book="${closingIdx}"]`);
+            spineEl?.classList.remove('pulled');
+            if (!onClosed) {
+              spineEl?.focus({ preventScroll: true });
+            }
 
-          curRef.current = -1;
-          activeBookRef.current = null;
-          setCurBook(-1);
-          busyRef.current = false;
-          try {
-            history.replaceState(null, '', location.pathname + location.search);
-          } catch {}
-        },
-        reduced ? 0 : 340
-      );
-    });
-  }, [setCurBook]);
+            curRef.current = -1;
+            activeBookRef.current = null;
+            setCurBook(-1);
+            busyRef.current = false;
+
+            if (!onClosed) {
+              try {
+                history.replaceState(null, '', location.pathname + location.search);
+              } catch {}
+            }
+
+            if (typeof onClosed === 'function') {
+              onClosed();
+            }
+          },
+          reduced ? 0 : 340
+        );
+      });
+    },
+    [setCurBook]
+  );
+
+  const prefetchBook = useCallback(
+    (i) => {
+      const bMeta = books[i];
+      if (!bMeta) return;
+      if (bookCacheRef.current[bMeta.n]) return;
+      const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+      fetch(`${base}/data/book-${bMeta.n}.json`)
+        .then((res) => res.json())
+        .then((data) => {
+          bookCacheRef.current[bMeta.n] = data;
+        })
+        .catch(() => {});
+    },
+    [books]
+  );
 
   // Keyboard navigation & Esc to close
   useEffect(() => {
@@ -590,8 +620,7 @@ export function useBook({ books, setCurBook }) {
         }
       } else {
         if (curRef.current >= 0) {
-          closeBook();
-          setTimeout(() => openBook(bi, ci >= 0 ? ci : undefined), 380);
+          closeBook(() => openBook(bi, ci >= 0 ? ci : undefined));
         } else {
           openBook(bi, ci >= 0 ? ci : undefined);
         }
@@ -622,5 +651,6 @@ export function useBook({ books, setCurBook }) {
     openBook,
     closeBook,
     go,
+    prefetchBook,
   };
 }

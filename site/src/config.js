@@ -1,5 +1,5 @@
 export const REPO = 'https://github.com/onuracar-dev/production-engineering-handbook/';
-export const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
+export const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
 
 // [spine label, cloth colour, label colour]
 export const SPINE = [
