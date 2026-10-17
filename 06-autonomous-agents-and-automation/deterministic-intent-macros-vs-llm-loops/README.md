@@ -4,7 +4,7 @@
 > **Source Project:** `llm-conductor` (Desktop Native Core)  
 > **Language:** TypeScript / Client-Side DOM Automation  
 > **Dependencies:** `0` (Standard DOM APIs)  
-> **Key Metric:** `90%` latency reduction (22s -> 1.2s), 1 turn vs 5 turns
+> **Key Metric:** Single-turn atomic intent compilation replaces multi-turn LLM reasoning loops
 
 ---
 
@@ -17,7 +17,7 @@ Standard autonomous browser agent frameworks (Browser-Use, Agent-E, generic Lang
 * Step 4: LLM identifies the search results.
 * Step 5: LLM selects the desired link.
 
-This creates 20 to 30 seconds of cumulative latency, burns $0.15 to $0.25 per workflow in tokens, and creates 5 separate opportunities for reasoning failures or DOM selector breakdowns.
+This introduces cumulative network latency across multi-turn reasoning loops, burns model tokens on repeated DOM dumps, and creates multiple separate opportunities for reasoning failures or DOM selector breakdowns.
 
 ---
 
@@ -41,10 +41,12 @@ We replaced the 5-turn loop with an Atomic Client-Side Intent Macro (`searchAndS
 
 ---
 
-## 4. Benchmarks & Results
+## 4. Behavior Comparison
 
-| Approach | LLM Turns | End-to-End Latency | Token Cost | Reliability |
-|---|---|---|---|---|
-| Standard N-Turn Agent | 5 turns | `~22,000ms` | `$0.18` | Fragile (5 hallucination points) |
-| Vision Coordinate Agent | 4 turns | `~16,000ms` | `$0.28` | Moderate (resolution dependent) |
-| **Atomic Intent Macro** | **1 turn** | **`1,200ms`** | **`$0.01`** | **100% Deterministic** |
+| Approach | LLM Interaction | Execution Model | Failure Surface |
+|---|---|---|---|
+| Standard N-Turn Agent | Multi-turn reasoning loops | Serial roundtrips per sub-action | Multiple LLM reasoning failure points |
+| Vision Coordinate Agent | Multi-turn coordinate inference | Screenshot encoding and coordinate mapping | Screen resolution and coordinate drift |
+| **Atomic Intent Macro** | **Single atomic intent turn** | **Client-side heuristic DOM execution** | **Deterministic DOM fallbacks** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

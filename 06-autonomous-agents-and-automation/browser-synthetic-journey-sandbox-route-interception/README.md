@@ -52,12 +52,14 @@ if (step.action === 'click') {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Journey Execution Model | Accidental Form Submission | Cross-Origin Data Leakage | Destructive Mutation Risk |
 |---|---|---|---|
 | Unrestricted Playwright | High (Unchecked Clicks) | Unrestricted | High (Unrestricted POST) |
 | Selector Whitelisting | Fragile (DOM Drift) | Moderate | Moderate |
-| **Fail-Closed Journey Sandbox** | **100% Blocked (Non-Submit Only)** | **Zero (Same-Origin Only)** | **Zero (Mutating Requests Aborted)** |
+| **Fail-Closed Journey Sandbox** | **Blocked (Non-Submit Only)** | **Restricted (Same-Origin Only)** | **Aborted (Mutating Requests Canceled)** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

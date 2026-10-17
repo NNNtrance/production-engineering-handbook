@@ -39,10 +39,12 @@ See [`src/crawler_limits.js`](./src/crawler_limits.js) for the isolated implemen
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Crawler Traversal Model | Infinite Calendar Trap | Faceted Search Explosion | Memory Footprint |
 |---|---|---|---|
 | Basic Visited Set | Infinite Loop (Memory Crash) | Exponential (O(N!)) | Unbounded |
 | Regex Blacklisting | Incomplete | Incomplete | High |
-| **Strict Bounded Crawler Limits** | **100% Mitigated (Max 5 Yrs)** | **Clamped (5 Variants)** | **Strictly O(1) Bounded** |
+| **Strict Bounded Crawler Limits** | **Bounded (Rejects calendar drift > 5 years)** | **Clamped (Max 5 query variants)** | **Bounded by configured depth and count limits** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
