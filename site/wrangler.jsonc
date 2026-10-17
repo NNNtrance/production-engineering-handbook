@@ -1,0 +1,8 @@
+{
+  // Static site on Cloudflare Workers: `npm run build` writes dist/, wrangler uploads it.
+  "name": "production-engineering-handbook",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist"
+  }
+}

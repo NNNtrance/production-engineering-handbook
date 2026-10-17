@@ -43,14 +43,16 @@ So a new case study shows up on the site after the next deploy, as long as it fo
 | `src/config.js` | Spine colours, heights, roman numerals, repo URL |
 | `prototype/` | The original single-file prototype the site was ported from, kept for reference |
 
-## Deploy (Cloudflare Pages)
+## Deploy (Cloudflare Workers)
+
+The site deploys as static assets on a Worker. `wrangler.jsonc` points the Worker at `dist/`.
 
 | Setting | Value |
 |---|---|
-| Root directory | `site` |
+| Path (root directory) | `site` |
 | Build command | `npm run build` |
-| Build output directory | `dist` |
-| Environment variable | `NODE_VERSION=22` |
+| Deploy command | `npx wrangler deploy` |
+| Build variable | `NODE_VERSION=22` |
 | Custom domain | `handbook.onuracar.dev` |
 
-The build reads files outside `site/` (the root README and the domain folders), which works because Pages clones the whole repository.
+The build reads files outside `site/` (the root README and the domain folders), which works because Cloudflare clones the whole repository.
