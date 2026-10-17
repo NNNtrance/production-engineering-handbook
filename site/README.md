@@ -52,7 +52,7 @@ The site deploys as static assets on a Worker. `wrangler.jsonc` points the Worke
 | Path (root directory) | `site` |
 | Build command | `npm run build` |
 | Deploy command | `npx wrangler deploy` |
-| Build variable | `NODE_VERSION=22` |
+| Node version | `site/.node-version` (22) |
 | Custom domain | `handbook.onuracar.dev` |
 
 The build reads files outside `site/` (the root README and the domain folders), which works because Cloudflare clones the whole repository.
