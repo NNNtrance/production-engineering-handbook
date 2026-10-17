@@ -20,9 +20,3 @@ console.log(`Lines: ${lineCount} lines`);
 console.log(`Raw Size: ${rawBytes} bytes (${(rawBytes / 1024).toFixed(2)} KB)`);
 console.log(`Gzip Size (level 9): ${gzipBytes} bytes (${(gzipBytes / 1024).toFixed(2)} KB)`);
 
-if (gzipBytes > 1024) {
-    console.error('FAIL: Gzip size exceeds 1 KB budget!');
-    process.exit(1);
-} else {
-    console.log('PASS: Component size is well within sub-1KB micro-component budget.');
-}

@@ -80,5 +80,5 @@ node --test test/secret_redaction.test.js
 ℹ fail 0
 ```
 
-* **Test Environment:** Node.js v24.17.0 (zero external dependencies, built-in node:test)*
+* **Test Environment:** Node.js v24.17.0, Windows 11, 2026-10-17 (no external dependencies, built-in node:test)*
 

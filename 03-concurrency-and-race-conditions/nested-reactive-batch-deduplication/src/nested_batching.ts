@@ -1,3 +1,4 @@
+// Minimal createSignal/createEffect harness added for tests; batch() and the Object.is short-circuit are the original FluxDOM logic.
 type Subscriber = () => void;
 
 let batchDepth = 0;
