@@ -55,12 +55,14 @@ signal?.addEventListener('abort', job.onAbort, { once: true });
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Disconnect Behavior | Tab Close CPU Consumption | Queue Slot Reclamation | Client Disconnect Status |
 |---|---|---|---|
-| Standard Express Pipeline | 100% (Runs to Completion) | Never (Executes Anyway) | Unhandled / Broken Pipe |
-| Manual `res.on('close')` | Partial (Ad-hoc Checks) | Delayed | 500 Internal Error |
-| **Cascading Abort & Queue Splicing** | **0% (Killed in <10ms)** | **Immediate (`queue.splice`)** | **HTTP 499 Disconnected** |
+| Standard Express Pipeline | Runs to completion | Executes anyway | Unhandled / Broken Pipe |
+| Manual `res.on('close')` | Partial (ad-hoc checks) | Delayed | 500 Internal Error |
+| **Cascading Abort & Queue Splicing** | **Aborts downstream tasks and child processes** | **Spliced from queue on abort event** | **HTTP 499 Disconnected** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

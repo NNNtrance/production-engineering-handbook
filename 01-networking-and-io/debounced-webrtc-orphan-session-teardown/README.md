@@ -15,12 +15,14 @@
 2. **Debounced Flap Guard (`debounceMs = 2000`):** When participant count drops from 2+ to 1, a 2000ms timer starts. If the peer reconnects within 2 seconds, the timer is cleared immediately.
 3. **Atomic Session Settlement:** Upon timeout expiration, local audio/video media tracks are released, the room status is marked `ended` in PostgreSQL, and the session duration is durably logged.
 
-## 4. Benchmarks & Validation
+## 4. Behavior Comparison
 | Disconnection Architecture | Network Flap Immunity | Orphan Room TURN Leak | Session Audit Accuracy |
 |---|---|---|---|
 | Immediate Peer Drop Exit | Broken (Drops on Wi-Fi switch) | Low | Flawed (Truncated Calls) |
-| Cron Room Sweep (60s) | Flap Immune | High (60s Wasted Video Stream) | Imprecise |
-| **Latched 2000ms Debounce** | **100% Protected (2s Reconnect)** | **Zero (Auto-Kills Abandoned Rooms)** | **Exact (Microsecond Session Log)** |
+| Cron Room Sweep | Flap Immune | High (Retains video stream until poll) | Imprecise |
+| **Latched 2000ms Debounce** | **Tolerates reconnects within configured debounce window** | **Terminates abandoned rooms after timeout** | **Logs session duration on teardown** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ## 5. Implementation
-See production-grade implementation in [`src/webrtc_teardown_guard.ts`](./src/webrtc_teardown_guard.ts).
+See implementation in [`src/webrtc_teardown_guard.ts`](./src/webrtc_teardown_guard.ts).

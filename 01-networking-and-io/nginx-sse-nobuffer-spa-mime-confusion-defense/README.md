@@ -50,12 +50,14 @@ location ~* \.(?:js|css|svg|png|jpg|jpeg|gif|webp|woff2?)$ {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Nginx Reverse Proxy Setup | Real-Time SSE Chunk Latency | Missing JS Bundle Handling | Browser Script Execution |
 |---|---|---|---|
-| Default Nginx Config | 10,000ms+ (Buffered Burst) | Returns HTML (MIME Confusion) | Crashes (`SyntaxError '<'`) |
-| API-Only Unbuffered | 0ms Delay | Returns HTML | Crashes |
-| **SSE Unbuffered + `=404` Asset Guard** | **0ms Real-Time Delivery** | **Returns Explicit HTTP 404** | **Clean Graceful Degradation** |
+| Default Nginx Config | Buffered until buffer fills (burst delivery) | Returns HTML (MIME Confusion) | Crashes (`SyntaxError '<'`) |
+| API-Only Unbuffered | Flushed immediately | Returns HTML | Crashes |
+| **SSE Unbuffered + `=404` Asset Guard** | **Flushed immediately without proxy buffer delay** | **Returns explicit HTTP 404** | **Clean graceful degradation** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

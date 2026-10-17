@@ -4,7 +4,7 @@
 > **Source Project:** `llm-conductor` (Desktop Native Core)  
 > **Language:** Rust  
 > **Dependencies:** `0` (Standard Library only)  
-> **Key Metric:** `0.74ms` handshake latency, zero binary overhead
+> **Key Metric:** Zero external dependencies, immediate Content-Length framing exit
 
 ---
 
@@ -20,7 +20,7 @@ To circumvent this, the desktop host process (Rust / OS layer) must perform the 
 
 1. **Heavy HTTP Client Crates (`reqwest`, `hyper`, `surf`):**
    * Pulling in `reqwest` introduces 30+ transitive crates (async runtimes, connection pools, TLS backends like `native-tls` or `rustls`).
-   * Increases release binary size by **~3.5 MB to 5 MB**.
+   * Increases release binary size by adding HTTP client and async/TLS runtime dependencies.
    * Introduces non-trivial initialization latency for what is fundamentally an ephemeral localhost probe.
 2. **Local Proxy Daemons:**
    * Running a background proxy process introduces port contention, process-monitoring overhead, and OS firewall prompts.
@@ -67,13 +67,15 @@ if let Some(pos) = resp_str.find("\r\n\r\n") {
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
-| Approach | External Crates | Binary Size Impact | Latency (Localhost) |
+| Approach | External Crates | Binary Size Impact | Protocol Overhead |
 |---|---|---|---|
-| `reqwest` (Blocking) | ~34 crates | `+4.1 MB` | `3.2ms` |
-| `ureq` (Minimal) | ~7 crates | `+620 KB` | `1.8ms` |
-| **Raw TCP (Handcrafted)** | **0 crates** | **`0 KB`** | **`0.74ms`** |
+| `reqwest` (Blocking) | Multiple dependencies (async/TLS runtime) | Increases binary footprint | TLS/pool initialization overhead |
+| `ureq` (Minimal) | Multiple dependencies | Adds crate dependencies | Minimal HTTP parser |
+| **Raw TCP (Handcrafted)** | **0 (Standard library only)** | **Zero added dependencies** | **Immediate exit on Content-Length framing** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

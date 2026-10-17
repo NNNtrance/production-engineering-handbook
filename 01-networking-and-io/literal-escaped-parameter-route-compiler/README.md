@@ -49,12 +49,14 @@ function compileRoutePath(path: string): { regex: RegExp; paramNames: string[] }
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Route Pattern Matching | Version Dots (`/v1.0/`) | Parentheses (`/(draft)/`) | Parameter Extraction |
 |---|---|---|---|
 | Naive String Replace | Matches `v1x0` (Wildcard Dot) | Broken Capture Groups | Mismatched Indices |
 | Path-to-Regexp (Heavy) | Escaped | Escaped | Requires Extra Dependency |
-| **FluxDOM Route Compiler** | **Strict Literal (`v1\.0`)** | **Strict Literal (`\(draft\)`)** | **100% Deterministic** |
+| **FluxDOM Route Compiler** | **Strict Literal (`v1\.0`)** | **Strict Literal (`\(draft\)`)** | **Preserves parameter indices** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 
