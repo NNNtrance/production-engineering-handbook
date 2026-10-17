@@ -1,10 +1,10 @@
 // 1. Literal regex metacharacter escaping pass
-function escapeRegex(value: string): string {
+export function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 // 2. Compiling [param] paths into safe regular expressions
-function compileRoutePath(path: string): { regex: RegExp; paramNames: string[] } {
+export function compileRoutePath(path: string): { regex: RegExp; paramNames: string[] } {
   const paramNames: string[] = [];
   const parameterPattern = /\[([^\]]+)\]/g;
   let regexPath = '';

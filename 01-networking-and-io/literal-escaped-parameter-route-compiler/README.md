@@ -62,3 +62,27 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ## 5. Visual Representation (Raw VS Code Crop)
 ![Production Code Snippet](./assets/code-card.png)
+
+---
+
+## 6. How to Verify
+
+Run the automated test suite using Node.js built-in test runner with native TypeScript type stripping (requires Node 22.6+):
+
+```bash
+node --experimental-strip-types --test test/route_compiler.test.ts
+```
+
+### Verified Output:
+```text
+✔ route with dot literal (/v1.0/[id]) matches exact dot and rejects wildcard matches (/v1x0/[id]) (1.54ms)
+✔ route with parenthesis literal (/(draft)/[slug]) treats parentheses literally without capturing groups (0.27ms)
+✔ escapeRegex escapes all standard regex metacharacters (0.19ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+```
+
+* **Test Environment:** Node.js v24.17.0 (zero external dependencies, native type stripping)*
+

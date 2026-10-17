@@ -26,3 +26,23 @@ _Qualitative comparison. Numbers appear only where derived by explicit formula o
 
 ## 5. Implementation
 See implementation in [`src/biquad_slew_equalizer.rs`](./src/biquad_slew_equalizer.rs).
+
+---
+
+## 6. How to Verify (Formula Derivation)
+
+The decimation and update rates are derived directly from the standard audio PCM sampling rate and processing buffer geometry:
+
+1. **Update Frequency ($F_{\text{update}}$):**
+   $$\text{Updates per second} = \frac{f_s}{B} = \frac{44,100\text{ samples/s}}{128\text{ frames}} = 344.53125\text{ updates/s} \approx 344\text{ updates/s}$$
+
+2. **Block Period / Update Interval ($T_{\text{block}}$):**
+   $$T_{\text{block}} = \frac{128}{44,100}\text{ s} \approx 0.0029025\text{ s} \approx 2.90\text{ ms}$$
+
+3. **Trigonometric Calculation Reduction:**
+   $$\text{Computation Reduction} = 1 - \frac{1}{B} = 1 - \frac{1}{128} = \frac{127}{128} \approx 99.21875\% \approx 99.2\%$$
+
+4. **Geometric Convergence Step:**
+   $$G_{k+1} = G_k + 0.12 \times (G_{\text{target}} - G_k)$$
+   At $\sim 344.5\text{ updates/s}$, an instantaneous 10 dB slider step settles within $\sim 15\text{ to }20\text{ blocks}$ ($\sim 45\text{ to }60\text{ ms}$), well beneath human acoustic perception of discrete steps while preventing waveform discontinuities.
+

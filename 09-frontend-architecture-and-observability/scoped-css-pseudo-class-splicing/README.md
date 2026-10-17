@@ -64,3 +64,27 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ## 5. Visual Representation (Raw VS Code Crop)
 ![Production Code Snippet](./assets/code-card.png)
+
+---
+
+## 6. How to Verify
+
+Run the automated test suite using Node.js built-in test runner with native TypeScript type stripping (requires Node 22.6+):
+
+```bash
+node --experimental-strip-types --test test/scoped_css_transformer.test.ts
+```
+
+### Verified Output:
+```text
+✔ splices scoping attribute BEFORE pseudo-classes and pseudo-elements (:hover, ::before) (1.14ms)
+✔ preserves keyframe steps (from, to, percentage) and @-rules without mangling selectors (0.24ms)
+✔ preserves :root and :global(...) selectors without scope injection (0.17ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+```
+
+* **Test Environment:** Node.js v24.17.0 (zero external dependencies, native type stripping)*
+

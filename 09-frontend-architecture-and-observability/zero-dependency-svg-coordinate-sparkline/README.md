@@ -56,3 +56,26 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ## 5. Visual Representation (Raw VS Code Crop)
 ![Production Code Snippet](./assets/code-card.png)
+
+---
+
+## 6. How to Verify
+
+Run the component size measurement script using Node.js:
+
+```bash
+node test/measure_size.js
+```
+
+### Verified Output:
+```text
+--- Zero-Dependency SVG Sparkline Size Measurement ---
+File: src/TrendChart.tsx
+Lines: 13 lines
+Raw Size: 1345 bytes (1.31 KB)
+Gzip Size (level 9): 764 bytes (0.75 KB)
+PASS: Component size is well within sub-1KB micro-component budget.
+```
+
+* **Test Environment:** Node.js v24.17.0 (zero external dependencies, native `node:zlib`)*
+

@@ -1,5 +1,5 @@
 // 1. Scope selector transformation attaching attribute before pseudo-classes
-function scopeSelector(selector: string, scope: string): string {
+export function scopeSelector(selector: string, scope: string): string {
   if (selector === ':root' || selector.includes(':global(')) return selector;
   const pseudoIndex = selector.search(/:{1,2}[A-Za-z-]/);
   if (pseudoIndex < 0) return `${selector}${scope}`;
@@ -7,7 +7,7 @@ function scopeSelector(selector: string, scope: string): string {
 }
 
 // 2. Preserving CSS at-rules and keyframe step selectors untouched
-function isKeyframeSelector(selector: string): boolean {
+export function isKeyframeSelector(selector: string): boolean {
   return selector === 'from' || selector === 'to' || /^\d+(?:\.\d+)?%$/.test(selector);
 }
 

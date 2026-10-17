@@ -82,3 +82,20 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 ## 6. Visual Asset
 
 * **Retina Visual Card:** [`assets/code-card.png`](./assets/code-card.png)
+
+---
+
+## 7. How to Verify
+
+1. Start Google Chrome with remote debugging enabled on port 9222:
+   ```bash
+   chrome.exe --remote-debugging-port=9222 --headless --disable-gpu about:blank
+   ```
+
+2. Execute the Rust client to perform the raw TCP HTTP/1.1 handshake and Content-Length parse:
+   ```bash
+   cargo run --release
+   ```
+
+The application connects to `127.0.0.1:9222`, transmits the handcrafted HTTP/1.1 frame, parses `Content-Length`, exits immediately upon frame completion, and outputs the elapsed handshake duration.
+

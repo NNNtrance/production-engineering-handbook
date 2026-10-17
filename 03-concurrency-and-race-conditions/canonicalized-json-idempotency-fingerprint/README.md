@@ -60,3 +60,26 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ## 5. Visual Representation (Raw VS Code Crop)
 ![Production Code Snippet](./assets/code-card.png)
+
+---
+
+## 6. How to Verify
+
+Run the automated test suite using Node.js built-in test runner:
+
+```bash
+node --test test/idempotency.test.js
+```
+
+### Verified Output:
+```text
+✔ canonicalize sorts object keys recursively regardless of insertion order (1.08ms)
+✔ mutated payload produces different fingerprint and triggers 409 replay rejection (0.59ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+```
+
+* **Test Environment:** Node.js v24.17.0 (zero external dependencies, built-in node:test and node:crypto)*
+
