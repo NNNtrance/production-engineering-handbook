@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { REPO } from './config.js';
+import Shelf from './Shelf.jsx';
+import { REPO, ROMAN } from './config.js';
 
 export default function App() {
   const [books, setBooks] = useState([]);
+  const [caption, setCaption] = useState('nine books, one per domain');
+  const [curBook, setCurBook] = useState(-1);
   const [theme, setTheme] = useState(() => {
     try {
       return localStorage.getItem('hb-theme') || '';
@@ -36,6 +39,17 @@ export default function App() {
       .then((data) => setBooks(data))
       .catch((err) => console.error('Failed to load index.json:', err));
   }, []);
+
+  const handleHoverBook = (i) => {
+    if (books[i]) {
+      setCaption(`${ROMAN[i]} · ${books[i].name}, ${books[i].cases.length} problems`);
+    }
+  };
+
+  const handleOpenBook = (i) => {
+    setCurBook(i);
+    // In Faz 3, this triggers Reader openBook flow
+  };
 
   const totalCases = books.reduce((acc, b) => acc + (b.cases?.length || 0), 0);
 
@@ -73,12 +87,15 @@ export default function App() {
           </p>
         </header>
 
-        <div id="shelf" className="shelf">
-          {/* Bookshelf component will be mounted here in Faz 2 */}
-        </div>
+        <Shelf
+          books={books}
+          curBook={curBook}
+          onOpenBook={handleOpenBook}
+          onHoverBook={handleHoverBook}
+        />
 
         <p className="caption" id="caption" aria-live="polite">
-          nine books, one per domain
+          {caption}
         </p>
 
         <p className="foot">

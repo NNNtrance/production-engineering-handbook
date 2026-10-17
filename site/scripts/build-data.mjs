@@ -19,6 +19,8 @@ for (const l of readme) {
   if (m) blurbs[m[1]] = m[2].trim();
 }
 
+import { SPINE, HEIGHTS } from '../src/config.js';
+
 // Extract books and cases from Quick Problem Index
 const start = readme.findIndex((l) => l.startsWith('## ⚡ Quick'));
 if (start === -1) {
@@ -38,8 +40,13 @@ for (const l of readme.slice(start, end === -1 ? undefined : end)) {
   }
 }
 
-if (books.length !== 9) {
-  throw new Error(`Expected 9 books in Quick Problem Index, found ${books.length}`);
+for (const b of books) {
+  if (!SPINE[b.n - 1]) {
+    throw new Error(`Missing SPINE entry for book ${b.n} (${b.name}) in src/config.js. Please add one.`);
+  }
+  if (!HEIGHTS[b.n - 1]) {
+    throw new Error(`Missing HEIGHTS entry for book ${b.n} (${b.name}) in src/config.js. Please add one.`);
+  }
 }
 
 const dirs = fs.readdirSync(root).filter((d) => /^\d\d-/.test(d));
@@ -114,6 +121,11 @@ for (const b of books) {
     const srcMatch = (s['Implementation'] || '').match(/\(\.\/(src\/[^)]+)\)/);
     const src = srcMatch ? srcMatch[1] : '';
     if (!src) throw new Error(`Missing Implementation src link in ${c.slug}`);
+
+    const srcFile = path.join(caseDir, src);
+    if (!fs.existsSync(srcFile)) {
+      throw new Error(`Source file missing: ${srcFile} for case ${c.slug}`);
+    }
 
     indexCases.push({ slug: c.slug, q: c.q });
     fullCases.push({
