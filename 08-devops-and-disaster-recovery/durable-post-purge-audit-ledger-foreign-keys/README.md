@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Durable Post-Purge Audit Ledger via Foreign Key Decoupling for GDPR Compliance
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Under GDPR "Right to be Forgotten" and SOC 2 data retention mandates, deleting a customer organization requires purging all customer-owned data (reports, scanned repositories, source inputs). If the deletion tracking ledger references the workspace with standard `ON DELETE CASCADE`, deleting the workspace wipes the deletion execution row itself! This leaves administrators and auditors with no audit proof that the purge occurred, who authorized it, or how many artifacts were purged.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Standard `ON DELETE CASCADE`:**
    * Cascading foreign keys wipe the audit trail along with the customer records, destroying legal compliance records.
 2. **Application-Level Text Log Files:**
@@ -15,7 +19,8 @@ Under GDPR "Right to be Forgotten" and SOC 2 data retention mandates, deleting a
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Foreign Key Decoupling via `ON DELETE SET NULL`:** By defining `workspace_id text REFERENCES wpa_workspaces(id) ON DELETE SET NULL`, the database engine permits the workspace record and all its private child tables to be permanently deleted via cascading purge.
 2. **Durable Forensic Counters:** The deletion run record survives the cascade. Its `workspace_id` gracefully transitions to `NULL`, while retaining:
    * `request_id`: Unique transaction identifier.
@@ -49,6 +54,7 @@ CREATE INDEX IF NOT EXISTS wpa_workspace_deletion_runs_status_idx
 ---
 
 ## 4. Behavior Comparison
+
 | Deletion Audit Architecture | Customer Data Purge | Forensic Audit Retention | GDPR / SOC 2 Compliance |
 |---|---|---|---|
 | Soft Delete (`is_deleted = true`) | Incomplete (Data Retained) | Retained | Non-Compliant (PII Survives) |
@@ -59,5 +65,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/retention_audit_ledger.sql`](./src/retention_audit_ledger.sql).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

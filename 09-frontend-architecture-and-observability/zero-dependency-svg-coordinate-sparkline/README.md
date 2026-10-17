@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Zero-Dependency SVG Coordinate Math Sparkline Rendering in React
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Rendering simple six-week audit finding trends in web dashboards often tempts developers to pull in heavy charting dependencies (such as Chart.js, Recharts, or D3.js). These libraries introduce 150KB to 400KB of JavaScript bundle bloat, multiple canvas context lifecycles, and hydration layout shifts (CLS), negatively impacting Core Web Vitals for what is fundamentally a simple 6-point line graph.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Client Bundle Inflation:**
    * Adding Chart.js or Recharts increases first-contentful-paint (FCP) time and mobile memory usage.
 2. **Hydration Cumulative Layout Shift (CLS):**
@@ -15,7 +19,8 @@ Rendering simple six-week audit finding trends in web dashboards often tempts de
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Pure ViewBox Vector Projection:** Computes SVG coordinates directly in 13 lines of TypeScript:
    * Maps time intervals across the X-axis: `36 + index * (484 / (length - 1))`.
    * Scales quantitative values on the inverted Y-axis: `210 - (count / max) * 160`.
@@ -44,6 +49,7 @@ export default function TrendChart({ data }: { data: Array<{ at: string; count: 
 ---
 
 ## 4. Behavior Comparison
+
 | Chart Rendering Approach | Bundle Size Impact | Layout Shift Behavior | External Dependencies |
 |---|---|---|---|
 | Recharts / D3 | Heavy charting bundle | Async ResizeObserver measurement | Multiple third-party packages |
@@ -54,8 +60,9 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/TrendChart.tsx`](./src/TrendChart.tsx).
 
 ---
 
@@ -80,4 +87,8 @@ _Note: Measures the source file, not a compiled/minified bundle._
 
 * **Test Environment:** Node.js v24.17.0, Windows 11, 2026-10-17 (no external dependencies, native `node:zlib`)*
 
+---
 
+## 7. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

@@ -7,13 +7,13 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 Allowing users to upload ZIP archives for source code vulnerability auditing (OSV scanner) introduces severe vulnerabilities: directory traversal escaping the destination folder (Zip-Slip), symlink dereferencing reading host files, and 42.zip decompression bombs.
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Standard `unzip` Shell Executions:**
    * Vulnerable to arbitrary file writes via crafted `../../` entry paths and creates dangling symlinks that point to `/etc/passwd` or `/proc/self/environ`.
@@ -24,7 +24,7 @@ Allowing users to upload ZIP archives for source code vulnerability auditing (OS
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **POSIX Bitmask Inspection:** Inspects `(entry.externalFileAttributes >>> 16) & 0o170000` before opening entry streams. Symlinks (`0o120000`), FIFOs, and device nodes fail immediately.
 2. **4-Tier Quota Enforcement:** Validates entry count (max 20,000), total uncompressed bytes (max 500 MB), single-file ceiling (max 100 MB), and compression ratios (>200x for files >1 MB).
@@ -33,13 +33,7 @@ Allowing users to upload ZIP archives for source code vulnerability auditing (OS
 
 ---
 
-## 4. Code Implementation
-
-See [`src/zip_security.js`](./src/zip_security.js) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Attack Vector | Naive Unzip | Header-Only Check | **Streamed POSIX Guard** |
 |---|---|---|---|
@@ -49,3 +43,15 @@ See [`src/zip_security.js`](./src/zip_security.js) for the isolated implementati
 | Case-Collision Clobbering | Unhandled | Unhandled | **Blocked (Case-Fold)** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/zip_security.js`](./src/zip_security.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

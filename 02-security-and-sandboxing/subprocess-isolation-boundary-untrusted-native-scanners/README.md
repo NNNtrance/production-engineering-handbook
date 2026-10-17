@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Subprocess Isolation Boundary & Sanitized Environment Stripping for Untrusted Scanners
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Running native CLI security scanners (such as `osv-scanner`) against untrusted user code repositories introduces container breakout risks. Third-party scanner binaries can be tricked into reading local developer/server secrets (`~/.ssh/id_rsa`, `~/.gitconfig`, `.env`) or consuming unbounded RAM via inflated stdout JSON payloads.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Direct Child Process Spawning (`child_process.exec`):**
    * Inherits all parent container environment variables (API secrets, database credentials) and runs under default shell execution vulnerable to command injection.
 2. **Standard Process Termination (`child.kill()`):**
@@ -15,7 +19,8 @@ Running native CLI security scanners (such as `osv-scanner`) against untrusted u
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Isolated Subprocess Wrapper:** Enforces execution strictly through a dedicated `isolationRunner` sandbox wrapper. Direct execution is rejected fail-closed with `OSV_ISOLATION_UNAVAILABLE`.
 2. **Environment Stripping & Synthetic Home:** Wipes all environment variables except essential paths, explicitly setting `HOME: '/nonexistent'` to prevent scanners from reading developer dotfiles (`.ssh`, `.npmrc`).
 3. **Detached Process Tree Killing:** Spawns with `detached: true` on POSIX, allowing `process.kill(-child.pid, 'SIGKILL')` to terminate the entire process group cleanly upon timeout or client abort.
@@ -47,6 +52,7 @@ context.sourceBuffer.fill(0);
 ---
 
 ## 4. Behavior Comparison
+
 | Subprocess Execution Model | Credential Leakage Surface | Orphaned Zombie Processes | Memory Retention |
 |---|---|---|---|
 | Direct `exec` / `spawn` | High (Full `process.env` Inherited) | Frequent (Standard `kill`) | Indefinite (Heap Retained) |
@@ -57,5 +63,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/osv_sandbox.js`](./src/osv_sandbox.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

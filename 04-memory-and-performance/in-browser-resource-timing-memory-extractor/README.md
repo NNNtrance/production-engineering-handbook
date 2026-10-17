@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: In-Browser Real-Time Resource Timing Memory Extraction & Third-Party Weight Auditing
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Auditing a web page's total network footprint and third-party script bloat usually requires running an external HTTP man-in-the-middle (MITM) proxy daemon (like mitmproxy or browsermob-proxy). Intercepting and buffering all TLS traffic outside the browser introduces massive CPU overhead, SSL re-encryption latency, and packet buffering memory consumption.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **External MITM Proxy Daemons:**
    * Require installing custom root CA certificates inside Chromium and buffering gigabytes of network packets in proxy RAM.
 2. **CDP Network Domain Event Buffering:**
@@ -15,7 +19,8 @@ Auditing a web page's total network footprint and third-party script bloat usual
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Direct V8 Memory Inspection:** Evaluates `performance.getEntriesByType('resource')` inside the browser's JavaScript execution thread. Browser engines (V8/Blink) maintain low-level network performance counters natively in memory.
 2. **Zero-Copy Byte Aggregation:** Extracts `transferSize || encodedBodySize` directly from native `PerformanceResourceTiming` objects without streaming HTTP chunks across process boundaries.
 3. **In-Browser Origin Partitioning:** Compares `new URL(resource.name).origin !== location.origin`, accurately tallying third-party tracking, analytics, and CDN weight in sub-millisecond execution time.
@@ -41,6 +46,7 @@ for (const resource of resources) {
 ---
 
 ## 4. Behavior Comparison
+
 | Third-Party Weight Auditing | TLS MITM Proxy Overhead | Transport Overhead | Extraction Model |
 |---|---|---|---|
 | External Proxy (mitmproxy) | Re-encryption & Root CA required | Local network proxy hop | Separate background process |
@@ -51,5 +57,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/resource_timing_extractor.js`](./src/resource_timing_extractor.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

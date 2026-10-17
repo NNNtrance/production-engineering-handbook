@@ -8,7 +8,7 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 Desktop AI browser automation fails on modern web applications because fresh browser sessions encounter Cloudflare bot detection, login walls, and SMS 2FA.
 
@@ -16,7 +16,7 @@ However, launching a second Chrome instance with `--remote-debugging-port` point
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Process Termination (`killall chrome`):**
    * Destroys user productivity and active workspaces.
@@ -25,7 +25,7 @@ However, launching a second Chrome instance with `--remote-debugging-port` point
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 We engineered an Atomic Shadow Profile Sync in Rust:
 
@@ -45,3 +45,15 @@ We engineered an Atomic Shadow Profile Sync in Rust:
 | **Surgical Shadow Profile Sync** | **Leaves active browser untouched** | **Non-exclusive read copy** | **Preserves Local State & DPAPI key** | **Lightweight (Cookies & preferences only)** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/shadow_profile.rs`](./src/shadow_profile.rs).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

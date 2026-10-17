@@ -7,13 +7,13 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 Dynamic security scanners like OWASP ZAP are stateful and CPU/RAM heavy. When multiple worker containers process crawl queues concurrently, bombarding a single ZAP daemon causes session cross-pollution, crashed daemon processes, and corrupted scan reports.
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Spinning Up External Redis Mutexes (Redlock):**
    * Adds operational complexity, network failure modes, separate cluster health checks, and memory management for a single serialized task.
@@ -24,7 +24,7 @@ Dynamic security scanners like OWASP ZAP are stateful and CPU/RAM heavy. When mu
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **Postgres Session Advisory Lock:** Uses `SELECT pg_try_advisory_lock(hashtext('wpa-zap-baseline'))` on a dedicated database pool client.
 2. **Dedicated Connection Retain:** The acquired connection is held open for the exact duration of the scan, tying the advisory lock lifetime directly to the TCP socket.
@@ -33,13 +33,7 @@ Dynamic security scanners like OWASP ZAP are stateful and CPU/RAM heavy. When mu
 
 ---
 
-## 4. Code Implementation
-
-See [`src/zap_lock.js`](./src/zap_lock.js) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Locking Architecture | Cross-Container Coordination | Infrastructure Footprint | Crash Resilience |
 |---|---|---|---|
@@ -48,3 +42,15 @@ See [`src/zap_lock.js`](./src/zap_lock.js) for the isolated implementation.
 | **PostgreSQL Advisory Lock** | **Yes (Cluster-Wide)** | **No added services (Existing pool)** | **Automatic on Socket Close** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/zap_lock.js`](./src/zap_lock.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

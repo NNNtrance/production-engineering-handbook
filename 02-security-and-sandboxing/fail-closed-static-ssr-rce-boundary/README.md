@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Fail-Closed Static SSR Boundary & Server-Side RCE Elimination
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Server-Side Rendering (SSR) in component frameworks typically evaluates component JavaScript on the backend Node.js thread. If untrusted users or CMS contributors submit component markup containing expressions (e.g. `{process.exit()}` or `{require('child_process').exec(...)}`), evaluating this template on the server grants attackers full Remote Code Execution (RCE) on backend infrastructure.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Arbitrary Code Evaluation in SSR:**
    * Running `eval()` or executing compiled JS in SSR environments executes untrusted code with full server process permissions.
 2. **Partial Render Leakage:**
@@ -15,7 +19,8 @@ Server-Side Rendering (SSR) in component frameworks typically evaluates componen
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **AST AST Rejection of Dynamic Directives:** `renderStaticNode()` inspects template node types. If it encounters `Expression`, `IfBlock`, `EachBlock`, or dynamic `bindings`/`events`, it immediately throws without evaluating code.
 2. **Fail-Closed Fallback Mount Point:** The SSR helper catches dynamic components and returns a safe client-rendered placeholder: `<div id="app" data-flow-client-render></div>`.
 3. **Rigorous HTML & Attribute Escaping:**
@@ -55,6 +60,7 @@ export function renderToString(source: string): StaticRenderResult {
 ---
 
 ## 4. Behavior Comparison
+
 | SSR Execution Model | RCE Vulnerability Surface | Unescaped XSS Risk | Dynamic Template Behavior |
 |---|---|---|---|
 | Full Node.js `eval()` SSR | Critical (Arbitrary Code Exec) | Moderate | Executes Arbitrary Code |
@@ -65,5 +71,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/static_ssr_boundary.ts`](./src/static_ssr_boundary.ts).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

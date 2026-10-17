@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Append-Only Commercial Plan Change Ledger with Database Immutability Triggers
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 In multi-tenant SaaS platforms, commercial plan changes (upgrades, downgrades, cancellations) are often applied as direct row mutations (`UPDATE workspaces SET plan_id = ...`). If a database admin accidentally mutates records or a billing race condition occurs, historical subscription state is lost, making financial audits and disputes impossible to resolve.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Direct In-Place Column Updates:**
    * Overwriting `plan_id` destroys historical billing provenance. There is no cryptographic proof of who authorized a change, when it occurred, or what the preceding plan was.
 2. **Application-Layer Audit Logging Alone:**
@@ -15,7 +19,8 @@ In multi-tenant SaaS platforms, commercial plan changes (upgrades, downgrades, c
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Append-Only Transition Ledger:** Every commercial plan change is recorded in `wpa_user_plan_changes` with `before_plan_id`, `after_plan_id`, `source` (`admin`, `provider`, `redeem`, `system`), `reason`, and `created_by`.
 2. **Database Engine Immutability Trigger:** Enforces immutability at the PostgreSQL engine level via a `BEFORE UPDATE OR DELETE` trigger that raises SQLSTATE `55000` (`WPA_USER_PLAN_CHANGES_APPEND_ONLY`). Even a superuser executing an accidental `DELETE` is stopped by the database engine.
 3. **Per-User Idempotency Constraint:** Imposes `UNIQUE (user_id, idempotency_key)`, ensuring duplicate provider webhook dispatches or retried administrative API requests cannot create duplicate billing mutations.
@@ -52,6 +57,7 @@ FOR EACH ROW EXECUTE FUNCTION wpa_user_plan_changes_immutable();
 ---
 
 ## 4. Behavior Comparison
+
 | Commercial Audit Model | Historical Plan Provenance | Tampering Protection | Webhook Replay Defense |
 |---|---|---|---|
 | In-Place `UPDATE` | Lost (Overwritten) | None | Vulnerable |
@@ -62,5 +68,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/immutable_plan_ledger.sql`](./src/immutable_plan_ledger.sql).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

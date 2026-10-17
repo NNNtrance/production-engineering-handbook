@@ -8,7 +8,7 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 Standard autonomous web agents parse the HTML DOM tree to extract information for LLM reasoning loops. 
 
@@ -16,7 +16,7 @@ On modern Single Page Applications (SPAs), dumping the DOM yields thousands of t
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **HTML Sanitization (readability.js, cheerio):**
    * Drops crucial dynamic client-side hydration data and still produces unstructured tokens.
@@ -25,7 +25,7 @@ On modern Single Page Applications (SPAs), dumping the DOM yields thousands of t
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 Instead of parsing what the browser rendered, we intercept the authoritative API responses directly from Chrome's RAM:
 
@@ -44,3 +44,15 @@ Instead of parsing what the browser rendered, we intercept the authoritative API
 | **CDP Network Body Extraction** | **No LLM tokens** | **Direct RAM payload extraction** | **Bypasses DOM serialization** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/reverse_scraping.ts`](./src/reverse_scraping.ts).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

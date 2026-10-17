@@ -7,13 +7,13 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 Headless Chromium executing arbitrary third-party JavaScript is a high-value RCE target. In Docker environments, Chromium's namespace sandbox often fails under unprivileged users, tempting developers to run `--no-sandbox`, leaving the host container wide open to escape.
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Running with `--no-sandbox`:**
    * Disables Chrome's multi-process sandbox completely. Any V8 JIT compiler exploit or Chromium memory corruption gives attackers direct code execution within the container.
@@ -24,7 +24,7 @@ Headless Chromium executing arbitrary third-party JavaScript is a high-value RCE
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **Fail-Closed Sandbox Enforcer:** Worker entrypoint explicitly rejects boot if `CHROME_NO_SANDBOX` is set to any truthy value.
 2. **Helper Binary Verification:** Validates that `/usr/lib/chromium/chrome-sandbox` is root-owned with the setuid bit active (`mode & 0o4000`), followed by a headless probe on `about:blank`.
@@ -33,13 +33,7 @@ Headless Chromium executing arbitrary third-party JavaScript is a high-value RCE
 
 ---
 
-## 4. Code Implementation
-
-See [`src/sandbox_enforcer.js`](./src/sandbox_enforcer.js) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Container Security Model | V8 Exploit Blast Radius | Container Escape Risk | Secret Exposure |
 |---|---|---|---|
@@ -48,3 +42,15 @@ See [`src/sandbox_enforcer.js`](./src/sandbox_enforcer.js) for the isolated impl
 | **Pinned Seccomp Worker** | **Isolated to Chromium Process** | **Blocked (Capabilities dropped)** | **Stripped on boot** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/sandbox_enforcer.js`](./src/sandbox_enforcer.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

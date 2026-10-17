@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to the **Production Engineering Handbook**! 
 
-This repository is a curated, domain-driven cookbook of real-world systems engineering solutions, non-trivial architectural decisions, and zero-slop implementations extracted from real-world projects (including WebPageAnalyz, FluxDOM, and PlantUML).
+This repository is a curated, domain-driven cookbook of real-world systems engineering solutions, non-trivial architectural decisions, and working implementations drawn from real-world projects (including WebPageAnalyz and FluxDOM) and open-source contributions (such as PlantUML, npm-check-updates, and YamlDotNet).
 
 To maintain the highest engineering standards and ensure newly submitted problems blend seamlessly alongside the existing 67 case studies, all contributions must strictly follow this guide.
 
@@ -13,7 +13,7 @@ To maintain the highest engineering standards and ensure newly submitted problem
 ### ✅ What We Look For
 1. **Hard Systems Constraints:** Edge cases in low-level runtimes, compiler ASTs, real-time audio DSP, socket-level security, database concurrency races, or distributed consensus.
 2. **Post-Mortem Root Cause Analysis:** Explaining *why* standard approaches failed (e.g. why DNS rebinding bypasses URL checks, why biquad filter swaps cause audio pops, why VDOM diffing allocates ephemeral VNodes).
-3. **Pragmatic, Zero-Slop Architecture:** Solutions implemented with minimal abstraction overhead, following the pragmatic principles of Andrej Karpathy and John Carmack.
+3. **Pragmatic Architecture:** Solutions implemented with minimal abstraction, small focused implementations, and low runtime overhead.
 4. **Verified Invariants & Benchmarks:** Concrete behavioral comparisons, test suites, or reproducible benchmarks proving the fix.
 
 ### ❌ What Will Be Rejected
@@ -50,29 +50,32 @@ Every new case study must live inside one of the 9 domain directories and follow
 
 ---
 
-## 📝 3. Strict 5-Section `README.md` Specification
+## 📝 3. Case Study `README.md` Specification
 
-Your case study's `README.md` must adhere strictly to these 5 sections:
+Your case study's `README.md` must adhere strictly to these sections:
 
 ```markdown
 # Case Study: <Concise Technical Problem Title>
 
-## 1. The Engineering Constraint
+## 1. Problem
 Explain the hard technical problem, edge cases, and real-world failure mode under load. Use numbered lists.
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 Analyze why common high-level developer workarounds break (e.g. timeout races, memory leaks, unhandled exceptions, security vulnerabilities).
 
-## 3. The Architecture
+## 3. Architecture
 Detail the low-level architectural fix with code snippets, algorithms, and invariant guarantees.
 
-## 4. Behavior Comparison & Validation
+## 4. Behavior Comparison
 Provide a Markdown table comparing the naive approach vs your architecture across verified behaviors and failure modes. Numbers appear only where accompanied by a reproducible script in `bench/` or `test/` (or an explicit mathematical derivation). Append the note:
 `_Qualitative comparison. Numbers appear only where a script in this folder measures them._`
 
 ## 5. Implementation
 Link directly to the runnable source code in `src/`:
 See implementation in [`src/<file-name>`](./src/<file-name>).
+
+## 6. Visual Representation
+![Visual Architecture Card](./assets/code-card.png)
 ```
 
 ---

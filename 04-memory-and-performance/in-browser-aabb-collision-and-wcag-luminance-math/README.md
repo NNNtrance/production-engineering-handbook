@@ -3,17 +3,17 @@
 > **Domain:** Memory & Performance  
 > **Source Project:** `WebPageAnalyz (Advanced Browser Analyzer)`  
 > **Language:** JavaScript / In-Page Evaluation  
-> **Key Metric:** `AABB 2D area intersection (>400px excluding ancestry), W3C relative luminance bubbling through transparent DOM parents`  
+> **Key Metric:** `AABB 2D area intersection (>400px excluding ancestry), W3C relative luminance bubbling through transparent DOM parents`
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
-Auditing responsive web pages for visual interface bugs—such as overlapping modals, obscured buttons, or unreadable low-contrast text—is typically done with screenshot OCR or multi-modal Vision LLMs. Vision models are slow (3-8s latency), expensive ($0.05 per screenshot), non-deterministic, and fail on dynamic viewports.
+Auditing responsive web pages for visual interface bugs—such as overlapping modals, obscured buttons, or unreadable low-contrast text—is typically done with screenshot OCR or multi-modal Vision LLMs. Vision models introduce network latency, incur per-call API costs, are non-deterministic, and fail on dynamic viewports.
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Multi-Modal Vision LLMs (GPT-4o / Claude Vision):**
    * Non-deterministic; hallucinations cause false positives on gradient backgrounds and miss sub-pixel collisions on complex dashboards.
@@ -24,7 +24,7 @@ Auditing responsive web pages for visual interface bugs—such as overlapping mo
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **Recursive Parent Luminance Bubbling:** If an element has transparent background, the analyzer traverses up the DOM tree until it resolves a non-transparent ancestor, applying the W3C relative luminance formula:
    `L = 0.2126 * R + 0.7152 * G + 0.0722 * B` (with sRGB gamma expansion).
@@ -34,13 +34,7 @@ Auditing responsive web pages for visual interface bugs—such as overlapping mo
 
 ---
 
-## 4. Code Implementation
-
-See [`src/geometry_analyzer.js`](./src/geometry_analyzer.js) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Layout Audit Model | Latency | Resource Overhead | Determinism | Viewport Portability |
 |---|---|---|---|---|
@@ -49,3 +43,15 @@ See [`src/geometry_analyzer.js`](./src/geometry_analyzer.js) for the isolated im
 | **In-Browser Geometry & Math** | **Single execution tick** | **No external API calls (DOM-native)** | **Deterministic math** | **Desktop & Mobile** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/geometry_analyzer.js`](./src/geometry_analyzer.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

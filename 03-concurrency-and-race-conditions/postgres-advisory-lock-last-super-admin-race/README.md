@@ -7,13 +7,13 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 A critical system invariant requires that at least one active `super_admin` must exist at all times. Under PostgreSQL's default `READ COMMITTED` transaction isolation, row-level check triggers fail to prevent concurrent downgrade attacks: if two admins downgrade each other simultaneously, both transactions see 2 admins in their snapshot and commit, leaving 0 super admins.
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Application-Layer Count Checks:**
    * `SELECT count(*) FROM admins` executed in Node.js before an update suffers from a classic Time-of-Check to Time-of-Use race condition across concurrent requests.
@@ -24,7 +24,7 @@ A critical system invariant requires that at least one active `super_admin` must
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **Statement-Level Transaction Advisory Lock:** Migration 041 installs a statement-level trigger acquiring `pg_advisory_xact_lock(hashtext('wpa:privileged-role-management'))` BEFORE any UPDATE or DELETE statement executes.
 2. **Deterministic Serialization:** Concurrent mutations on the admin set are strictly serialized before row evaluation begins.
@@ -33,13 +33,7 @@ A critical system invariant requires that at least one active `super_admin` must
 
 ---
 
-## 4. Code Implementation
-
-See [`src/super_admin_guard.sql`](./src/super_admin_guard.sql) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Concurrency Guard | Concurrent Downgrade Race | Performance Overhead | Lock Residue Risk |
 |---|---|---|---|
@@ -49,3 +43,15 @@ See [`src/super_admin_guard.sql`](./src/super_admin_guard.sql) for the isolated 
 | **Statement Advisory Lock** | **Serialized (Raises SQLSTATE 23514)** | **Scoped to statement mutation** | **Releases automatically on commit/rollback** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/super_admin_guard.sql`](./src/super_admin_guard.sql).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

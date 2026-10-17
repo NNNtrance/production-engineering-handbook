@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Automated Pre-Flight Shell Script Byte-Level LF Audit & Shebang Verification
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 In cross-platform engineering teams, developers working on Windows machines often edit bootstrap scripts, database backup scripts, or Docker entrypoint scripts. Windows editors default to CRLF (`\r\n`) line endings. When pushed and built into Debian, Alpine, or Ubuntu Docker images, executing the script fails with cryptic POSIX kernel errors: `/bin/sh: ./entrypoint.sh: /bin/sh^M: bad interpreter: No such file or directory`, bringing down production deployments during pod startup.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Relying on Developer Operating System Discipline:**
    * Hoping all developers configure their local IDEs or git configurations with `core.autocrlf = input` is non-deterministic and fails on new developer machines.
 2. **Post-Build Dockerfile Workarounds (`dos2unix`):**
@@ -15,7 +19,8 @@ In cross-platform engineering teams, developers working on Windows machines ofte
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Git-Aware Shell Discovery:** Executes `git ls-files -z` to discover all tracked files safely across null-terminated byte streams.
 2. **Byte-Level Shebang Inspection:** Evaluates raw buffer slices without string conversions. Checks for `.sh` extension or POSIX shebang syntax (`^#!.*(?:/|env\s+)(?:ba|da|a|k|z)?sh`).
 3. **Strict Carriage Return Assertion:** Filters buffer bytes for `0x0d` (ASCII carriage return `\r`). Any script containing even a single `\r` immediately fails the test suite.
@@ -44,6 +49,7 @@ test('tracked Linux shell scripts use LF-only bytes and explicit Git attributes'
 ---
 
 ## 4. Behavior Comparison
+
 | Shell Script Line-Ending Defense | Windows Dev Portability | Production Docker Startup | CI/CD Enforcement |
 |---|---|---|---|
 | Manual IDE Settings | Fragile (Fails Frequently) | `/bin/sh^M` Crashes | None |
@@ -54,5 +60,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/shell_line_endings_audit.js`](./src/shell_line_endings_audit.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

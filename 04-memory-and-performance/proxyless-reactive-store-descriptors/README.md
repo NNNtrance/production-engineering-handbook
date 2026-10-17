@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Proxy-Less Reactive State Store with Dynamic Property Descriptors
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Global state management libraries often rely on ES6 `Proxy` objects or Redux-style action dispatchers with reducers. ES6 Proxies add property lookup overhead and trap performance penalties across thousands of reads in hot loops. Meanwhile, Redux-style immutable stores require repetitive action creators and full object cloning on every mutation.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Proxy Trap Performance Tax:**
    * Intercepting every property access through deep Proxy handlers slows down execution in render loops.
 2. **Boilerplate Reducer Overhead:**
@@ -15,7 +19,8 @@ Global state management libraries often rely on ES6 `Proxy` objects or Redux-sty
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Signal-Backed Property Map:** Each state property maps to an isolated `createSignal()` tuple (`[get, set]`).
 2. **Dynamic Context Descriptors:** `Object.defineProperty(context, key, ...)` defines getters and setters on the action `this` context:
    * Reading `this.count` calls `get()`.
@@ -58,6 +63,7 @@ if (config.actions) {
 ---
 
 ## 4. Behavior Comparison
+
 | State Management Pattern | Property Access Overhead | Boilerplate Action Reducers | Storage Persistence |
 |---|---|---|---|
 | Redux / Flux | High (Cloned Objects) | Mandatory (Actions/Reducers) | Middleware Required |
@@ -68,5 +74,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/reactive_store.ts`](./src/reactive_store.ts).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

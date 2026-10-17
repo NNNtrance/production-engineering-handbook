@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Dynamic Dependency Pruning & Zombie Computation Elimination in Fine-Grained Signals
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 In fine-grained reactive runtimes (such as Solid, Svelte, or Vue), an effect that evaluates dynamic conditional branches (`condition() ? signalA() : signalB()`) subscribes to whichever signal is read. If `condition` later flips from `true` to `false`, naive subscription graphs keep the effect permanently registered in `signalA`'s subscriber set. Subsequent updates to `signalA` continue triggering the effect unnecessarily (Zombie Computation), leaking memory and executing stale work.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Static Dependency Registration:**
    * Subscribing once during initialization fails to reflect changing branches, causing effects to execute on irrelevant state mutations.
 2. **Memory Leakage Across Component Trees:**
@@ -15,7 +19,8 @@ In fine-grained reactive runtimes (such as Solid, Svelte, or Vue), an effect tha
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Pre-Execution Subscription Disposal:** Before re-evaluating `fn()`, the effect traverses `dependencies` (a `Set<Set<() => void>>`) and deletes itself from every signal's subscriber set, then calls `dependencies.clear()`.
 2. **Fresh Dependency Recording:** As `fn()` executes under `setActiveEffect(effectFn)`, only signals actually evaluated in the active branch add `effectFn` back to their subscriber sets.
 3. **Deterministic Cleanup Hook:** Executes the previous execution's returned cleanup callback before re-running, ensuring timers, DOM listeners, or abort signals are torn down cleanly.
@@ -54,6 +59,7 @@ try {
 ---
 
 ## 4. Behavior Comparison
+
 | Reactivity Model | Ternary Branch Invariance | Zombie Computation Risk | Teardown Memory Leak |
 |---|---|---|---|
 | Naive Subscriptions | Broken (Stale Subscriptions) | Critical (Runs Stale Branches) | High |
@@ -64,5 +70,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/effect_pruning.ts`](./src/effect_pruning.ts).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

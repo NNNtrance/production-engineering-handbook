@@ -7,13 +7,13 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 Implementing sliding-window rate limiting across distributed containerized workers typically leads teams to deploy Redis clusters and maintain custom Lua scripts. Adding Redis adds operational complexity, memory eviction issues, and network failure modes.
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **In-Memory Rate Limiters (Node.js Map/LRU):**
    * Only protects a single process. In multi-container topologies behind load balancers, memory counters are fragmented, allowing N-times traffic multiplication.
@@ -24,7 +24,7 @@ Implementing sliding-window rate limiting across distributed containerized worke
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **Atomic Upsert Invariant:** Executes an atomic `INSERT ... ON CONFLICT (namespace, key) DO UPDATE` in a single database roundtrip.
 2. **In-Database Window Evaluation:** Evaluates whether `window_started_at` has exceeded the sliding duration directly inside SQL `CASE` expressions:
@@ -34,13 +34,7 @@ Implementing sliding-window rate limiting across distributed containerized worke
 
 ---
 
-## 4. Code Implementation
-
-See [`src/rate_limiter.sql`](./src/rate_limiter.sql) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Rate Limiting Strategy | Distributed Consistency | Infrastructure Footprint | Race Condition Risk |
 |---|---|---|---|
@@ -49,3 +43,15 @@ See [`src/rate_limiter.sql`](./src/rate_limiter.sql) for the isolated implementa
 | **PostgreSQL Atomic Upsert** | **ACID Consistent** | **No added services (Existing DB pool)** | **Serialized by row upsert** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/rate_limiter.sql`](./src/rate_limiter.sql).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

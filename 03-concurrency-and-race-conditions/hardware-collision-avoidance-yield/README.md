@@ -8,7 +8,7 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 In co-pilot browser automation, an AI agent and a human user share access to the same active browser window. 
 
@@ -16,7 +16,7 @@ If the agent dispatches synthetic CDP mouse events (`Input.dispatchMouseEvent`) 
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Locking User Peripherals:**
    * Blocking OS-level input while the AI navigates destroys ergonomics and violates basic user agency.
@@ -25,7 +25,7 @@ If the agent dispatches synthetic CDP mouse events (`Input.dispatchMouseEvent`) 
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 We engineered a passive Hardware Yield Protocol:
 
@@ -45,3 +45,15 @@ We engineered a passive Hardware Yield Protocol:
 | **Passive Hardware Yield Lock** | **Full human priority** | **Yields CDP dispatch during user input** | **Passive event listeners (`{ passive: true }`)** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/collision_avoidance.ts`](./src/collision_avoidance.ts).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

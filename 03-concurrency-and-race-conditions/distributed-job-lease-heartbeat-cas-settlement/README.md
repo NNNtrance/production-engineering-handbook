@@ -3,17 +3,17 @@
 > **Domain:** Concurrency & Race Conditions  
 > **Source Project:** `WebPageAnalyz (Distributed Workers)`  
 > **Language:** Node.js / PostgreSQL  
-> **Key Metric:** `Heartbeat lease renewal, Compare-And-Swap settlement, path-traversal sandboxed cleanup`  
+> **Key Metric:** `Heartbeat lease renewal, Compare-And-Swap settlement, path-traversal sandboxed cleanup`
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 In distributed architectures processing long-running browser analyses (multi-page audits taking minutes), worker nodes can experience temporary network partitions or high CPU freezes. When a queue manager assumes the job failed and reassigns it, the original worker can revive and overwrite the new worker's results with stale data (the "Zombie Worker" problem).
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Static Job Timeouts:**
    * Setting a fixed timeout (e.g., 60 seconds) causes complex 50-page audits to be prematurely reassigned while still actively and legitimately computing.
@@ -24,7 +24,7 @@ In distributed architectures processing long-running browser analyses (multi-pag
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **Heartbeat Lease Renewal:** An unref'd timer executes every `leaseMs / 3`, extending `lease_expires_at` in PostgreSQL as long as the worker process remains healthy.
 2. **Compare-And-Swap (CAS) Settlement:** When settling job completion, the worker passes its unique `leaseOwner` and `leaseToken`. If a timeout expired the lease and reassigned the job, the CAS query updates 0 rows, gracefully rejecting the zombie write.
@@ -32,13 +32,7 @@ In distributed architectures processing long-running browser analyses (multi-pag
 
 ---
 
-## 4. Code Implementation
-
-See [`src/lease_heartbeat.js`](./src/lease_heartbeat.js) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Distributed Worker Model | Zombie Worker Protection | Long-Running Job Support | Filesystem Safety |
 |---|---|---|---|
@@ -47,3 +41,15 @@ See [`src/lease_heartbeat.js`](./src/lease_heartbeat.js) for the isolated implem
 | **Heartbeat Lease + CAS** | **Fenced (CAS rejects stale writes)** | **Continuous Renewal** | **Strict Path Sandbox** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/lease_heartbeat.js`](./src/lease_heartbeat.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

@@ -3,17 +3,17 @@
 > **Domain:** Fintech & Billing Invariants  
 > **Source Project:** `WebPageAnalyz (Billing Gateway)`  
 > **Language:** Node.js / Timing-Safe Crypto  
-> **Key Metric:** `Constant-time verification, 5s replay fence, monotonic event ordering`  
+> **Key Metric:** `Constant-time verification, 5s replay fence, monotonic event ordering`
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 Webhooks from billing providers (Paddle, Stripe) are vulnerable to timing attacks when verified with standard string comparisons, allowing attackers to deduce valid signatures. Furthermore, lack of timestamp replay fencing enables replay attacks where valid historic payment events are re-sent to grant unauthorized subscriptions.
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Standard Equality Operators (`=== / ==`):**
    * Early-exit string comparisons terminate on the first mismatched byte, leaking cryptographic signature byte values through nanosecond timing discrepancies.
@@ -24,7 +24,7 @@ Webhooks from billing providers (Paddle, Stripe) are vulnerable to timing attack
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **Constant-Time Verification:** Compares cryptographic signature buffers strictly using `crypto.timingSafeEqual()`, eliminating side-channel timing leaks.
 2. **5-Second Replay Fence:** Enforces `Math.abs(currentSeconds - timestamp) > 5` to reject any captured or delayed webhook outside an immediate 5-second window.
@@ -32,13 +32,7 @@ Webhooks from billing providers (Paddle, Stripe) are vulnerable to timing attack
 
 ---
 
-## 4. Code Implementation
-
-See [`src/webhook_verifier.js`](./src/webhook_verifier.js) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Webhook Verification Model | Side-Channel Timing Leak | Replay Attack Window | Out-of-Order Safety |
 |---|---|---|---|
@@ -47,3 +41,15 @@ See [`src/webhook_verifier.js`](./src/webhook_verifier.js) for the isolated impl
 | **Timing-Safe + 5s Fence** | **Protected (crypto.timingSafeEqual)** | **Bounded (5-second timestamp window)** | **Monotonic event timestamp sequencing** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/webhook_verifier.js`](./src/webhook_verifier.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

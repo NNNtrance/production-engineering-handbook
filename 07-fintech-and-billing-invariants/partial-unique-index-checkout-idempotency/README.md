@@ -7,13 +7,13 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 Double-clicks on checkout buttons or multiple open browser tabs spawn duplicate payment sessions and race conditions with providers like Paddle or Stripe. Furthermore, in high-compliance billing, if an audit log write fails, leaving an entitlement change committed creates severe compliance violations.
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Frontend Button Disabling:**
    * Trivial to bypass via network retries, script injection, or opening two browser tabs simultaneously.
@@ -24,7 +24,7 @@ Double-clicks on checkout buttons or multiple open browser tabs spawn duplicate 
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **Partial Unique Index Invariant:** `CREATE UNIQUE INDEX ... ON wpa_checkout_acceptances(workspace_id) WHERE status IN ('accepted', 'checkout_created')` ensures only one active checkout intent can exist per tenant at any time.
 2. **Setup Lease Fencing:** Provider checkout creation is guarded by a bounded lease (`setup_lease_owner`, `setup_lease_token`), serializing external API calls while permitting crash recovery after timeout.
@@ -32,13 +32,7 @@ Double-clicks on checkout buttons or multiple open browser tabs spawn duplicate 
 
 ---
 
-## 4. Code Implementation
-
-See [`src/checkout_idempotency.sql`](./src/checkout_idempotency.sql) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Billing Protection Model | Double-Click Protection | Multi-Tab Race Safety | Audit Guarantee |
 |---|---|---|---|
@@ -47,3 +41,15 @@ See [`src/checkout_idempotency.sql`](./src/checkout_idempotency.sql) for the iso
 | **Partial Unique Index + Lease** | **Database-enforced index deduplication** | **Serialized active intents via lease** | **Strict Transactional Rollback** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/checkout_idempotency.sql`](./src/checkout_idempotency.sql).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

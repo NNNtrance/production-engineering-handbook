@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Fail-Closed Destructive Maintenance Boundary with Forbidden Secret Auditing
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Background workers handling destructive operations—such as data retention pruning or GDPR workspace purging—typically run inside the same container image as API workers. If an API worker is compromised, possessing destructive deletion rights and billing/AI secrets in the same container creates an immense blast radius.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Shared Container Environments:**
    * Running maintenance tasks inside standard worker containers means destructive database credentials sit adjacent to Stripe secrets, AI keys, and Chromium binaries.
 2. **Assuming Correct Configuration:**
@@ -15,7 +19,8 @@ Background workers handling destructive operations—such as data retention prun
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Forbidden Secret Auditing on Boot:** Scans `process.env` against 9 prohibited credentials (`BETTER_AUTH_SECRET`, `STRIPE_SECRET_KEY`, `SOURCE_ENCRYPTION_KEY`). If even one secret is found, the container crashes with `MAINTENANCE_SECRET_BOUNDARY_VIOLATION`.
 2. **Mandatory Execution Disablement:** Requires `BROWSER_EXECUTION_DISABLED`, `SOURCE_EXECUTION_DISABLED`, and `PDF_EXECUTION_DISABLED` to all be true, preventing destructive workers from executing untrusted code.
 3. **Database Role Verification:** Queries `SELECT current_user AS role` and crashes if the active role does not match `wpa_maintenance` (which has scoped DELETE grants on retention tables and no DDL authority).
@@ -46,6 +51,7 @@ function assertMaintenanceBoundary(env = process.env) {
 ---
 
 ## 4. Behavior Comparison
+
 | Maintenance Isolation Model | Blast Radius on Worker RCE | Secret Leakage Risk | Startup Attestation |
 |---|---|---|---|
 | Shared Worker Container | Full (All Secrets + Deletion) | High (Stripe/AI Keys Present) | None |
@@ -56,5 +62,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/maintenance_boundary.js`](./src/maintenance_boundary.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

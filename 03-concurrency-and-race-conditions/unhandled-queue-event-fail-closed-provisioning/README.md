@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Unhandled EventEmitter Swallowing & Fail-Closed Queue Provisioning
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 In PostgreSQL-backed job queues (such as `pg-boss`), background idle connection drops or planned PostgreSQL maintenance restarts emit errors directly onto the `PgBoss` EventEmitter. In Node.js, an EventEmitter with an unhandled `error` event immediately triggers an `uncaughtException`, crashing the entire container. Furthermore, allowing workers or API processes to execute opportunistic DDL (`migrate: true`) causes schema migration deadlocks during multi-container rolling deployments.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Missing EventEmitter Error Handler:**
    * By default, `boss.on('error')` is not registered. When the database pool closes during a failover or restart, Node.js terminates with code 1.
 2. **Opportunistic DDL on Application Boot:**
@@ -15,7 +19,8 @@ In PostgreSQL-backed job queues (such as `pg-boss`), background idle connection 
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Explicit Error Boundary:** Binds a top-level `this.boss.on('error', ...)` listener. Logs the event cleanly with error codes and absorbs transient network drops so the container remains alive during planned DB maintenance.
 2. **No-Migration Runtime Invariant (`migrate: false`):** Disables auto-migration in application code. Queue schema creation is strictly isolated to dedicated deployment CI/CD migration scripts.
 3. **Canonical Queue Validation (`ensureQueue`):**
@@ -51,6 +56,7 @@ async ensureQueue(name) {
 ---
 
 ## 4. Behavior Comparison
+
 | Queue Resiliency Model | DB Restart Behavior | Schema Lock Deadlocks | Unprovisioned Queue Catch |
 |---|---|---|---|
 | Default pg-boss Boot | Process Crashes (`uncaughtException`) | Frequent (`migrate: true`) | Silent Blackhole |
@@ -61,5 +67,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/queue_boundary.js`](./src/queue_boundary.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

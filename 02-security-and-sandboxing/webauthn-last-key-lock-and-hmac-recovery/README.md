@@ -7,13 +7,13 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 In high-security administrator planes mandating phishing-resistant FIDO2/WebAuthn hardware keys, concurrent deletion requests from two browser tabs can race past checks and delete the operator's last remaining passkey, locking them out permanently. Furthermore, plaintext recovery code storage creates credential leak hazards.
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Generic ORM Hook Validation:**
    * Official authentication library plugin hooks often bypass generic application model hooks during passkey deletion, allowing concurrent deletes to succeed unnoticed.
@@ -24,7 +24,7 @@ In high-security administrator planes mandating phishing-resistant FIDO2/WebAuth
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **Serialized Atomic Key Deletion:** Protects passkey deletion with application middleware and per-user atomic locking, re-evaluating credentials inside the lock and throwing `409 ADMIN_FINAL_PASSKEY_REQUIRED` if only one key remains.
 2. **Show-Once CSPRNG Recovery Codes:** 10 recovery codes generated with cryptographic randomness, shown only in the initial generation response, and stored strictly as HMAC-SHA256 hashes.
@@ -32,13 +32,7 @@ In high-security administrator planes mandating phishing-resistant FIDO2/WebAuth
 
 ---
 
-## 4. Code Implementation
-
-See [`src/passkey_lock.js`](./src/passkey_lock.js) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Passkey Security Model | Concurrent Deletion Race | Break-Glass Storage | Session Invalidation |
 |---|---|---|---|
@@ -47,3 +41,15 @@ See [`src/passkey_lock.js`](./src/passkey_lock.js) for the isolated implementati
 | **Atomic Lock + HMAC Batch** | **Rejects last passkey deletion with HTTP 409** | **HMAC-SHA256 (Show-Once)** | **Immediate Global Revocation** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/passkey_lock.js`](./src/passkey_lock.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

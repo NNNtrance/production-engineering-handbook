@@ -7,13 +7,13 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 Headless browser analyzers crawling modern dynamic Single Page Applications (SPAs) frequently extract links rendered by client-side JavaScript. Many applications inadvertently expose authentication tokens, OAuth authorization codes, session keys, or API secrets in query parameters (`?token=xyz`, `?access_key=123`). Storing these links into shareable audit reports leaks sensitive customer secrets.
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Unfiltered Link Discovery:**
    * Ingesting all `<a>` tags and dynamically rendered references exposes ephemeral tokens to database logs, report viewers, and external export APIs.
@@ -24,7 +24,7 @@ Headless browser analyzers crawling modern dynamic Single Page Applications (SPA
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **In-Browser Credential Filter:** `RENDERED_LINK_SENSITIVE_PARAMETER` scans all query parameters for sensitive tokens (`token`, `secret`, `api_key`, `auth`, `session`), stripping offending parameters immediately.
 2. **Diagnostic Log Redaction:** `sanitizeDiagnosticText()` strips URLs down to clean origins and replaces sensitive headers (`authorization`, `cookie`, `set-cookie`, `token`, `password`) with `[REDACTED]`.
@@ -32,13 +32,7 @@ Headless browser analyzers crawling modern dynamic Single Page Applications (SPA
 
 ---
 
-## 4. Code Implementation
-
-See [`src/credential_redactor.js`](./src/credential_redactor.js) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Analyzer Redaction Model | SPA Token Leaks | Diagnostic Secret Redaction | Shareable Report Safety |
 |---|---|---|---|
@@ -47,3 +41,15 @@ See [`src/credential_redactor.js`](./src/credential_redactor.js) for the isolate
 | **AST & Diagnostic Redactor** | **Stripped by parameter filter** | **Redacted before persistence** | **Safe for Public Sharing** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/credential_redactor.js`](./src/credential_redactor.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

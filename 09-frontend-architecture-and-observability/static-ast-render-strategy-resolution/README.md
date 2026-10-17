@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Static AST Inspection for Automatic SSG/SSR/CSR Strategy Resolution
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 In modern full-stack web applications, developers must manually annotate which pages or components should be statically generated (SSG), server-rendered (SSR), or client-rendered (CSR). Human error frequently leads to pages with client-only APIs (`window`, `localStorage`) failing during SSR builds, or purely static marketing pages wasting server compute because they were unnecessarily configured for dynamic SSR.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Manual Framework Directives (`use client` / `ssr: false`):**
    * Relies on developer memory and discipline; missing an annotation causes hydration crashes in production.
 2. **Runtime Detection Penalties:**
@@ -15,7 +19,8 @@ In modern full-stack web applications, developers must manually annotate which p
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **AST AST Analysis Pass:** `analyze()` evaluates both script declarations and template nodes:
    * Detects reactive signal declarations (`let count = 0`).
    * Detects asynchronous operations (`await`, `fetch()`).
@@ -55,6 +60,7 @@ if (hasSideEffects || templateAnalysis.hasEvents) {
 ---
 
 ## 4. Behavior Comparison
+
 | Strategy Selection | Human Configuration Overhead | Hydration Crash Risk | Server Resource Optimization |
 |---|---|---|---|
 | Manual Directives (`use client`) | High (Manual per file) | Frequent (Forgotten Directives) | Sub-optimal |
@@ -65,5 +71,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/strategy_resolver.ts`](./src/strategy_resolver.ts).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Canonicalized JSON Key Sorting & SHA-256 Idempotency Fingerprinting
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Standard HTTP API idempotency implementations rely solely on the `Idempotency-Key` HTTP header. If a malicious or buggy client sends a modified request body using an existing idempotency key, the server may either blindly return the cached response of the earlier request (serving mismatched data) or re-execute the mutation under the conflicting key. Furthermore, JSON serialization has non-deterministic object key order (`{"a":1,"b":2}` vs `{"b":2,"a":1}`), causing naive hashing to trigger false mismatch errors.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Header-Only Idempotency Validation:**
    * Checking only `key = store.get(header)` fails to detect payload tampering or client parameter divergence.
 2. **Raw JSON String Hashing:**
@@ -15,7 +19,8 @@ Standard HTTP API idempotency implementations rely solely on the `Idempotency-Ke
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Recursive Canonicalization:** `canonicalize()` traverses arrays and objects recursively, applying `Object.keys(value).sort()` at every nesting level to ensure deterministic JSON representation regardless of serialization order.
 2. **Cryptographic SHA-256 Fingerprinting:** Computes `sha256(JSON.stringify(canonicalize(body)))`, generating a stable 64-character hexadecimal digest.
 3. **Fail-Closed Replay Assertion:** `assertIdempotentReplay()` cross-references the requested fingerprint with the existing stored transaction. If fingerprints diverge, it immediately throws HTTP 409 `IDEMPOTENCY_KEY_REUSED`.
@@ -48,6 +53,7 @@ function assertIdempotentReplay(existingFingerprint, requestedFingerprint) {
 ---
 
 ## 4. Behavior Comparison
+
 | Idempotency Strategy | Key Ordering Robustness | Mutated Payload Detection | Replay Integrity |
 |---|---|---|---|
 | Header-Only Matching | Irrelevant | Fails to detect mutated payload | Vulnerable |
@@ -58,8 +64,9 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/idempotency.js`](./src/idempotency.js).
 
 ---
 
@@ -83,3 +90,8 @@ node --test test/idempotency.test.js
 
 * **Test Environment:** Node.js v24.17.0, Windows 11, 2026-10-17 (no external dependencies, built-in node:test and node:crypto)*
 
+---
+
+## 7. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

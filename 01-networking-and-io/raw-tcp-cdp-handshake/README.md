@@ -8,7 +8,7 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 When building sovereign desktop harnesses or local orchestration runtimes that drive Chrome via the Chrome DevTools Protocol (CDP on port `9222`), querying target endpoints (`http://127.0.0.1:9222/json`) from an embedded WebView is strictly blocked by **Chromium Private Network Access (PNA)** and **CORS**.
 
@@ -16,7 +16,7 @@ To circumvent this, the desktop host process (Rust / OS layer) must perform the 
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Heavy HTTP Client Crates (`reqwest`, `hyper`, `surf`):**
    * Pulling in `reqwest` pulls in an async runtime, connection pool, and TLS stack (such as `native-tls` or `rustls`).
@@ -29,7 +29,7 @@ To circumvent this, the desktop host process (Rust / OS layer) must perform the 
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 We eliminated external HTTP dependencies entirely by implementing a handcrafted raw TCP HTTP/1.1 handshake using Rust's `std::net::TcpStream`:
 
@@ -44,9 +44,21 @@ We eliminated external HTTP dependencies entirely by implementing a handcrafted 
 
 ---
 
-## 4. Code Implementation
+## 4. Behavior Comparison
 
-See [`src/main.rs`](./src/main.rs) for the complete implementation.
+| Approach | External Crates | Binary Size Impact | Protocol Overhead |
+|---|---|---|---|
+| `reqwest` (Blocking) | Multiple dependencies (async/TLS runtime) | Increases binary footprint | TLS/pool initialization overhead |
+| `ureq` (Minimal) | Multiple dependencies | Adds crate dependencies | Minimal HTTP parser |
+| **Raw TCP (Handcrafted)** | **0 (Standard library only)** | **No added dependencies** | **Immediate exit on Content-Length framing** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/main.rs`](./src/main.rs).
 
 ```rust
 // Handcrafted HTTP/1.1 frame without external HTTP dependencies
@@ -67,25 +79,7 @@ if let Some(pos) = resp_str.find("\r\n\r\n") {
 
 ---
 
-## 5. Behavior Comparison
-
-| Approach | External Crates | Binary Size Impact | Protocol Overhead |
-|---|---|---|---|
-| `reqwest` (Blocking) | Multiple dependencies (async/TLS runtime) | Increases binary footprint | TLS/pool initialization overhead |
-| `ureq` (Minimal) | Multiple dependencies | Adds crate dependencies | Minimal HTTP parser |
-| **Raw TCP (Handcrafted)** | **0 (Standard library only)** | **No added dependencies** | **Immediate exit on Content-Length framing** |
-
-_Qualitative comparison. Numbers appear only where a script in this folder measures them._
-
----
-
-## 6. Visual Asset
-
-* **Retina Visual Card:** [`assets/code-card.png`](./assets/code-card.png)
-
----
-
-## 7. How to Verify
+## 6. How to Verify
 
 1. Start Google Chrome with remote debugging enabled on port 9222:
    ```bash
@@ -99,3 +93,8 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 The application connects to `127.0.0.1:9222`, transmits the handcrafted HTTP/1.1 frame, parses `Content-Length`, exits immediately upon frame completion, and outputs the elapsed handshake duration.
 
+---
+
+## 7. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Single-Use Cryptographic WebAuthn Assertion Binding & Monotonic Security Versioning
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 In administrative dashboards, step-up authentication tokens (proving a user recently touched a hardware passkey) are vulnerable to session replay attacks: if an attacker steals an elevated session cookie or token, they can replay privileged administrative operations across separate devices.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Generic Step-Up Boolean Flags (`is_step_up=true`):**
    * Storing a simple timestamp or boolean flag in user session tables allows any active session for that user to inherit privileged status.
 2. **Token Replay Across IPs / Devices:**
@@ -15,7 +19,8 @@ In administrative dashboards, step-up authentication tokens (proving a user rece
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Cryptographic Assertion Binding:** When a WebAuthn hardware passkey is verified, the assertion is hashed alongside the client's IP, User-Agent, and session token:
    `wpa_admin_webauthn_assertions(user_id, credential_id, ip_hash, user_agent_hash, session_id_hash)`.
 2. **Single-Use Partial Unique Index:** Enforces `UNIQUE (session_id_hash) WHERE session_id_hash IS NOT NULL`. An assertion can be bound strictly once; any attempt to replay it raises a unique constraint violation.
@@ -52,6 +57,7 @@ ALTER TABLE wpa_admin_reauth_markers ADD COLUMN IF NOT EXISTS security_version b
 ---
 
 ## 4. Behavior Comparison
+
 | Step-Up Security Model | Token Replay Across Sessions | Device / IP Hijacking | Revocation Propagation |
 |---|---|---|---|
 | In-Memory Session Flag | Vulnerable | High | Slow / Incomplete |
@@ -62,5 +68,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/webauthn_binding.sql`](./src/webauthn_binding.sql).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

@@ -1,13 +1,17 @@
 # Systems Engineering Case Study: Precision Scoped CSS Splicing with Pseudo-Class Specificity Preservation
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Scoped CSS in Single File Components ensures component styles do not leak to other parts of the application. However, naive scoped CSS compilers that simply append attribute selectors to the end of rules (e.g. `button:hover[data-scope]`) corrupt CSS semantics:
 1. Attaching attributes after pseudo-classes or pseudo-elements (`button::before[data-scope]`) produces invalid CSS that browsers reject entirely.
 2. Transforming keyframe percentage rules (`0% { opacity: 0 }` -> `0%[data-scope]`) breaks CSS animations.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **End-of-String Appending:**
    * `selector + scope` fails on `:hover`, `:focus`, `:disabled`, and pseudo-elements like `::before`.
 2. **Animation Keyframe Corruption:**
@@ -17,7 +21,8 @@ Scoped CSS in Single File Components ensures component styles do not leak to oth
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Pseudo-Class Boundary Detection:** Scans selector strings with `selector.search(/:{1,2}[A-Za-z-])` to find the exact index of any pseudo-class or pseudo-element.
 2. **Pre-Pseudo Splicing:** Splices `[data-fluxdom="hash"]` *before* the colon (`button[data-fluxdom]:hover`). This preserves browser selector matching and CSS specificity rules.
 3. **Keyframe Step Whitelist:** `isKeyframeSelector()` checks for `from`, `to`, and `^\d+(?:\.\d+)?%$`, leaving animation keyframe steps untouched.
@@ -52,6 +57,7 @@ export function transformStyle(styleContent: string, hash: string): string {
 ---
 
 ## 4. Behavior Comparison
+
 | Scoped CSS Strategy | Pseudo-Class Output (`:hover`) | Pseudo-Element (`::before`) | Keyframe Animations |
 |---|---|---|---|
 | Naive Suffix Append | `button:hover[data-scope]` (Weaker Specificity) | `button::before[data-scope]` (Syntax Error) | Broken (`50%[scope]`) |
@@ -62,8 +68,9 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/scoped_css_transformer.ts`](./src/scoped_css_transformer.ts).
 
 ---
 
@@ -88,3 +95,8 @@ node --experimental-strip-types --test test/scoped_css_transformer.test.ts
 
 * **Test Environment:** Node.js v24.17.0, Windows 11, 2026-10-17 (no external dependencies, native type stripping)*
 
+---
+
+## 7. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

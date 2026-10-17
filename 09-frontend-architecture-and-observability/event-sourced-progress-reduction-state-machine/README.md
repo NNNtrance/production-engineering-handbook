@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Event-Sourced Progress Reduction State Machine for Real-Time SSE Streams
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 When multi-engine background workflows (running Lighthouse, YellowLab, Axe, ZAP) stream progress events over Server-Sent Events (SSE), network disconnects and packet jitter cause events to arrive out of order or re-deliver upon reconnection. Handling progress via ad-hoc mutable state variables in React (`setEngineAStatus`, `setEngineBStatus`) leads to race conditions, lost error badges, flickering UI transitions, and desynchronized progress bars.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Ad-Hoc Mutable State Updates:**
    * Updating individual component states on each incoming websocket/SSE message creates cascading React re-renders and out-of-order state corruption.
 2. **Reconnection Blindness:**
@@ -15,7 +19,8 @@ When multi-engine background workflows (running Lighthouse, YellowLab, Axe, ZAP)
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Pure Event Reduction State Machine:** Treats UI state as a deterministic projection over an append-only `ScanProgressEvent[]` event log.
 2. **Reverse Event Folding:** Evaluates `[...snapshot.events].reverse().find(...)` to locate the latest state for each engine and page. Completed, failed, or retrying states naturally supersede prior queued states.
 3. **Execution Plan Alignment:** Matches active engines against the canonical `analysis.plan` payload, ensuring dynamic engine rosters (e.g. Lighthouse vs Axe) accurately reflect server-side dispatch plans.
@@ -54,6 +59,7 @@ function rowsFor(snapshot: ScanProgressSnapshot): { rows: EngineRow[]; page?: Sc
 ---
 
 ## 4. Behavior Comparison
+
 | Progress UI Architecture | Reconnect State Integrity | Out-of-Order Event Handling | Render Jitter |
 |---|---|---|---|
 | Ad-Hoc `useState` Callbacks | Corrupted / Stuck Progress | Desynchronized UI | High (Cascading Rerenders) |
@@ -64,5 +70,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/event_progress_reducer.ts`](./src/event_progress_reducer.ts).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

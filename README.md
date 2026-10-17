@@ -2,7 +2,7 @@
 
 # Production Engineering Handbook: Hard Problems & Pragmatic Solutions
 
-A curated, domain-driven cookbook of low-level systems engineering solutions, non-trivial architectural decisions, and zero-slop implementations extracted from real-world projects (including WebPageAnalyz, FluxDOM, and PlantUML).
+A curated, domain-driven cookbook of low-level systems engineering solutions, non-trivial architectural decisions, and working implementations drawn from my own projects (such as WebPageAnalyz and FluxDOM) and open-source contributions (such as PlantUML, npm-check-updates, and YamlDotNet).
 
 ---
 
@@ -420,7 +420,7 @@ Click on any engineering challenge below to jump directly to the case study, arc
 <a id="fixed-port-loopback-origin-preservation"></a>
 * ### [👉 How to prevent Electron desktop SPAs from silently wiping IndexedDB and localStorage across launches using fixed loopback ports?](./05-os-and-process-architecture/fixed-port-loopback-origin-preservation)
   * **The Challenge:** Serving Next.js static exports in Electron via ephemeral ports (`listen(0)`) assigns a random port on every boot, altering the web origin (`http://127.0.0.1:XXXXX`) and permanently partitioning user `IndexedDB` and `localStorage` state.
-  * **The Engineering Fix:** Fixed production loopback port reservation (`38450`) on `127.0.0.1` with dynamic `EADDRINUSE` fallback. Guarantees identical web origin across reboots while providing extensionless SPA fallback routing.
+  * **The Engineering Fix:** Fixed loopback port reservation (`38450`) on `127.0.0.1` with dynamic `EADDRINUSE` fallback. Preserves identical web origin across reboots while providing extensionless SPA fallback routing.
   * **Outcome:** Assigns dynamic loopback ports for internal IPC communication, binding strictly to 127.0.0.1 without exposing ports to the LAN.
 
 <a id="frameless-window-delta-drag-ipc"></a>
@@ -582,9 +582,9 @@ Click on any engineering challenge below to jump directly to the case study, arc
 Have you solved a hard, non-trivial systems engineering problem? We welcome contributions that maintain the strict engineering bar of this handbook.
 
 ### 🎯 The Engineering Bar
-* **Zero AI-Slop & Zero Trivial Boilerplate:** Submissions must tackle genuine, hard systems constraints (memory leaks, race conditions, parser edge cases, kernel/socket invariants, cryptographically secure guarantees). Generic tutorials ("How to use useState", "How to connect to MongoDB") will be rejected.
+* **No Trivial Boilerplate:** Submissions must tackle genuine, hard systems constraints (memory leaks, race conditions, parser edge cases, kernel/socket invariants, cryptographically secure guarantees). Generic tutorials ("How to use useState", "How to connect to MongoDB") will be rejected.
 * **Domain-Driven Taxonomy:** Submissions must fit into one of the 9 defined domain categories (`01` to `09`).
-* **Strict 5-Section Architecture Breakdown:** Every case study must include a comprehensive `README.md` following our formal 5-section specification.
+* **Strict Architecture Breakdown:** Every case study must include a comprehensive `README.md` following our uniform section specification.
 * **Runnable/Verifiable Code:** Every case must include isolated source code in `src/`.
 * **Standard Code Card:** Every case must include a 1000x750 raw VS Code editor crop in `assets/code-card.png`.
 

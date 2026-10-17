@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Bracket-Balanced Single File Component Lexing with Sticky Attribute Scanning
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Single File Component (SFC) compilers must parse templates containing complex JavaScript expressions (`{items.map(x => ({ val: x }))}`), nested quotes inside HTML attributes (`data-label="a > b"`), and structural directives (`{#if}`, `{#each}`). Naive regular expression parsers break on nested braces, truncate attributes at unescaped greater-than symbols, or suffer from catastrophic regex backtracking (ReDoS).
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Regex Greedy Attribute Matching:**
    * `/<[^>]+>/` terminates prematurely on `data-condition="a > b"`, splitting HTML tags in half.
 2. **Regex Expression Truncation:**
@@ -15,7 +19,8 @@ Single File Component (SFC) compilers must parse templates containing complex Ja
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Depth-Balanced Expression Scanner:** `findExpressionEnd()` maintains an integer depth counter (`depth += 1 / depth -= 1`) while tracking string quotation boundaries (`"`, `'`, `` ` ``). It returns only when `depth === 0` outside any string literal.
 2. **Sticky Attribute Scanning (`/gy`):** Uses the sticky `y` regex flag with explicit `lastIndex = cursor`. Matches advance contiguously across source characters in O(N) time without catastrophic regex backtracking.
 3. **Structured Directive Separation:** Automatically classifies attributes by prefix:
@@ -71,6 +76,7 @@ function parseAttributes(source: string, filename: string) {
 ---
 
 ## 4. Behavior Comparison
+
 | Template Lexing Engine | Nested Braces `{ { a: 1 } }` | Nested Quotes `"a > b"` | Backtracking Complexity |
 |---|---|---|---|
 | Naive Regex Split | Fails (Truncates at First `}`) | Fails (Splits Tag) | O(2^N) Vulnerable |
@@ -81,5 +87,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/sfc_parser.ts`](./src/sfc_parser.ts).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

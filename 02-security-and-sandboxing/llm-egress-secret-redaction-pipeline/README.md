@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Multi-Layer Secret Redaction Pipeline for External LLM Egress
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 When integrating third-party LLM providers (such as OpenAI, Gemini, or OpenRouter) to summarize audit findings or explain vulnerabilities, raw code snippets and error logs are transmitted across the network. If logs contain database connection strings, JWTs, Stripe keys, or private SSH/RSA keys, sending them unredacted exposes critical infrastructure to third-party data leaks, violating SOC 2, HIPAA, and GDPR compliance.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Naive Keyword Filtering:**
    * Replacing only known environment variable values fails when logs contain credentials generated at runtime or keys belonging to customers.
 2. **Unbounded Prompt Payloads:**
@@ -15,7 +19,8 @@ When integrating third-party LLM providers (such as OpenAI, Gemini, or OpenRoute
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Null-Byte Scrubbing & Length Clamping:** `String(value).replace(/\0/g, '').slice(0, maxLength)` neutralizes null-byte bypasses and bounds prompt memory before regex execution.
 2. **6 Frozen Pattern Filters:** Matches:
    * Private keys (`-----BEGIN RSA PRIVATE KEY-----`) -> `[redacted-private-key]`
@@ -47,6 +52,7 @@ function redactText(value, { maxLength = 4_000 } = {}) {
 ---
 
 ## 4. Behavior Comparison
+
 | LLM Egress Protection | Credential Leak Risk | Database URI Redaction | Null-Byte Robustness |
 |---|---|---|---|
 | Unfiltered Payloads | Critical (Full Leaks) | None (Exposes Passwords) | Vulnerable |
@@ -57,8 +63,9 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/secret_redaction.js`](./src/secret_redaction.js).
 
 ---
 
@@ -82,3 +89,8 @@ node --test test/secret_redaction.test.js
 
 * **Test Environment:** Node.js v24.17.0, Windows 11, 2026-10-17 (no external dependencies, built-in node:test)*
 
+---
+
+## 7. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

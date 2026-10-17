@@ -1,13 +1,17 @@
 # Systems Engineering Case Study: Base64url Keyset Pagination Cursors & Target URL Credential Scrubbing
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 In customer support and ticketing backends, two problems frequently occur:
 1. **Offset Pagination Degradation:** Using `OFFSET 10000` causes linear performance degradation and full table scans. Furthermore, concurrent ticket creation shifts row offsets, causing users to see duplicate items or miss newly created tickets.
 2. **Credential Leaks in User Bug Reports:** Users copying and pasting internal URLs into support tickets often paste authenticated URLs containing embedded credentials (`https://{user}:{password}@internal.corp/debug`). Storing these in plain text risks exposing sensitive internal passwords to support staff and logging pipelines.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Traditional Limit/Offset Queries:**
    * Scanning 50 pages of tickets forces the database engine to traverse and discard thousands of rows for every page turn.
 2. **Unvalidated Cursor Payloads:**
@@ -17,7 +21,8 @@ In customer support and ticketing backends, two problems frequently occur:
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Base64url Encoded Keyset Cursors:** Serializes deterministic state tuples (`{ at, id }`) into compact Base64url tokens. `decodeCursor()` bounds token length to 512 bytes, verifies JSON structure, and asserts finite ISO timestamp parsing.
 2. **Index Seek (O(log n)) Instead of Offset Scan:** Uses indexed compound filters (`WHERE (created_at, id) < ($1, $2)`), executing an index seek instead of scanning and discarding preceding rows with OFFSET regardless of table depth.
 3. **URL Protocol & Credential Sanitization:** Parses input via native `URL`. Strictly rejects non-HTTP(S) schemes and asserts `!parsed.username && !parsed.password`. Authenticated URLs with embedded credentials are discarded rather than persisted.
@@ -50,6 +55,7 @@ try {
 ---
 
 ## 4. Behavior Comparison
+
 | Support Table Pagination | Deep Page Query Latency | Row Shift Invariance | URL Credential Scrubbing |
 |---|---|---|---|
 | Offset Pagination (`OFFSET 5000`) | Degrades with page depth (Scans preceding rows) | Vulnerable (Skips/Duplicates) | None (Stores Plaintext) |
@@ -60,5 +66,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/support_keyset_cursor.js`](./src/support_keyset_cursor.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

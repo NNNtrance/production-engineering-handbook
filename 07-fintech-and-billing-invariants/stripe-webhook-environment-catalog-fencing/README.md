@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Stripe Live/Test Mode & Multi-Account Webhook Spoofing Fencing
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Verifying Stripe webhook signatures using `stripe.webhooks.constructEvent()` only proves that the payload was signed by the configured webhook signing secret. In staging/production shared environments or Stripe Connect multi-account configurations, signing secrets can be misrouted. An attacker or staging tester sending a signed test-mode event (`livemode: false`) to a production webhook endpoint can trick the server into provisioning free paid subscriptions.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Standard Signature Verification Alone:**
    * Signature checks only validate cryptographic integrity against a signing secret. If a test webhook endpoint URL points to production, signatures validate successfully.
 2. **Missing Livemode Cross-Referencing:**
@@ -15,7 +19,8 @@ Verifying Stripe webhook signatures using `stripe.webhooks.constructEvent()` onl
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Cryptographic Key Prefix Inference:** `expectedStripeLiveMode()` inspects the server's configured secret key. If it begins with `sk_live_`, livemode must strictly be `true`; if `sk_test_`, livemode must be `false`.
 2. **Production Environment Assertion:** In `production`, if `expectedLiveMode` is unverified or `event.livemode` is missing, the request is immediately rejected with HTTP 503 `BILLING_PROVIDER_ENVIRONMENT_UNVERIFIED`.
 3. **Deterministic Mode Mismatch Fencing:** If `event.livemode !== expectedLiveMode`, the handler fails closed with HTTP 400 `BILLING_PROVIDER_ENVIRONMENT_MISMATCH`.
@@ -49,6 +54,7 @@ function assertStripeWebhookEnvironment(event, config) {
 ---
 
 ## 4. Behavior Comparison
+
 | Stripe Webhook Validation | Signature Integrity | Test-Mode Event Replay | Cross-Account Connect Fencing |
 |---|---|---|---|
 | Naive `constructEvent()` | Validated | Vulnerable (Provisions Paid Plan) | Vulnerable |
@@ -59,5 +65,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/stripe_webhook_fence.js`](./src/stripe_webhook_fence.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

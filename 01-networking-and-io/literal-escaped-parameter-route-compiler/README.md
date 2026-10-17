@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Dynamic Parameter Route Compiler with Literal Metacharacter Escaping
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Client-side Single Page Application routers that support file-system-style parameter routes (such as Next.js/SvelteKit `/users/[userId]/posts/[postId]`) compile paths into regular expressions. If static path segments contain literal regex characters—such as version dots (`/docs/v1.0/[slug]`) or parentheses (`/releases/(draft)/[id]`)—naive string substitution produces unescaped regular expressions, causing wildcard injection, unintended matches, or syntax crashes.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Unescaped Dot Wildcards:**
    * `/docs/v1.0/[slug]` compiles to `/docs/v1.0/([^/]+)`. Because `.` is an unescaped regex wildcard, `/docs/v1x0/slug` falsely matches!
 2. **Parentheses Capture Group Corruption:**
@@ -15,7 +19,8 @@ Client-side Single Page Application routers that support file-system-style param
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Metacharacter Escaping Pass:** `escapeRegex()` replaces all special characters (`.*+?^${}()|[]\`) with escaped literals (`\\`).
 2. **Bracket Parameter Tokenization:** Scans route paths for bracket tokens (`/[([^]]+)]/g`). Each token compiles into `([^/]+)` while its identifier is pushed to `paramNames`.
 3. **URL Pathname Isolation:** Normalizes URLs via `new URL(url, 'http://localhost').pathname`, cleanly stripping query strings and hash anchors before route evaluation.
@@ -50,6 +55,7 @@ function compileRoutePath(path: string): { regex: RegExp; paramNames: string[] }
 ---
 
 ## 4. Behavior Comparison
+
 | Route Pattern Matching | Version Dots (`/v1.0/`) | Parentheses (`/(draft)/`) | Parameter Extraction |
 |---|---|---|---|
 | Naive String Replace | Matches `v1x0` (Wildcard Dot) | Broken Capture Groups | Mismatched Indices |
@@ -60,8 +66,9 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/route_compiler.ts`](./src/route_compiler.ts).
 
 ---
 
@@ -86,3 +93,8 @@ node --experimental-strip-types --test test/route_compiler.test.ts
 
 * **Test Environment:** Node.js v24.17.0, Windows 11, 2026-10-17 (no external dependencies, native type stripping)*
 
+---
+
+## 7. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

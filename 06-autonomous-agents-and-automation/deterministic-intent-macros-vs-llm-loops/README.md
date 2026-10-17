@@ -8,7 +8,7 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 Standard autonomous browser agent frameworks (Browser-Use, Agent-E, generic LangChain tools) interact with websites via brute-force single-step loops:
 * Step 1: LLM locates the search input.
@@ -21,7 +21,7 @@ This introduces cumulative network latency across multi-turn reasoning loops, bu
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Brute-Force Prompt Chaining:**
    * Each turn incurs LLM network roundtrips, context token reprocessing, and vision screenshot encoding overhead.
@@ -30,7 +30,7 @@ This introduces cumulative network latency across multi-turn reasoning loops, bu
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 We replaced the 5-turn loop with an Atomic Client-Side Intent Macro (`searchAndSelect`):
 
@@ -50,3 +50,15 @@ We replaced the 5-turn loop with an Atomic Client-Side Intent Macro (`searchAndS
 | **Atomic Intent Macro** | **Single atomic intent turn** | **Client-side heuristic DOM execution** | **Deterministic DOM fallbacks** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/intent_macro.ts`](./src/intent_macro.ts).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

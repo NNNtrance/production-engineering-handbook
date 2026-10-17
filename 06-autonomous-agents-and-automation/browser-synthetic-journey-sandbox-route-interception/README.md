@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Browser Synthetic Journey Sandbox: Route Interception & Click Mutation Guard
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Executing automated synthetic user journeys against live customer websites introduces catastrophic safety risks: synthetic scripts can inadvertently click form submit buttons that process real financial transactions, delete production data, or navigate to malicious cross-origin URLs.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Standard Playwright / Puppeteer Scripts:**
    * Blindly execute `page.click()` on any selector, triggering unwanted POST mutations or form submissions.
 2. **Relying on Target Web App Safeguards:**
@@ -15,7 +19,8 @@ Executing automated synthetic user journeys against live customer websites intro
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Fail-Closed Network Route Interception:** Intercepts all browser network traffic via `page.route('**/*', ...)`. Restricts requests strictly to `GET`, `HEAD`, and `OPTIONS`. Any mutating method (`POST`, `PUT`, `DELETE`) or cross-origin destination is immediately aborted with `blockedbyclient`.
 2. **DOM-Level Click Safety Assertions:** Before clicking any element, evaluates its properties directly in browser DOM memory:
    * Anchor tags (`<a>`) must strictly match the current origin (`new URL(el.href).origin === location.origin`).
@@ -53,6 +58,7 @@ if (step.action === 'click') {
 ---
 
 ## 4. Behavior Comparison
+
 | Journey Execution Model | Accidental Form Submission | Cross-Origin Data Leakage | Destructive Mutation Risk |
 |---|---|---|---|
 | Unrestricted Playwright | High (Unchecked Clicks) | Unrestricted | High (Unrestricted POST) |
@@ -63,5 +69,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/journey_sandbox.js`](./src/journey_sandbox.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

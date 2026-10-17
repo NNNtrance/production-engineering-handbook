@@ -1,6 +1,9 @@
 # Systems Engineering Case Study: Chromium Network Sandboxing: WebRTC UDP Leak Mitigation & QUIC Disablement
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 When routing automated headless Chromium crawlers through an egress security inspection proxy (`--proxy-server=http://proxy:8080`), Chromium by default can bypass the proxy across multiple network protocols:
 1. **WebRTC STUN/TURN UDP Leak:** WebRTC initiates peer-to-peer UDP connections directly to external STUN servers, completely bypassing HTTP/SOCKS proxies and broadcasting the host worker's true public and internal IP addresses.
 2. **HTTP/3 (QUIC) UDP Bypass:** Chromium defaults to HTTP/3 QUIC over UDP. Because most auditing proxies only inspect TCP, QUIC connections silently bypass inspection.
@@ -8,7 +11,8 @@ When routing automated headless Chromium crawlers through an egress security ins
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Standard `--proxy-server` Flag Alone:**
    * Configures proxying only for standard TCP HTTP/HTTPS traffic. WebRTC and QUIC UDP sockets are left completely unproxied.
 2. **Operating System Firewall Rules:**
@@ -18,7 +22,8 @@ When routing automated headless Chromium crawlers through an egress security ins
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **WebRTC IP Policy Enforcement:** Configures `--force-webrtc-ip-handling-policy=disable_non_proxied_udp`. Forces WebRTC to route strictly through the configured proxy or disable non-proxied UDP candidates entirely, eliminating host IP leaks.
 2. **QUIC Protocol Disablement:** Enforces `--disable-quic`, forcing all modern HTTP/3 connections to gracefully negotiate down to audited HTTP/2 and HTTP/1.1 TCP streams.
 3. **Mandatory Loopback Proxying:** Passes `--proxy-bypass-list=<-loopback>`. The `<-loopback>` syntax explicitly clears the default loopback bypass list, forcing even requests targeting `127.0.0.1` through the security proxy for validation and SSRF filtering.
@@ -51,6 +56,7 @@ function chromeFlags(proxyUrl, config = {}) {
 ---
 
 ## 4. Behavior Comparison
+
 | Headless Browser Network Mode | WebRTC Real IP Leakage | HTTP/3 QUIC Proxy Bypass | Localhost SSRF Defense |
 |---|---|---|---|
 | Standard `--proxy-server` | Vulnerable (UDP Leaked) | Vulnerable (UDP Bypasses Proxy) | Bypasses Proxy (Default) |
@@ -61,5 +67,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/browser_sandbox_flags.js`](./src/browser_sandbox_flags.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

@@ -7,13 +7,13 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 Most web backends connect to PostgreSQL using a single administrative or generic user (`postgres:postgres`). If a container running untrusted headless browser workloads is compromised via an RCE exploit, the attacker inherits full database privileges, allowing them to delete user accounts, drop audit tables, or dump payment secrets.
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Single Shared Database User:**
    * Grants every microservice, background worker, and script identical full DML/DDL permissions across all tables.
@@ -24,7 +24,7 @@ Most web backends connect to PostgreSQL using a single administrative or generic
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **5 Segregated PostgreSQL Roles:**
    * `wpa_owner` (NOLOGIN): Owns all platform tables.
@@ -37,13 +37,7 @@ Most web backends connect to PostgreSQL using a single administrative or generic
 
 ---
 
-## 4. Code Implementation
-
-See [`src/database_roles.sql`](./src/database_roles.sql) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Database Authority Model | Blast Radius on Worker RCE | Audit Log Tampering Risk | Startup Role Validation |
 |---|---|---|---|
@@ -52,3 +46,15 @@ See [`src/database_roles.sql`](./src/database_roles.sql) for the isolated implem
 | **5 Segregated Roles + Startup Attestation** | **No DELETE / No Schema Access** | **Protected (No DELETE Grants)** | **Fail-Closed (`current_user`)** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/database_roles.sql`](./src/database_roles.sql).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

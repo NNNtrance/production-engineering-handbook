@@ -3,17 +3,17 @@
 > **Domain:** Autonomous Agents & Automation  
 > **Source Project:** `WebPageAnalyz (Crawler Core)`  
 > **Language:** Node.js  
-> **Key Metric:** `maxCalendarYearDrift: 5, query variants clamped to 5, path depth 16, sitemap decompression limits`  
+> **Key Metric:** `maxCalendarYearDrift: 5, query variants clamped to 5, path depth 16, sitemap decompression limits`
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 Automated website crawlers face adversarial website architectures: infinite calendar widgets (clicking "Next Year" into infinity), faceted eCommerce search filters generating factorial query permutations (`?color=red&size=m&sort=asc...`), and deep cyclic URL structures. Without explicit boundaries, crawlers run out of memory or DDoS target hosts.
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Simple URL Visited Sets:**
    * Tracking visited URLs in a Set fails because dynamic parameters (`?page=1000`, `?date=2040`) generate millions of unique strings for identical pages.
@@ -24,7 +24,7 @@ Automated website crawlers face adversarial website architectures: infinite cale
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **Calendar Year Drift Clamping:** Rejects calendar drift beyond `maxCalendarYearDrift: 5`, immediately severing infinite calendar date click loops.
 2. **Path Depth & Combinatorial Query Ceilings:** Restricts maximum URL path depth to 16 and clamps query parameter variants per unique path to 5, killing faceted search explosions.
@@ -33,13 +33,7 @@ Automated website crawlers face adversarial website architectures: infinite cale
 
 ---
 
-## 4. Code Implementation
-
-See [`src/crawler_limits.js`](./src/crawler_limits.js) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Crawler Traversal Model | Infinite Calendar Trap | Faceted Search Explosion | Memory Footprint |
 |---|---|---|---|
@@ -48,3 +42,15 @@ See [`src/crawler_limits.js`](./src/crawler_limits.js) for the isolated implemen
 | **Strict Bounded Crawler Limits** | **Bounded (Rejects calendar drift > 5 years)** | **Clamped (Max 5 query variants)** | **Bounded by configured depth and count limits** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/crawler_limits.js`](./src/crawler_limits.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

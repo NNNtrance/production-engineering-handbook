@@ -8,7 +8,7 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 Autonomous AI browser agents executing tasks on behalf of a user possess authenticated session access to services like GitHub, AWS, cloud providers, and banking portals.
 
@@ -16,7 +16,7 @@ If an LLM hallucinates an interaction or follows a prompt injection embedded in 
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Pre-Click DOM Confirmation Prompts:**
    * Asking a human "May I click this button?" fails because DOM text labels are unreliable. A button labeled "Continue" or "Next" can trigger a background `DELETE` or `POST` mutation via dynamic JavaScript event listeners.
@@ -27,7 +27,7 @@ If an LLM hallucinates an interaction or follows a prompt injection embedded in 
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 We hooked directly into Chrome DevTools Protocol's low-level `Fetch` domain (`Fetch.enable` with request-stage interception):
 
@@ -38,13 +38,7 @@ We hooked directly into Chrome DevTools Protocol's low-level `Fetch` domain (`Fe
 
 ---
 
-## 4. Code Implementation
-
-See [`src/guard.ts`](./src/guard.ts) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Approach | Setup Overhead | TLS Certificate Decryption | Mutating Request Safety |
 |---|---|---|---|
@@ -53,3 +47,15 @@ See [`src/guard.ts`](./src/guard.ts) for the isolated implementation.
 | **CDP Mid-Flight Hook** | **Native browser API** | **Not needed (Pre-TLS)** | **Paused until explicit human approval** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/guard.ts`](./src/guard.ts).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

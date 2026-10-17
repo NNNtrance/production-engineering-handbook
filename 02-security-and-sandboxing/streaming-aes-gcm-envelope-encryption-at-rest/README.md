@@ -7,13 +7,13 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 Storing customer repository code archives on disk in plaintext creates severe regulatory and compliance violations. However, reading multi-hundred-megabyte ZIP files entirely into Node.js Buffer instances for encryption causes severe V8 garbage collection spikes and heap crashes under concurrent load.
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Plaintext Staging on Shared Mounts:**
    * Vulnerable to unauthorized access from adjacent containers, compromised logs, or host backup exposures.
@@ -24,7 +24,7 @@ Storing customer repository code archives on disk in plaintext creates severe re
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **WPA1 Binary Envelope Header:** Formats ciphertext with a compact 32-byte header: `WPA1` magic identifier (4 bytes), random CSPRNG IV (12 bytes), and GCM authentication tag (16 bytes).
 2. **Streaming Pipeline:** Pipes raw files through Node.js crypto ciphers directly to disk with `pipeline(fsReadStream, cipher, fsWriteStream, { mode: 0o600 })`.
@@ -33,13 +33,7 @@ Storing customer repository code archives on disk in plaintext creates severe re
 
 ---
 
-## 4. Code Implementation
-
-See [`src/envelope_encryption.js`](./src/envelope_encryption.js) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Encryption Strategy | V8 Heap Memory Impact | Cryptographic Integrity | Ciphertext Framing |
 |---|---|---|---|
@@ -48,3 +42,15 @@ See [`src/envelope_encryption.js`](./src/envelope_encryption.js) for the isolate
 | **Streaming AES-256-GCM (WPA1)** | **Fixed 32-byte header + stream buffer chunk** | **Authenticated (GCM Tag)** | **Structured WPA1 Header** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/envelope_encryption.js`](./src/envelope_encryption.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

@@ -7,13 +7,13 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 In SaaS applications with plan-based member seat limits (e.g., Studio plan = 5 seats), concurrent user invitations cause race conditions. If two admins approve invitations at the same millisecond when 4 seats are filled, both queries read 4 occupied seats and commit, resulting in 6 active members on a 5-seat plan.
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Application-Layer ORM Validation:**
    * Checking seat counts in Node.js before inserting a membership record fails completely under concurrent API calls due to network latency and asynchronous event loops.
@@ -24,7 +24,7 @@ In SaaS applications with plan-based member seat limits (e.g., Studio plan = 5 s
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **Per-Organization Advisory Lock:** The trigger executes `PERFORM pg_advisory_xact_lock(hashtext('workspace-seat:' || NEW."organizationId"))`. Only concurrent operations on the *same* workspace serialize; other workspaces proceed in parallel.
 2. **Dynamic Effective Plan Resolution:** Queries active temporary promotional upgrades (`wpa_entitlement_grants`) before falling back to the base workspace plan.
@@ -33,13 +33,7 @@ In SaaS applications with plan-based member seat limits (e.g., Studio plan = 5 s
 
 ---
 
-## 4. Code Implementation
-
-See [`src/workspace_seat_limit.sql`](./src/workspace_seat_limit.sql) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Concurrency Guard | Multi-Tenant Concurrency Race | Global Contention | Dynamic Plan Support |
 |---|---|---|---|
@@ -48,3 +42,15 @@ See [`src/workspace_seat_limit.sql`](./src/workspace_seat_limit.sql) for the iso
 | **Org-Scoped Advisory Lock** | **Enforces seat quota (Raises WORKSPACE_SEAT_LIMIT_REACHED)** | **Scoped strictly to target workspace ID** | **Evaluated inside transaction lock** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/workspace_seat_limit.sql`](./src/workspace_seat_limit.sql).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

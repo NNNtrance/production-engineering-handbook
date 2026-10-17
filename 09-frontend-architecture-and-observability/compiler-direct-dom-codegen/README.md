@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Direct-to-DOM Compiler Code Generation Bypassing Virtual DOM Tree Diffing
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Traditional Virtual DOM frameworks (like React) represent component templates as nested JavaScript objects (VDOM nodes). On every state update, the component re-executes, re-allocating tree structures in memory and traversing the entire hierarchy to diff changes. For large UI trees, this garbage collector churn and reconciliation overhead limits performance on low-power devices.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Heap Allocation Overhead:**
    * Generating thousands of ephemeral VNode objects on every keystroke forces frequent V8 garbage collection pauses.
 2. **Whole-Component Re-Execution:**
@@ -15,7 +19,8 @@ Traditional Virtual DOM frameworks (like React) represent component templates as
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Compiler-First Transformation:** FluxDOM's template transformer compiles `.flow` components directly into imperative browser DOM calls (`createElement`, `createText`, `insert`).
 2. **Fine-Grained Attribute Effects:** Compiles dynamic bindings (`:class="active ? 'on' : 'off'"`) into isolated `createEffect` closures. When `active` changes, only the single `setAttribute` call executes; no parent or child elements are touched.
 3. **Surgical Text Node Mutation:** Reactive text interpolations (`{count}`) compile into an initial `createText('')` and an effect updating `text.nodeValue`.
@@ -43,6 +48,7 @@ insert(el, expr);
 ---
 
 ## 4. Behavior Comparison
+
 | Frontend Architecture | Update Complexity | Ephemeral VNode Allocations | Component Re-renders |
 |---|---|---|---|
 | Virtual DOM (React) | O(Component Tree) | High (New VNodes per Render) | Entire Component |
@@ -53,5 +59,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/direct_dom_codegen.ts`](./src/direct_dom_codegen.ts).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

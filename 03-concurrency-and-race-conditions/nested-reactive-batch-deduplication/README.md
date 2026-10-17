@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: Deterministic Nested Batching with Object.is Equality & Set Deduplication
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 When multiple reactive signals mutate in sequence (e.g. updating `setX(1)`, `setY(2)`, `setZ(3)` inside a click handler or network callback), a naive reactive engine immediately notifies subscribers on each write. This causes 3 separate DOM updates and cascading effect executions. Furthermore, if batches are nested (`batch(() => { batch(...) })`), naive implementations flush prematurely on the inner batch, triggering visual glitches and race conditions.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Immediate Synchronous Dispatch:**
    * Updating multiple related signals causes effects to observe intermediate, inconsistent states (Glitching).
 2. **Premature Inner Batch Flushing:**
@@ -15,7 +19,8 @@ When multiple reactive signals mutate in sequence (e.g. updating `setX(1)`, `set
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Object.is Value Short-Circuiting:** Compares new values against existing values via `Object.is(value, newValue)`. Writing identical values (including `NaN === NaN`) returns immediately without queuing effects.
 2. **Re-entrant Depth Tracking:** `batchDepth++` increments upon entering and decrements in a mandatory `finally` block.
 3. **Atomic Outermost Flush:** Queued effects are collected in `batchedEffects = new Set<() => void>()`. Effects only flush when `batchDepth === 0`, ensuring nested batches coalesce cleanly into a single execution tick.
@@ -54,6 +59,7 @@ export function batch(fn: () => void) {
 ---
 
 ## 4. Behavior Comparison
+
 | Mutation Strategy | Effect Invocations (3 Writes) | Intermediate Glitch States | Nested Batch Support |
 |---|---|---|---|
 | Unbatched Synchronous | 3 Separate Runs | Present (Visual Glitches) | None |
@@ -64,8 +70,9 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/nested_batching.ts`](./src/nested_batching.ts).
 
 ---
 
@@ -89,3 +96,8 @@ node --experimental-strip-types --test test/nested_batching.test.ts
 
 * **Test Environment:** Node.js v24.17.0, Windows 11, 2026-10-17 (no external dependencies, native type stripping)*
 
+---
+
+## 7. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

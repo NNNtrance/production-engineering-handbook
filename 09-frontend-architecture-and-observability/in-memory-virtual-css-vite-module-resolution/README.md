@@ -1,11 +1,15 @@
 # Systems Engineering Case Study: In-Memory Virtual CSS Module Resolution & Vite Pipeline Integration
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Compiling Single File Components containing `<style scoped>` blocks requires extracting CSS and feeding it into modern bundlers (like Vite, PostCSS, or Tailwind). Naive plugins write temporary CSS files to disk (e.g. `.tmp/component.css`), causing disk I/O bottlenecks, file watcher loops during Hot Module Replacement (HMR), and file system race conditions across concurrent worker threads.
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Disk I/O Bottlenecks:**
    * Writing intermediate CSS files to `.tmp` on every keystroke wears SSDs and slows HMR feedback loops.
 2. **File Watcher Thrashing:**
@@ -15,7 +19,8 @@ Compiling Single File Components containing `<style scoped>` blocks requires ext
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **In-Memory Buffer Cache:** Holds compiled, scoped CSS strings in a process-level `Map<string, string>()` keyed by the component's unique file ID.
 2. **Rollup Virtual Module Convention (`\0`):** `resolveId()` prefixes virtual CSS identifiers with a null byte (`\0${id}`). This tells Rollup and Vite that the module is a virtual asset not present on the physical disk.
 3. **Seamless Vite Pipeline Forwarding:** In `transform()`, appending `import "${id}.css";` instructs Vite to process the virtual module through its native CSS pipeline (PostCSS, CSS modules, autoprefixer, minifier) entirely in RAM.
@@ -61,6 +66,7 @@ return {
 ---
 
 ## 4. Behavior Comparison
+
 | Single File Component CSS Pipeline | Disk I/O Overhead | Vite HMR File Watcher Loops | Memory Footprint |
 |---|---|---|---|
 | Disk Temporary Files (`.tmp/*.css`) | Heavy (Disk Writes per Keystroke) | Vulnerable (Watches Temp Dirs) | Disk + Heap |
@@ -71,5 +77,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/virtual_css_plugin.ts`](./src/virtual_css_plugin.ts).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

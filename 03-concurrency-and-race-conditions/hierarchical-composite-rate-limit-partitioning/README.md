@@ -1,6 +1,9 @@
 # Systems Engineering Case Study: Hierarchical Composite Rate Limit Keys & Single-Query SQL Sliding Window
 
-## 1. The Production Constraint & Problem Statement
+---
+
+## 1. Problem
+
 Standard API rate limiters rely either on raw IP addresses or simple API key strings.
 1. **IP-Only Limits Break Corporate NATs:** Large enterprise organizations share single egress IP addresses across thousands of employees. A single automated script can exhaust the rate limit for the entire corporate office.
 2. **API-Key-Only Limits Cause Internal Starvation:** In multi-user workspaces, a misconfigured script using one API key can starve other workspace members.
@@ -8,7 +11,8 @@ Standard API rate limiters rely either on raw IP addresses or simple API key str
 
 ---
 
-## 2. Why Naive Workarounds Fail in Production
+## 2. Why Naive Approaches Fail
+
 1. **Noisy Neighbor Starvation:**
    * Global IP keys cause multi-tenant workspaces behind shared corporate proxies to constantly encounter HTTP 429 errors.
 2. **Redis Failover Outages:**
@@ -18,7 +22,8 @@ Standard API rate limiters rely either on raw IP addresses or simple API key str
 
 ---
 
-## 3. The Architecture & Algorithmic Invariants
+## 3. Architecture
+
 1. **Hierarchical Composite Key Resolution:**
    * If a workspace identity exists: resolves to `workspace:{id}:key:{apiKeyId}` (if authenticated via key) or `workspace:{id}:ip:{ip}` (if authenticated via web session).
    * Unauthenticated traffic falls back cleanly to normalized IP keys (`ip:{ip}`).
@@ -52,6 +57,7 @@ async increment(key, windowMs = 900_000) {
 ---
 
 ## 4. Behavior Comparison
+
 | Rate Limiting Engine | Infrastructure Overhead | Enterprise NAT Starvation | Multi-Pod Consistency |
 |---|---|---|---|
 | In-Memory Map | Minimal | High (Per IP) | Broken (Non-Synchronized) |
@@ -62,5 +68,12 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 
 ---
 
-## 5. Visual Representation (Raw VS Code Crop)
-![Production Code Snippet](./assets/code-card.png)
+## 5. Implementation
+
+See implementation in [`src/composite_rate_limiter.js`](./src/composite_rate_limiter.js).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)

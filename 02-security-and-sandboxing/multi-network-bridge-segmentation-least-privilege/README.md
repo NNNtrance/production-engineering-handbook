@@ -7,13 +7,13 @@
 
 ---
 
-## 1. The Constraint
+## 1. Problem
 
 Deploying microservices and background workers onto a single shared Docker bridge network allows compromised worker containers executing untrusted code to move laterally. An exploited browser worker can query internal database admin ports or harvest AI/payment credentials from adjacent microservices.
 
 ---
 
-## 2. Why Naive Workarounds Fail
+## 2. Why Naive Approaches Fail
 
 1. **Single Docker Bridge Network (`default`):**
    * Every container can reach every other container's open ports via internal DNS names, completely bypassing firewall isolation.
@@ -24,7 +24,7 @@ Deploying microservices and background workers onto a single shared Docker bridg
 
 ---
 
-## 3. The Architecture
+## 3. Architecture
 
 1. **5 Isolated Docker Bridge Networks:**
    * `app-internal` (internal: true): Connects Frontend, API, and isolated internal workers.
@@ -37,13 +37,7 @@ Deploying microservices and background workers onto a single shared Docker bridg
 
 ---
 
-## 4. Code Implementation
-
-See [`src/network_boundary.yml`](./src/network_boundary.yml) for the isolated implementation.
-
----
-
-## 5. Behavior Comparison
+## 4. Behavior Comparison
 
 | Network Boundary Model | Lateral Worker Movement | Internet Egress Air-Gap | Credential Containment |
 |---|---|---|---|
@@ -52,3 +46,15 @@ See [`src/network_boundary.yml`](./src/network_boundary.yml) for the isolated im
 | **5-Tier Segmented Bridges** | **Blocked by bridge iptables isolation** | **Strictly Scoped** | **Physically Isolated** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
+
+---
+
+## 5. Implementation
+
+See implementation in [`src/network_boundary.yml`](./src/network_boundary.yml).
+
+---
+
+## 6. Visual Representation
+
+![Visual Architecture Card](./assets/code-card.png)
