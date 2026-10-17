@@ -15,12 +15,14 @@
 2. **Preservation of Existing Fields:** If no version is specified, an empty dictionary is returned, allowing `npm-check-updates` to continue upgrading all regular dependencies without modifying or corrupting the bare `packageManager` entry.
 3. **End-to-End Regression Test Suite:** Validated via Vitest suites ensuring `packageManager: "pnpm"` remains intact while `dependencies` upgrade seamlessly.
 
-## 4. Benchmarks & Validation
+## 4. Behavior Comparison
 | Dependency Parser Handling | Versionless `packageManager` Crash | Regular Dependencies Upgraded | CLI Exit Code |
 |---|---|---|---|
 | Unchecked Split (`split('@')`) | Fatal Crash (`TypeError: undefined`) | 0 (Aborted Run) | Exit 1 (Fatal) |
 | Strip Unknown Fields | Corrupts `package.json` | Upgraded | Exit 0 (Corrupted) |
-| **Conditional Guard (`version ? ... : {}`)** | **Zero Crashes (Safely Skipped)** | **100% Upgraded** | **Exit 0 (Success)** |
+| **Conditional Guard (`version ? ... : {}`)** | **Safely skipped without crashing** | **Valid dependencies upgraded** | **Exit 0 (Success)** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ## 5. Implementation
-See production-grade implementation in [`src/package_manager_parser.ts`](./src/package_manager_parser.ts).
+See implementation in [`src/package_manager_parser.ts`](./src/package_manager_parser.ts).

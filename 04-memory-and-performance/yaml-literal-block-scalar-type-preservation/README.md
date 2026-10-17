@@ -15,12 +15,14 @@
 2. **Comprehensive Theory Tests:** Validated via xUnit `[Theory]` test cases testing empty blocks (`Value: |-`), boolean-like blocks (`Value: |-\n  true`), null blocks, and numeric blocks.
 3. **Zero Overhead:** Eliminates multiple style equality checks, executing a single comparison instruction.
 
-## 4. Benchmarks & Validation
+## 4. Behavior Comparison
 | YAML Deserialization Strategy | Literal Block Scalar (`Value: |-\n true`) | Plain Scalar (`Value: true`) | Spec Conformance |
 |---|---|---|---|
 | Incomplete Whitelist | Coerced to `Boolean(true)` | `Boolean(true)` | Violates YAML 1.2 |
 | Disable Type Inference | `String("true")` | Coerced to `String` (Lost Types) | Partial |
-| **Strict Plain-Only Check (`!= Plain`)** | **`String("true")` (Preserved)** | **`Boolean(true)` (Preserved)** | **100% YAML 1.2 Compliant** |
+| **Strict Plain-Only Check (`!= Plain`)** | **`String("true")` (Preserved)** | **`Boolean(true)` (Preserved)** | **Preserves scalar style per YAML 1.2** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ## 5. Implementation
-See production-grade implementation in [`src/yaml_scalar_deserializer.cs`](./src/yaml_scalar_deserializer.cs).
+See implementation in [`src/yaml_scalar_deserializer.cs`](./src/yaml_scalar_deserializer.cs).

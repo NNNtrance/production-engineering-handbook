@@ -11,16 +11,18 @@
 3. **Fixed Preamp Attenuation:** Applying global volume reduction even when EQ gains are flat reduces signal dynamic range unnecessarily.
 
 ## 3. The Architecture
-1. **Frame-Bounded Decimation (`128-Frame Block Rate`):** Coefficient interpolation runs strictly once every 128 audio frames (`~2.9ms` at 44.1kHz), reducing trigonometric calculation overhead by 99.2%.
+1. **Frame-Bounded Decimation (`128-Frame Block Rate`):** Coefficient interpolation runs strictly once every 128 audio frames (`44,100 / 128 ≈ 344 updates/s`, `~2.9ms` at 44.1kHz), reducing trigonometric calculation frequency by `1 - 1/128 ≈ 99.2%`.
 2. **Geometric Slew-Rate Smoothing (`12% Convergence`):** Gains interpolate geometrically toward user targets (`*current += (target - *current) * 0.12`), ensuring seamless analog-like transitions with zero audible pops.
 3. **Dynamic Preamp Compensation:** Computes peak negative gain offset (`eq_preamp`), automatically attenuating the input stage to preserve dynamic headroom and prevent clipping.
 
-## 4. Benchmarks & Validation
+## 4. Behavior Comparison
 | Audio Filter Transition Approach | Audible Audio Clicks | Coefficient CPU Usage | Headroom Clipping Defense |
 |---|---|---|---|
 | Direct Parameter Overwrite | Severe (Loud Digital Pops) | Low | None (Severe Clipping) |
-| Per-Sample Linear Slew | Zero (Smooth) | Critical (44.1k Trig Evals/s) | Partial |
-| **128-Frame Geometric Slew Rate** | **Zero (Imperceptible Smoothness)** | **Negligible (344 Evals/s)** | **Dynamic Preamp Headroom** |
+| Per-Sample Linear Slew | Smooth | High (44,100 Evals/s at 44.1kHz) | Partial |
+| **128-Frame Geometric Slew Rate** | **Smooth transitions (Eliminates clicks)** | **Decimated: 44,100 / 128 ≈ 344 Evals/s (~99.2% reduction)** | **Dynamic Preamp Headroom** |
+
+_Qualitative comparison. Numbers appear only where derived by explicit formula or measured by script._
 
 ## 5. Implementation
-See production-grade implementation in [`src/biquad_slew_equalizer.rs`](./src/biquad_slew_equalizer.rs).
+See implementation in [`src/biquad_slew_equalizer.rs`](./src/biquad_slew_equalizer.rs).

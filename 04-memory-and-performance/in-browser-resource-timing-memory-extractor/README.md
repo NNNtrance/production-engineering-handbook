@@ -40,12 +40,14 @@ for (const resource of resources) {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
-| Third-Party Weight Auditing | TLS MITM Proxy Overhead | WebSocket IPC Messages | Extraction Latency |
+## 4. Behavior Comparison
+| Third-Party Weight Auditing | TLS MITM Proxy Overhead | Transport Overhead | Extraction Model |
 |---|---|---|---|
-| External Proxy (mitmproxy) | High (Re-encryption + Root CA) | None (Separate Process) | 3,500ms - 8,000ms |
-| CDP Network Event Stream | Medium (IPC Serialization) | 10,000+ WS Events | 800ms - 2,200ms |
-| **In-Browser Performance API** | **Zero (Native Web API)** | **1 In-Browser Eval Tick** | **< 15ms** |
+| External Proxy (mitmproxy) | Re-encryption & Root CA required | Local network proxy hop | Separate background process |
+| CDP Network Event Stream | Native browser protocol | Verbose WebSocket event stream | Stream serialization overhead |
+| **In-Browser Performance API** | **None (Native Web API)** | **Single in-browser evaluation** | **Direct Resource Timing API extraction** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

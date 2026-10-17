@@ -15,12 +15,14 @@
 2. **Per-Runner Recursion Guard (`runner.running = true`):** Restricts recursion protection strictly to the active runner instance, avoiding global reactive pipeline freezes while preventing infinite self-invocation.
 3. **Clean Teardown Guarantees:** Returns from effect functions are captured as `userCleanup` and executed before subsequent runs and upon unmount.
 
-## 4. Benchmarks & Validation
+## 4. Behavior Comparison
 | Reactive Runtime Strategy | Stale Branch Memory Leak | Self-Mutating Infinite Loop | Teardown Lifecycle Guarantee |
 |---|---|---|---|
-| Unchecked Listener Array | 100% Leaked Subscriptions | Stack Overflow Crash | None (Manual Unbind) |
+| Unchecked Listener Array | Leaked Subscriptions | Stack Overflow Crash | None (Manual Unbind) |
 | Global Re-Entry Lock | Leaked Subscriptions | Deadlocks Concurrent Effects | Partial |
-| **Bidirectional Set Tracking** | **0 Leaks (Dynamic Pruning)** | **Cycle Immune (runner.running)** | **Deterministic (Per-Run Cleanup)** |
+| **Bidirectional Set Tracking** | **Dynamic Pruning on Re-execution** | **Self-mutation suppressed (runner.running)** | **Per-Run Subscription Cleanup** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ## 5. Implementation
-See production-grade implementation in [`src/effect_tracking.ts`](./src/effect_tracking.ts).
+See implementation in [`src/effect_tracking.ts`](./src/effect_tracking.ts).

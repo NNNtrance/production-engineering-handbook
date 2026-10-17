@@ -70,12 +70,14 @@ function parseAttributes(source: string, filename: string) {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Template Lexing Engine | Nested Braces `{ { a: 1 } }` | Nested Quotes `"a > b"` | Backtracking Complexity |
 |---|---|---|---|
 | Naive Regex Split | Fails (Truncates at First `}`) | Fails (Splits Tag) | O(2^N) Vulnerable |
 | Heavy Babel/HTML5 Parser | Supported | Supported | Heavy C++ / WASM Dependency |
-| **Depth-Balanced Sticky Parser** | **100% Supported** | **100% Supported** | **O(N) Zero Backtracking** |
+| **Depth-Balanced Sticky Parser** | **Preserved without truncation** | **Handled without premature tag split** | **Linear scan (O(N))** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

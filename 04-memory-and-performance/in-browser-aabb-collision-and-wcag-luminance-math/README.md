@@ -40,10 +40,12 @@ See [`src/geometry_analyzer.js`](./src/geometry_analyzer.js) for the isolated im
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
-| Layout Audit Model | Latency | Cost Per Page | Determinism | Viewport Portability |
+| Layout Audit Model | Latency | Resource Overhead | Determinism | Viewport Portability |
 |---|---|---|---|---|
-| Vision Model Prompt | 3,000ms - 8,000ms | ~$0.05 | Non-Deterministic | Low |
-| Canvas Pixel Diffing | 1,500ms | Compute Heavy | Fragile | Baseline Required |
-| **In-Browser Geometry & Math** | **<50ms** | **$0.00 (Zero Tokens)** | **100% Deterministic** | **Desktop & Mobile** |
+| Vision Model Prompt | Multi-second model inference | API token cost | Non-Deterministic | Dependent on screenshot resolution |
+| Canvas Pixel Diffing | Rasterization overhead | High compute (CPU/GPU) | Pixel threshold fragile | Baseline required |
+| **In-Browser Geometry & Math** | **Single execution tick** | **Zero API calls (DOM-native)** | **Deterministic math** | **Desktop & Mobile** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

@@ -57,12 +57,14 @@ if (config.actions) {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | State Management Pattern | Property Access Overhead | Boilerplate Action Reducers | Storage Persistence |
 |---|---|---|---|
 | Redux / Flux | High (Cloned Objects) | Mandatory (Actions/Reducers) | Middleware Required |
 | MobX / Vue Reactive (Proxy) | Medium (Proxy Traps) | Low | Custom Plugins |
-| **FluxDOM Signal Descriptors** | **Minimal (Native V8 Getters)** | **Zero (Natural `this.x++`)** | **Built-in Auto-Sync** |
+| **FluxDOM Signal Descriptors** | **Minimal (Native V8 Getters)** | **Direct property mutation (`this.x++`)** | **Descriptor-driven persistence** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

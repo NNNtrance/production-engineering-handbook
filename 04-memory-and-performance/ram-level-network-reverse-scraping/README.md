@@ -4,7 +4,7 @@
 > **Source Project:** `llm-conductor` (Desktop Native Core)  
 > **Language:** TypeScript / Chrome DevTools Protocol  
 > **Dependencies:** `0` (Native CDP Network domain)  
-> **Key Metric:** `0` prompt tokens, `<10ms` response extraction (down from 4000ms DOM stringification)
+> **Key Metric:** Direct CDP network response body extraction, avoids DOM stringification
 
 ---
 
@@ -12,14 +12,14 @@
 
 Standard autonomous web agents parse the HTML DOM tree to extract information for LLM reasoning loops. 
 
-On modern Single Page Applications (SPAs), dumping the DOM yields 30,000 to 80,000 tokens of useless div wrappers, CSS class names, and SVG markup. This costs ~$0.05 to $0.15 per turn and introduces 3 to 6 seconds of latency.
+On modern Single Page Applications (SPAs), dumping the DOM yields thousands of tokens of wrapper elements, CSS class names, and SVG markup. This inflates context windows with redundant markup and increases reasoning latency.
 
 ---
 
 ## 2. Why Naive Workarounds Fail
 
 1. **HTML Sanitization (readability.js, cheerio):**
-   * Drops crucial dynamic client-side hydration data and still produces thousands of unstructured tokens.
+   * Drops crucial dynamic client-side hydration data and still produces unstructured tokens.
 2. **Vision Screenshots:**
    * High token cost, coordinate inaccuracy, and fails on off-screen lazy-loaded lists.
 
@@ -31,4 +31,16 @@ Instead of parsing what the browser rendered, we intercept the authoritative API
 
 1. **Network Sniffing:** We subscribe to CDP `Network.responseReceived`.
 2. **Filter & In-Memory Trap:** Incoming responses matching `application/json` or API patterns have their `requestId` registered.
-3. **RAM Reverse-Scraping:** We issue `Network.getResponseBody`. Chrome returns the raw JSON payload directly from its internal cache in under 10ms with zero token overhead.
+3. **RAM Reverse-Scraping:** We issue `Network.getResponseBody`. Chrome returns the raw JSON payload directly from its internal cache without prompt token overhead.
+
+---
+
+## 4. Behavior Comparison
+
+| Scraping Extraction Model | Prompt Token Cost | Execution Model | HTML Serialization Overhead |
+|---|---|---|---|
+| LLM DOM Stringification | High token consumption | LLM prompt serialization | Full DOM dump parse |
+| DOM QuerySelector Parsing | Zero tokens | Fragile client selectors | Vulnerable to DOM class obfuscation |
+| **CDP Network Body Extraction** | **Zero tokens** | **Direct RAM payload extraction** | **Zero DOM serialization** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

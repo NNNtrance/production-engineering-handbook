@@ -49,12 +49,14 @@ try {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Support Table Pagination | Deep Page Query Latency | Row Shift Invariance | URL Credential Scrubbing |
 |---|---|---|---|
-| Offset Pagination (`OFFSET 5000`) | Slow (150ms - 450ms) | Vulnerable (Skips/Duplicates) | None (Stores Plaintext) |
-| ID-Only Cursor | Fast (< 5ms) | Breaks on equal timestamps | None |
-| **Base64url Keyset `(at, id)`** | **Constant (< 3ms O(1))** | **100% Invariant** | **Strictly Sanitized** |
+| Offset Pagination (`OFFSET 5000`) | Degrades with page depth (Scans preceding rows) | Vulnerable (Skips/Duplicates) | None (Stores Plaintext) |
+| ID-Only Cursor | Index seek | Breaks on equal timestamps | None |
+| **Base64url Keyset `(at, id)`** | **B-tree index seek (O(log n))** | **Stable against concurrent row shifts** | **Query credentials stripped from URLs** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

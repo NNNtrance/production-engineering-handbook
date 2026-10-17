@@ -53,12 +53,14 @@ try {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Reactivity Model | Ternary Branch Invariance | Zombie Computation Risk | Teardown Memory Leak |
 |---|---|---|---|
 | Naive Subscriptions | Broken (Stale Subscriptions) | Critical (Runs Stale Branches) | High |
 | WeakMap Caching | Partial | Medium | Complex GC Overhead |
-| **Dynamic Set Pruning** | **100% Deterministic** | **Zero (Cleaned Before Run)** | **Immediate (`subscribers.delete`)** |
+| **Dynamic Set Pruning** | **Subscribes strictly to active branch** | **Cleaned before each run** | **Immediate (`subscribers.delete`)** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 
