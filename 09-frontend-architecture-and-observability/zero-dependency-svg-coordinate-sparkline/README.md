@@ -4,7 +4,7 @@
 
 ## 1. Problem
 
-Rendering simple six-week audit finding trends in web dashboards often tempts developers to pull in heavy charting dependencies (such as Chart.js, Recharts, or D3.js). These libraries introduce 150KB to 400KB of JavaScript bundle bloat, multiple canvas context lifecycles, and hydration layout shifts (CLS), negatively impacting Core Web Vitals for what is fundamentally a simple 6-point line graph.
+Rendering simple six-week audit finding trends in web dashboards often tempts developers to pull in heavy charting dependencies (such as Chart.js, Recharts, or D3.js). These libraries add a significant amount of JavaScript bundle bloat, multiple canvas context lifecycles, and hydration layout shifts (CLS), negatively impacting Core Web Vitals for what is fundamentally a simple 6-point line graph.
 
 ---
 

@@ -5,7 +5,7 @@
 ## 1. Problem
 
 1. **Zombie Media Server Channels:** In peer-to-peer or SFU WebRTC architectures (LiveKit, Agora), users frequently forget to hang up after the other party leaves. The room stays open indefinitely, burning TURN bandwidth and CPU.
-2. **Premature Disconnection on Network Flaps:** When mobile users switch between Wi-Fi and 5G cellular, WebRTC renegotiation drops the participant count to 1 for 500-1500ms. An immediate teardown kills the call right before the user reconnects.
+2. **Premature Disconnection on Network Flaps:** When mobile users switch between Wi-Fi and 5G cellular, WebRTC renegotiation briefly drops the participant count to 1. An immediate teardown kills the call right before the user reconnects.
 3. **Unbilled Session Inaccuracies:** Audio and video calls require accurate start-to-finish duration logging in PostgreSQL audit ledgers without manual user action.
 
 ---
