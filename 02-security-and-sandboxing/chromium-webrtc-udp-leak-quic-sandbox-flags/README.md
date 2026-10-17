@@ -50,12 +50,14 @@ function chromeFlags(proxyUrl, config = {}) {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Headless Browser Network Mode | WebRTC Real IP Leakage | HTTP/3 QUIC Proxy Bypass | Localhost SSRF Defense |
 |---|---|---|---|
 | Standard `--proxy-server` | Vulnerable (UDP Leaked) | Vulnerable (UDP Bypasses Proxy) | Bypasses Proxy (Default) |
 | Container Firewall Drop | High Latency / Freezes | TCP Fallback | Vulnerable |
-| **Hardened Sandboxed Flags** | **Zero (disable_non_proxied_udp)** | **Blocked (--disable-quic)** | **Enforced (<-loopback>)** |
+| **Hardened Sandboxed Flags** | **Restricted (disable_non_proxied_udp)** | **Disabled (--disable-quic)** | **Blocked (<-loopback>)** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

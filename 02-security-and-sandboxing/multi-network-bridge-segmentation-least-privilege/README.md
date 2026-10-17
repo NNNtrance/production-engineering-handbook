@@ -3,7 +3,7 @@
 > **Domain:** Security & Sandboxing  
 > **Source Project:** `WebPageAnalyz (Container Topology)`  
 > **Language:** Docker Compose / Linux Networks  
-> **Key Metric:** `5 isolated Docker networks, 0 cross-network access, API air-gapped from analysis egress`  
+> **Key Metric:** 5 isolated Docker networks, iptables bridge separation, API air-gapped from analysis egress
 
 ---
 
@@ -43,10 +43,12 @@ See [`src/network_boundary.yml`](./src/network_boundary.yml) for the isolated im
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Network Boundary Model | Lateral Worker Movement | Internet Egress Air-Gap | Credential Containment |
 |---|---|---|---|
 | Single Default Bridge | Unrestricted (Full LAN) | None (Shared Egress) | Vulnerable |
-| Host Network Mode | Catastrophic (Host Loopback) | None | Zero Isolation |
-| **5-Tier Segmented Bridges** | **Zero (Blocked by IP Tables)** | **Strictly Scoped** | **Physically Isolated** |
+| Host Network Mode | Catastrophic (Host Loopback) | None | No Isolation |
+| **5-Tier Segmented Bridges** | **Blocked by bridge iptables isolation** | **Strictly Scoped** | **Physically Isolated** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

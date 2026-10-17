@@ -3,7 +3,7 @@
 > **Domain:** Security & Sandboxing  
 > **Source Project:** `WebPageAnalyz (Core Engine)`  
 > **Language:** Node.js / Native Sockets  
-> **Key Metric:** `0ms TOCTOU window, 100% IP pinning via net.BlockList`  
+> **Key Metric:** Direct IP connect eliminates TOCTOU window, net.BlockList subnet enforcement
 
 ---
 
@@ -41,11 +41,13 @@ See [`src/safe_proxy.js`](./src/safe_proxy.js) for the isolated implementation.
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Defense Strategy | DNS Rebinding (TOCTOU) Safety | Latency Overhead | External Daemons |
 |---|---|---|---|
-| Regex Host Checking | Vulnerable (0% Protection) | Negligible | None |
-| Pre-flight DNS Resolver | Vulnerable (TOCTOU Race) | +15ms | None |
-| Forward Proxy Daemon | Protected | +35ms | Required (Squid/Envoy) |
-| **Native Socket IP Pinning** | **100% Deterministic** | **<1ms** | **Zero (Native Net)** |
+| Regex Host Checking | Vulnerable | Negligible | None |
+| Pre-flight DNS Resolver | Vulnerable (TOCTOU Race) | Extra DNS roundtrip | None |
+| Forward Proxy Daemon | Protected | Proxy hop overhead | Required (Squid/Envoy) |
+| **Native Socket IP Pinning** | **Protected (Pinned IP connect)** | **No proxy hop** | **None (Native Node.js `net`)** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

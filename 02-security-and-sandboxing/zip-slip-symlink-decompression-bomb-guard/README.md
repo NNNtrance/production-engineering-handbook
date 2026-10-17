@@ -3,7 +3,7 @@
 > **Domain:** Security & Sandboxing  
 > **Source Project:** `WebPageAnalyz (Source Audit)`  
 > **Language:** Node.js / yauzl  
-> **Key Metric:** `0 symlink dereferences, in-flight streaming chunk abort`  
+> **Key Metric:** Bitmask symlink rejection, in-flight decompression byte tally abort
 
 ---
 
@@ -39,7 +39,7 @@ See [`src/zip_security.js`](./src/zip_security.js) for the isolated implementati
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Attack Vector | Naive Unzip | Header-Only Check | **Streamed POSIX Guard** |
 |---|---|---|---|
@@ -47,3 +47,5 @@ See [`src/zip_security.js`](./src/zip_security.js) for the isolated implementati
 | Symlink Host Escape | Vulnerable | Vulnerable | **Blocked (Bitmask)** |
 | Spoofed Header Zip Bomb | Crushes Disk | Crushes Disk | **Aborted In-Flight** |
 | Case-Collision Clobbering | Unhandled | Unhandled | **Blocked (Case-Fold)** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

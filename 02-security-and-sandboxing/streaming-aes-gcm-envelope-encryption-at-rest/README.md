@@ -3,7 +3,7 @@
 > **Domain:** Security & Sandboxing  
 > **Source Project:** `WebPageAnalyz (Source Sandbox)`  
 > **Language:** Node.js / Web Crypto Streams  
-> **Key Metric:** `32-byte fixed RAM overhead, streaming MAC authentication, 0o600 file modes`  
+> **Key Metric:** Constant 32-byte header, streaming MAC authentication, 0o600 file modes
 
 ---
 
@@ -39,10 +39,12 @@ See [`src/envelope_encryption.js`](./src/envelope_encryption.js) for the isolate
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Encryption Strategy | V8 Heap Memory Impact | Cryptographic Integrity | Ciphertext Framing |
 |---|---|---|---|
 | Buffer In-Memory AES-GCM | Scales with File Size (O(N)) | Yes (MAC Tag) | Ad-hoc |
-| Streaming AES-CBC | O(1) Memory | No (Malleable) | Raw Stream |
-| **Streaming AES-256-GCM (WPA1)** | **Constant 32 Bytes (O(1))** | **Authenticated (GCM Tag)** | **Structured WPA1 Header** |
+| Streaming AES-CBC | Bounded stream buffer | No (Malleable) | Raw Stream |
+| **Streaming AES-256-GCM (WPA1)** | **Fixed 32-byte header + stream buffer chunk** | **Authenticated (GCM Tag)** | **Structured WPA1 Header** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

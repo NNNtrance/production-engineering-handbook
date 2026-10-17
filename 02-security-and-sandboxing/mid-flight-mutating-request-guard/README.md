@@ -4,7 +4,7 @@
 > **Source Project:** `llm-conductor` (Desktop Native Core)  
 > **Language:** TypeScript / Chrome DevTools Protocol  
 > **Dependencies:** `0` (Native CDP Fetch domain)  
-> **Key Metric:** `100%` deterministic mutation interception, 0 unauthorized side-effects
+> **Key Metric:** Mutating request pause via CDP, no proxy daemon required
 
 ---
 
@@ -44,10 +44,12 @@ See [`src/guard.ts`](./src/guard.ts) for the isolated implementation.
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Approach | Setup Overhead | TLS Certificate Decryption | Mutating Request Safety |
 |---|---|---|---|
 | DOM Prompting | None | N/A | Flawed (unreliable selectors) |
-| Local MITM Proxy | High (Daemon + Root CA) | Required | High (fragile on HTTP/2) |
-| **CDP Mid-Flight Hook** | **Zero (Native Browser)** | **Not needed (Pre-TLS)** | **100% Deterministic** |
+| Local MITM Proxy | High (Daemon + Root CA) | Required | Fragile on HTTP/2 and HTTP/3 |
+| **CDP Mid-Flight Hook** | **Native browser API** | **Not needed (Pre-TLS)** | **Paused until explicit human approval** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

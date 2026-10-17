@@ -46,12 +46,14 @@ context.sourceBuffer.fill(0);
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Subprocess Execution Model | Credential Leakage Surface | Orphaned Zombie Processes | Memory Retention |
 |---|---|---|---|
 | Direct `exec` / `spawn` | High (Full `process.env` Inherited) | Frequent (Standard `kill`) | Indefinite (Heap Retained) |
 | Docker-in-Docker | High Overhead / Privileged Daemon | Medium | Heavy Disk Footprint |
-| **Sanitized Subprocess Boundary** | **Zero (`HOME=/nonexistent`)** | **Zero (`-child.pid` SIGKILL)** | **Immediate Zero-Fill Wipe** |
+| **Sanitized Subprocess Boundary** | **Stripped (`HOME=/nonexistent`)** | **Kills process group (`-child.pid`)** | **Immediate Zero-Fill Wipe** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

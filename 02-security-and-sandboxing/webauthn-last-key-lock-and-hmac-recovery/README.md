@@ -3,7 +3,7 @@
 > **Domain:** Security & Sandboxing  
 > **Source Project:** `WebPageAnalyz (Operator Plane)`  
 > **Language:** Node.js / FIDO2 / WebAuthn  
-> **Key Metric:** `Zero lockout risk, atomic passkey deletion guard, HMAC recovery`  
+> **Key Metric:** Atomic passkey deletion lock rejects last key, HMAC-SHA256 recovery codes
 
 ---
 
@@ -38,10 +38,12 @@ See [`src/passkey_lock.js`](./src/passkey_lock.js) for the isolated implementati
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Passkey Security Model | Concurrent Deletion Race | Break-Glass Storage | Session Invalidation |
 |---|---|---|---|
 | Plugin Default Hooks | Vulnerable (Accidental Lockout) | Plaintext | None |
 | Client-Side Count Check | Vulnerable (Multi-Tab Race) | Plaintext | None |
-| **Atomic Lock + HMAC Batch** | **100% Invariant Protected** | **HMAC-SHA256 (Show-Once)** | **Immediate Global Revocation** |
+| **Atomic Lock + HMAC Batch** | **Rejects last passkey deletion with HTTP 409** | **HMAC-SHA256 (Show-Once)** | **Immediate Global Revocation** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

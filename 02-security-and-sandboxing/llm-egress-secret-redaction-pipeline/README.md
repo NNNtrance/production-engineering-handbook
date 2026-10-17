@@ -17,7 +17,7 @@ When integrating third-party LLM providers (such as OpenAI, Gemini, or OpenRoute
 
 ## 3. The Architecture & Algorithmic Invariants
 1. **Null-Byte Scrubbing & Length Clamping:** `String(value).replace(/\0/g, '').slice(0, maxLength)` neutralizes null-byte bypasses and bounds prompt memory before regex execution.
-2. **14 Frozen Pattern Filters:** Matches:
+2. **6 Frozen Pattern Filters:** Matches:
    * Private keys (`-----BEGIN RSA PRIVATE KEY-----`) -> `[redacted-private-key]`
    * JWT tokens (`eyJ...`) -> `[redacted-jwt]`
    * Database connection strings (`postgres://user:pass@host`) -> `postgres://[redacted]@host`
@@ -46,12 +46,14 @@ function redactText(value, { maxLength = 4_000 } = {}) {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | LLM Egress Protection | Credential Leak Risk | Database URI Redaction | Null-Byte Robustness |
 |---|---|---|---|
 | Unfiltered Payloads | Critical (Full Leaks) | None (Exposes Passwords) | Vulnerable |
 | Keyword Masking | High (Misses Ephemeral Keys) | Incomplete | Vulnerable |
-| **14-Pattern Frozen Sanitizer** | **Zero Detected Leaks** | **100% (`[redacted]@`)** | **Strictly Sanitized** |
+| **6-Pattern Frozen Sanitizer** | **Redacted (`[redacted-secret]`)** | **Redacted (`[redacted]@`)** | **Null-bytes stripped and length clamped** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

@@ -3,7 +3,7 @@
 > **Domain:** Security & Sandboxing  
 > **Source Project:** `WebPageAnalyz (DB Security)`  
 > **Language:** PostgreSQL / Node.js  
-> **Key Metric:** `5 dedicated PostgreSQL roles, worker has 0 DELETE grants, startup role attestation fails closed on mismatch`  
+> **Key Metric:** 5 dedicated PostgreSQL roles, worker has no DELETE grants, startup role attestation fails closed on mismatch
 
 ---
 
@@ -43,10 +43,12 @@ See [`src/database_roles.sql`](./src/database_roles.sql) for the isolated implem
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Database Authority Model | Blast Radius on Worker RCE | Audit Log Tampering Risk | Startup Role Validation |
 |---|---|---|---|
 | Single `postgres` User | Complete Database Destruction | High (DELETE Allowed) | None |
 | Granular Roles without Validation | Dependent on Configuration | Medium | Unchecked |
-| **5 Segregated Roles + Startup Attestation** | **Zero DELETE / Zero Schema Access** | **Protected (0 DELETE Grants)** | **Fail-Closed (`current_user`)** |
+| **5 Segregated Roles + Startup Attestation** | **No DELETE / No Schema Access** | **Protected (No DELETE Grants)** | **Fail-Closed (`current_user`)** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

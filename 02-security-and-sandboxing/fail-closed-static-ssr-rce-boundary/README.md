@@ -54,12 +54,14 @@ export function renderToString(source: string): StaticRenderResult {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | SSR Execution Model | RCE Vulnerability Surface | Unescaped XSS Risk | Dynamic Template Behavior |
 |---|---|---|---|
 | Full Node.js `eval()` SSR | Critical (Arbitrary Code Exec) | Moderate | Executes Arbitrary Code |
 | Silent Drop Fallback | None | High | Broken HTML Layout Shift |
-| **Fail-Closed Static AST Boundary** | **Zero (Code Never Evaluated)** | **100% Escaped (HTML/Attr)** | **Safe Client Mount Point** |
+| **Fail-Closed Static AST Boundary** | **Code Never Evaluated** | **Escaped (HTML/Attr)** | **Safe Client Mount Point** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

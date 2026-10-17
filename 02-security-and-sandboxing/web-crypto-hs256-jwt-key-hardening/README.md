@@ -15,13 +15,15 @@
 2. **Universal Web Crypto API:** Built entirely on `globalThis.crypto.subtle`, running natively with zero external dependencies in Cloudflare Workers, Node.js, Deno, Bun, and browsers.
 3. **Constant-Time Verification:** Signatures are verified natively via `crypto.subtle.verify('HMAC', ...)`, eliminating timing attacks.
 
-## 4. Benchmarks & Validation
+## 4. Behavior Comparison
 | JWT Security Attribute | Naive JWT Implementation | omniguard Web Crypto JWT |
 |---|---|---|
 | Key Length Validation | None (Allows 4-char keys) | Strict (>= 32 UTF-8 bytes / 256 bits) |
 | Algorithm Switching Attack | Vulnerable (`alg: none`) | Hardened (Enforces `alg: HS256`) |
 | Signature Comparison | String Equality (`===`) | Constant-Time (`crypto.subtle.verify`) |
-| Dependencies & Runtime Portability | 3+ C-bindings / Node-only | Zero Dependencies (Universal Web Crypto) |
+| Dependencies & Runtime Portability | 3+ C-bindings / Node-only | Standard Web Crypto API only (no external dependencies) |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ## 5. Implementation
-See production-grade implementation in [`src/jwt_validator.ts`](./src/jwt_validator.ts).
+See implementation in [`src/jwt_validator.ts`](./src/jwt_validator.ts).

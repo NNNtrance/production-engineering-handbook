@@ -3,7 +3,7 @@
 > **Domain:** Security & Sandboxing  
 > **Source Project:** `WebPageAnalyz (WPA Page Analyzer)`  
 > **Language:** JavaScript / Playwright  
-> **Key Metric:** `100% credential parameter stripping, console diagnostic redaction, zero secret leakage in shared reports`  
+> **Key Metric:** Query credential parameter stripping, diagnostic log redaction
 
 ---
 
@@ -38,10 +38,12 @@ See [`src/credential_redactor.js`](./src/credential_redactor.js) for the isolate
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Analyzer Redaction Model | SPA Token Leaks | Diagnostic Secret Redaction | Shareable Report Safety |
 |---|---|---|---|
 | Unfiltered Raw DOM | High (Tokens in Query Strings) | None (Raw Stacks) | Dangerous |
 | URL-Only Stripping | Partial | None | Vulnerable |
-| **AST & Diagnostic Redactor** | **100% Stripped** | **Full Regex Sanitization** | **Safe for Public Sharing** |
+| **AST & Diagnostic Redactor** | **Stripped by parameter filter** | **Redacted before persistence** | **Safe for Public Sharing** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

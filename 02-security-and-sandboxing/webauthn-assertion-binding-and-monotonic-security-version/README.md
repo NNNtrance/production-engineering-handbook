@@ -51,12 +51,14 @@ ALTER TABLE wpa_admin_reauth_markers ADD COLUMN IF NOT EXISTS security_version b
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Step-Up Security Model | Token Replay Across Sessions | Device / IP Hijacking | Revocation Propagation |
 |---|---|---|---|
 | In-Memory Session Flag | Vulnerable | High | Slow / Incomplete |
 | Redis TTL Keys | Vulnerable to Token Steal | Medium | Requires Key Scanning |
-| **Bound Assertions + Monotonic Version** | **Zero (Partial Unique Index)** | **Zero (Hashed IP/UA Binding)** | **Instant (`security_version` Mismatch)** |
+| **Bound Assertions + Monotonic Version** | **Rejected (Unique index collision on step-up)** | **Rejected on IP/UA mismatch** | **Rejected on security_version mismatch** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

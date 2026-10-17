@@ -3,7 +3,7 @@
 > **Domain:** Security & Sandboxing  
 > **Source Project:** `WebPageAnalyz (Browser Worker)`  
 > **Language:** Docker / Linux Seccomp / Node.js  
-> **Key Metric:** `--no-sandbox forbidden, root setuid probe, zero secret leaks`  
+> **Key Metric:** `--no-sandbox` forbidden, root setuid probe, fail-closed container boundary
 
 ---
 
@@ -39,10 +39,12 @@ See [`src/sandbox_enforcer.js`](./src/sandbox_enforcer.js) for the isolated impl
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Container Security Model | V8 Exploit Blast Radius | Container Escape Risk | Secret Exposure |
 |---|---|---|---|
 | Default + `--no-sandbox` | Full Container Compromise | High | High (Shared Env) |
 | Container + `SYS_ADMIN` | Host Kernel Compromise | Critical | High |
-| **Pinned Seccomp Worker** | **Isolated to Chromium Process** | **Negligible (Cap Drop)** | **Zero (Strict Blacklist)** |
+| **Pinned Seccomp Worker** | **Isolated to Chromium Process** | **Blocked (Capabilities dropped)** | **Stripped on boot** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
