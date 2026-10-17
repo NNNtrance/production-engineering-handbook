@@ -10,3 +10,6 @@ Thumbs.db
 # Temporary scratch files
 *.tmp
 .scratch/
+
+# Local task specs for AI agents
+TASK.md

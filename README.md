@@ -130,6 +130,8 @@ Browse the complete index of 67 case studies below. Click any problem to jump di
 
 Click on any engineering challenge below to jump directly to the case study, architectural breakdown, and source code:
 
+<a id="1-networking--low-level-io"></a>
+
 ### 🌐 1. Networking & Low-Level I/O
 <a id="raw-tcp-cdp-handshake"></a>
 * ### [👉 How to query CDP endpoints over raw TCP bypassing Chromium Private Network Access (PNA) and CORS without HTTP client bloat?](./01-networking-and-io/raw-tcp-cdp-handshake)
@@ -162,6 +164,8 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **Outcome:** Escapes regex metacharacters in route literals, binds capture groups to reactive signals, and prevents route injection.
 
 ---
+
+<a id="2-security--sandboxing"></a>
 
 ### 🛡️ 2. Security & Sandboxing
 <a id="mid-flight-mutating-request-guard"></a>
@@ -262,6 +266,8 @@ Click on any engineering challenge below to jump directly to the case study, arc
 
 ---
 
+<a id="3-concurrency--race-conditions"></a>
+
 ### ⚡ 3. Concurrency & Race Conditions
 <a id="hardware-collision-avoidance-yield"></a>
 * ### [👉 How to eliminate hardware mouse and keyboard race conditions between humans and autonomous web agents?](./03-concurrency-and-race-conditions/hardware-collision-avoidance-yield)
@@ -330,6 +336,8 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **Outcome:** Defers subscriber notifications across nested reactive updates, executing subscribers once upon outermost batch completion.
 
 ---
+
+<a id="4-memory--performance"></a>
 
 ### 🧠 4. Memory & Performance
 <a id="ram-level-network-reverse-scraping"></a>
@@ -400,6 +408,8 @@ Click on any engineering challenge below to jump directly to the case study, arc
 
 ---
 
+<a id="5-operating-system--process-management"></a>
+
 ### 💻 5. Operating System & Process Management
 <a id="chrome-sqlite-shadow-profile-sync"></a>
 * ### [👉 How to clone authenticated Chrome sessions without SQLite file-lock crashes or terminating active user tabs?](./05-os-and-process-architecture/chrome-sqlite-shadow-profile-sync)
@@ -427,6 +437,8 @@ Click on any engineering challenge below to jump directly to the case study, arc
 
 ---
 
+<a id="6-autonomous-agents--automation"></a>
+
 ### 🤖 6. Autonomous Agents & Automation
 <a id="deterministic-intent-macros-vs-llm-loops"></a>
 * ### [👉 How to reduce LLM round-trips using atomic deterministic intent macros instead of brute-force loops?](./06-autonomous-agents-and-automation/deterministic-intent-macros-vs-llm-loops)
@@ -447,6 +459,8 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **Outcome:** Aborts mutating HTTP requests and cancels click dispatches on form submission buttons during automated synthetic user tests.
 
 ---
+
+<a id="7-fintech--billing-invariants"></a>
 
 ### 💳 7. Fintech & Billing Invariants
 <a id="partial-unique-index-checkout-idempotency"></a>
@@ -474,6 +488,8 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **Outcome:** Compares Stripe event livemode against secret key prefixes and validates connected account IDs before provisioning access.
 
 ---
+
+<a id="8-devops--disaster-recovery"></a>
 
 ### 🚀 8. DevOps & Disaster Recovery
 <a id="automated-ephemeral-database-restore-validation"></a>
@@ -507,6 +523,8 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **Outcome:** Inspects tracked shell script buffers for byte-level carriage returns (0x0d) and verifies gitattributes line-ending settings in CI.
 
 ---
+
+<a id="9-frontend-architecture--observability"></a>
 
 ### 🎨 9. Frontend Architecture & Observability
 <a id="event-sourced-progress-reduction-state-machine"></a>
