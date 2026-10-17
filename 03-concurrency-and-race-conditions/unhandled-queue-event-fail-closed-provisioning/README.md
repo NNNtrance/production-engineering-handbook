@@ -50,12 +50,14 @@ async ensureQueue(name) {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Queue Resiliency Model | DB Restart Behavior | Schema Lock Deadlocks | Unprovisioned Queue Catch |
 |---|---|---|---|
 | Default pg-boss Boot | Process Crashes (`uncaughtException`) | Frequent (`migrate: true`) | Silent Blackhole |
 | Manual Try/Catch on Send | Crashes on Idle Pool Drop | Frequent | Partial |
-| **Fail-Closed Boundary** | **Absorbed & Recovers Cleanly** | **Zero (`migrate: false`)** | **Immediate Fail-Closed Check** |
+| **Fail-Closed Boundary** | **Absorbed & Recovers Cleanly** | **Eliminated (Runtime uses `migrate: false`)** | **Immediate Fail-Closed Check** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

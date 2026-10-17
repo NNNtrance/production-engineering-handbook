@@ -4,7 +4,7 @@
 > **Source Project:** `llm-conductor` (Desktop Native Core)  
 > **Language:** TypeScript / Injected Runtime Script  
 > **Dependencies:** `0` (Native DOM Events)  
-> **Key Metric:** `0ms` input race conditions, seamless human-agent coordination
+> **Key Metric:** Passive DOM input listeners yield control to human, 1800ms debounce
 
 ---
 
@@ -33,3 +33,15 @@ We engineered a passive, zero-cost Hardware Yield Protocol:
 2. **Intervention State:** When physical input is detected, `window.__humanIntervening` is asserted immediately.
 3. **Adaptive Debounce:** An 1800ms debounce window prevents flickering and yields control to the human.
 4. **Autonomous Yield Loop:** The agent execution engine awaits `waitForHumanYield()` prior to any CDP dispatch, cleanly yielding CPU time slices until the user releases the controls.
+
+---
+
+## 4. Behavior Comparison
+
+| Peripheral Coordination Model | User Agency | Coordinate Drift & Focus Loss | Main Thread Impact |
+|---|---|---|---|
+| OS Input Lockout | None (Peripherals blocked) | High user frustration | OS-level hooks |
+| Modal Screen Overlays | Obstructed | AI blocks human intervention | DOM overlay layout shifts |
+| **Passive Hardware Yield Lock** | **Full human priority** | **Yields CDP dispatch during user input** | **Passive event listeners (`{ passive: true }`)** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

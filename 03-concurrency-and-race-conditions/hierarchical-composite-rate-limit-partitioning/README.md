@@ -51,12 +51,14 @@ async increment(key, windowMs = 900_000) {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Rate Limiting Engine | Infrastructure Overhead | Enterprise NAT Starvation | Multi-Pod Consistency |
 |---|---|---|---|
-| In-Memory Map | 0 External Services | High (Per IP) | Broken (Non-Synchronized) |
-| Redis + Lua Script | Redis Cluster Required | High (Per IP) | Synchronized |
-| **Hierarchical Key + Postgres Upsert** | **Zero (Existing DB Pool)** | **Zero (Hierarchical Partitioning)** | **100% ACID Synchronized** |
+| In-Memory Map | Minimal | High (Per IP) | Broken (Non-Synchronized) |
+| Redis + Lua Script | Requires Redis Cluster | High (Per IP) | Synchronized |
+| **Hierarchical Key + Postgres Upsert** | **No added services (Existing DB)** | **Partitions quota by tier (IP vs User)** | **ACID Synchronized via PostgreSQL** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

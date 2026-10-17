@@ -47,12 +47,14 @@ function assertIdempotentReplay(existingFingerprint, requestedFingerprint) {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Idempotency Strategy | Key Ordering Robustness | Mutated Payload Detection | Replay Integrity |
 |---|---|---|---|
-| Header-Only Matching | Irrelevant | Zero (Silent Stale Response) | Vulnerable |
+| Header-Only Matching | Irrelevant | Fails to detect mutated payload | Vulnerable |
 | Raw String SHA-256 | Broken (False Conflicts) | Detected | Brittle |
-| **Recursive Canonicalized SHA-256** | **Deterministic (O(N log N))** | **100% Detected (HTTP 409)** | **Mathematically Proofed** |
+| **Recursive Canonicalized SHA-256** | **Deterministic key sorting (O(N log N))** | **Rejects mutated payload with HTTP 409** | **Replay detected via hash match** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

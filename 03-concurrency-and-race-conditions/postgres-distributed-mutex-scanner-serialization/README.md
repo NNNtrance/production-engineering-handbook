@@ -3,7 +3,7 @@
 > **Domain:** Concurrency & Race Conditions  
 > **Source Project:** `WebPageAnalyz (Security Engine)`  
 > **Language:** Node.js / PostgreSQL  
-> **Key Metric:** `0 external dependencies (no Redis), polling mutex with AbortSignal`  
+> **Key Metric:** Dedicated connection advisory lock, AbortSignal integration, automatic release on socket drop
 
 ---
 
@@ -39,10 +39,12 @@ See [`src/zap_lock.js`](./src/zap_lock.js) for the isolated implementation.
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Locking Architecture | Cross-Container Coordination | Infrastructure Footprint | Crash Resilience |
 |---|---|---|---|
-| In-Memory Mutex | None (Single Process Only) | 0 KB | N/A |
-| Redis Redlock | Yes | +Redis Cluster / Sentinel | Complex (TTL Expiry Race) |
-| **PostgreSQL Advisory Lock** | **Yes (Cluster-Wide)** | **Zero (Existing Pool)** | **Automatic on Socket Close** |
+| In-Memory Mutex | None (Single Process Only) | Local memory only | N/A |
+| Redis Redlock | Yes | Requires external Redis cluster | Complex (TTL Expiry Race) |
+| **PostgreSQL Advisory Lock** | **Yes (Cluster-Wide)** | **No added services (Existing pool)** | **Automatic on Socket Close** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

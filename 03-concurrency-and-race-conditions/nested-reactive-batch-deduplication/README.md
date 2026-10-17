@@ -53,12 +53,14 @@ export function batch(fn: () => void) {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Mutation Strategy | Effect Invocations (3 Writes) | Intermediate Glitch States | Nested Batch Support |
 |---|---|---|---|
 | Unbatched Synchronous | 3 Separate Runs | Present (Visual Glitches) | None |
 | Inner Batch Flush | 2 Runs | Partial Glitches | Broken |
-| **Atomic `batchDepth` Set Queue** | **1 Single Atomic Run** | **Zero (Coalesced Flush)** | **Fully Re-entrant** |
+| **Atomic `batchDepth` Set Queue** | **1 Single Atomic Run** | **Eliminated (Coalesced Flush)** | **Fully Re-entrant** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

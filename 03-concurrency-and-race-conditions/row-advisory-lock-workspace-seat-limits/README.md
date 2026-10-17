@@ -3,7 +3,7 @@
 > **Domain:** Concurrency & Race Conditions  
 > **Source Project:** `WebPageAnalyz (Multi-Tenant Core)`  
 > **Language:** PostgreSQL PL/pgSQL  
-> **Key Metric:** `0 seat over-allocations, per-workspace transaction locks`  
+> **Key Metric:** Per-workspace advisory transaction lock, dynamic entitlement plan resolution
 
 ---
 
@@ -39,10 +39,12 @@ See [`src/workspace_seat_limit.sql`](./src/workspace_seat_limit.sql) for the iso
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Concurrency Guard | Multi-Tenant Concurrency Race | Global Contention | Dynamic Plan Support |
 |---|---|---|---|
 | Node.js / ORM Check | Vulnerable (Over-allocations) | Low | Supported |
 | `LOCK TABLE member` | Protected | Catastrophic (All Tenants Blocked) | Supported |
-| **Org-Scoped Advisory Lock** | **100% Invariant Enforced** | **Zero Cross-Tenant Impact** | **Fully Atomic** |
+| **Org-Scoped Advisory Lock** | **Enforces seat quota (Raises WORKSPACE_SEAT_LIMIT_REACHED)** | **Scoped strictly to target workspace ID** | **Evaluated inside transaction lock** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

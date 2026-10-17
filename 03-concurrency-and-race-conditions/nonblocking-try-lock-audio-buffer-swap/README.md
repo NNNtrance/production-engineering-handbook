@@ -15,12 +15,14 @@
 2. **Zero-Copy Vector Swap (`std::mem::swap`):** Swapping buffer pointers via `std::mem::swap(&mut *target, &mut self.analysis_buffer)` transfers ownership in constant O(1) time without heap allocations.
 3. **Decoupled Atomic Flag (`AtomicBool`):** An atomic flag (`analysis_enabled`) checks whether visualizers are visible; if hidden, audio sample accumulation is completely disabled at zero cost.
 
-## 4. Benchmarks & Validation
+## 4. Behavior Comparison
 | Audio Visualizer Pipeline | Audio Thread Lock Contention | Buffer Underrun Stutter | Memory Allocation in Audio Loop |
 |---|---|---|---|
 | Standard Blocking Mutex | Critical (Blocks for UI FFT) | Frequent Audio Dropouts | Heap Allocations per Frame |
-| Unbounded MPSC Channel | Zero | Memory Inflation Risk | Continuous Node Allocation |
-| **Non-Blocking try_lock() Swap** | **Zero (Drops Lock Contention)** | **Zero (Guaranteed 0ms Jitter)** | **Zero (O(1) In-Place Buffer Swap)** |
+| Unbounded MPSC Channel | None | Memory Inflation Risk | Continuous Node Allocation |
+| **Non-Blocking try_lock() Swap** | **Drops frame on contention (Never blocks)** | **Eliminates lock-induced underruns** | **Zero heap allocation (In-place buffer swap)** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ## 5. Implementation
-See production-grade implementation in [`src/fft_buffer_swap.rs`](./src/fft_buffer_swap.rs).
+See implementation in [`src/fft_buffer_swap.rs`](./src/fft_buffer_swap.rs).

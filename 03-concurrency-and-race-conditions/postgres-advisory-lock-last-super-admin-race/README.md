@@ -3,7 +3,7 @@
 > **Domain:** Concurrency & Race Conditions  
 > **Source Project:** `WebPageAnalyz (Admin Auth Engine)`  
 > **Language:** PostgreSQL PL/pgSQL  
-> **Key Metric:** `0-race condition window, SQLSTATE 23514 check violation`  
+> **Key Metric:** Serialized statement advisory lock, SQLSTATE 23514 fail-closed check
 
 ---
 
@@ -39,11 +39,13 @@ See [`src/super_admin_guard.sql`](./src/super_admin_guard.sql) for the isolated 
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Concurrency Guard | Concurrent Downgrade Race | Performance Overhead | Lock Residue Risk |
 |---|---|---|---|
-| Application Check (`count(*)`) | Vulnerable (0% Protection) | Low | None |
+| Application Check (`count(*)`) | Vulnerable to concurrent updates | Low | None |
 | Row-Level Trigger Only | Vulnerable under Read Committed | Low | None |
 | `LOCK TABLE wpa_admin_accounts` | Protected | High (Blocks Reads) | High |
-| **Statement Advisory Lock** | **100% Deterministic** | **<0.2ms (Scoped)** | **Zero (Xact Scoped)** |
+| **Statement Advisory Lock** | **Serialized (Raises SQLSTATE 23514)** | **Scoped to statement mutation** | **Releases automatically on commit/rollback** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

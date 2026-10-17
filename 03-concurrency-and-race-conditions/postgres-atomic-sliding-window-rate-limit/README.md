@@ -3,7 +3,7 @@
 > **Domain:** Concurrency & Race Conditions  
 > **Source Project:** `WebPageAnalyz (Middleware Core)`  
 > **Language:** SQL / Node.js  
-> **Key Metric:** `1 roundtrip atomic upsert, 0 Redis clusters, microsecond execution`  
+> **Key Metric:** Single-query atomic upsert, no external cache cluster required
 
 ---
 
@@ -30,7 +30,7 @@ Implementing sliding-window rate limiting across distributed containerized worke
 2. **In-Database Window Evaluation:** Evaluates whether `window_started_at` has exceeded the sliding duration directly inside SQL `CASE` expressions:
    * If the window expired: Resets `window_started_at` to `now()` and sets `hits` to 1.
    * If the window is active: Retains `window_started_at` and increments `hits + 1`.
-3. **Immediate Atomic Return:** The query returns `RETURNING hits, window_started_at`, providing exact count and calculated reset time in microseconds without locks.
+3. **Immediate Atomic Return:** The query returns `RETURNING hits, window_started_at`, providing exact count and calculated reset time without advisory locks.
 
 ---
 
@@ -40,10 +40,12 @@ See [`src/rate_limiter.sql`](./src/rate_limiter.sql) for the isolated implementa
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Rate Limiting Strategy | Distributed Consistency | Infrastructure Footprint | Race Condition Risk |
 |---|---|---|---|
-| In-Memory Node.js Map | Fragmented (Per-Process) | 0 KB | High (Cluster Bypass) |
-| Redis + Lua Script | Consistent | +Redis Cluster / Memory | Low |
-| **PostgreSQL Atomic Upsert** | **100% Consistent** | **Zero (Existing DB Pool)** | **Zero (Atomic On-Conflict)** |
+| In-Memory Node.js Map | Fragmented (Per-Process) | Local memory only | High (Cluster Bypass) |
+| Redis + Lua Script | Consistent | Requires external Redis cluster | Low |
+| **PostgreSQL Atomic Upsert** | **ACID Consistent** | **No added services (Existing DB pool)** | **Serialized by row upsert** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

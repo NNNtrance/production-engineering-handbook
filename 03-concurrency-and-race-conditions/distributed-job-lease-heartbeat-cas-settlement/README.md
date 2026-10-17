@@ -38,10 +38,12 @@ See [`src/lease_heartbeat.js`](./src/lease_heartbeat.js) for the isolated implem
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Distributed Worker Model | Zombie Worker Protection | Long-Running Job Support | Filesystem Safety |
 |---|---|---|---|
 | Static Queue Timeout | Vulnerable (Data Overwrites) | Broken (Premature Retries) | Unchecked |
 | Unfenced Database Writes | Vulnerable | Supported | Unchecked |
-| **Heartbeat Lease + CAS** | **100% Deterministic (Fenced)** | **Continuous Renewal** | **Strict Path Sandbox** |
+| **Heartbeat Lease + CAS** | **Fenced (CAS rejects stale writes)** | **Continuous Renewal** | **Strict Path Sandbox** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
