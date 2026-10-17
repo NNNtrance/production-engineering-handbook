@@ -13,3 +13,6 @@ Thumbs.db
 
 # Local task specs for AI agents
 TASK.md
+
+# Local editor/agent config
+.claude/

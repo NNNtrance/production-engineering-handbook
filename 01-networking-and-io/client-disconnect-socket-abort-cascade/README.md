@@ -4,7 +4,7 @@
 
 ## 1. Problem
 
-In high-overhead audit systems (running Chromium, ZAP security scans, and Lighthouse), audits can take anywhere from 10 to 60 seconds. When users close the browser tab, refresh the page, or lose network connectivity mid-scan, Node.js HTTP servers keep executing the downstream asynchronous tasks by default, wasting significant CPU and RAM on results that will never be delivered.
+In high-overhead audit systems (running Chromium, ZAP security scans, and Lighthouse), audits can run for a long time. When users close the browser tab, refresh the page, or lose network connectivity mid-scan, Node.js HTTP servers keep executing the downstream asynchronous tasks by default, wasting significant CPU and RAM on results that will never be delivered.
 
 ---
 
@@ -23,7 +23,7 @@ In high-overhead audit systems (running Chromium, ZAP security scans, and Lighth
 
 1. **Socket Event Binding:** `requestController()` hooks both `request.once('aborted')` and `response.once('close')`. If the client closes the TCP socket before `writableEnded`, it aborts the controller with HTTP 499 `CLIENT_DISCONNECTED`.
 2. **Queue-Level Splicing:** In `TaskPool`, each queued job registers a one-shot abort listener. If a client disconnects while waiting in line, `this.queue.splice(index, 1)` removes the job immediately, freeing worker slots for active users.
-3. **Cascading Child Process Abort:** Active workers receive the cascading `controller.signal`. Headless browser wrappers listen to this signal and kill Chromium child processes via `SIGKILL`, reclaiming memory within milliseconds.
+3. **Cascading Child Process Abort:** Active workers receive the cascading `controller.signal`. Headless browser wrappers listen to this signal and kill Chromium child processes via `SIGKILL`, reclaiming memory promptly.
 4. **Explicit Cleanup:** Unbinds socket listeners in `cleanup()` upon successful completion to prevent memory leaks.
 
 ```javascript
