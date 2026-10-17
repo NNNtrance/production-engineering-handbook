@@ -18,8 +18,8 @@ In cross-platform engineering teams, developers working on Windows machines ofte
 ## 3. The Architecture & Algorithmic Invariants
 1. **Git-Aware Shell Discovery:** Executes `git ls-files -z` to discover all tracked files safely across null-terminated byte streams.
 2. **Byte-Level Shebang Inspection:** Evaluates raw buffer slices without string conversions. Checks for `.sh` extension or POSIX shebang syntax (`^#!.*(?:/|env\s+)(?:ba|da|a|k|z)?sh`).
-3. **Zero-Tolerance Carriage Return Assertion:** Filters buffer bytes for `0x0d` (ASCII carriage return `\r`). Any script containing even a single `\r` immediately fails the test suite.
-4. **Git Attributes Enforcement:** Validates repository `.gitattributes` using `git check-attr eol`, mathematically ensuring git checkout rules enforce `eol=lf` permanently across all developer environments.
+3. **Strict Carriage Return Assertion:** Filters buffer bytes for `0x0d` (ASCII carriage return `\r`). Any script containing even a single `\r` immediately fails the test suite.
+4. **Git Attributes Enforcement:** Validates repository `.gitattributes` using `git check-attr eol`, ensuring git checkout rules enforce `eol=lf` permanently across all developer environments.
 
 ```javascript
 // 1. Inspect raw buffer bytes for shebang lines and Windows CRLF carriage returns
@@ -30,7 +30,7 @@ function isShellScript(relativePath, bytes) {
     return /^#!.*(?:\/|env\s+)(?:ba|da|a|k|z)?sh(?:\s|$)/.test(firstLine);
 }
 
-// 2. Automated test asserting zero carriage return bytes (0x0d) across all tracked shell files
+// 2. Automated test asserting no carriage return bytes (0x0d) across all tracked shell files
 test('tracked Linux shell scripts use LF-only bytes and explicit Git attributes', () => {
     const scripts = trackedShellScripts();
     const carriageReturns = scripts.filter(({ bytes }) => bytes.includes(0x0d)).map(({ relativePath }) => relativePath);

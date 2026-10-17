@@ -19,7 +19,7 @@ In customer support and ticketing backends, two problems frequently occur:
 
 ## 3. The Architecture & Algorithmic Invariants
 1. **Base64url Encoded Keyset Cursors:** Serializes deterministic state tuples (`{ at, id }`) into compact Base64url tokens. `decodeCursor()` bounds token length to 512 bytes, verifies JSON structure, and asserts finite ISO timestamp parsing.
-2. **O(1) Indexed Cursor Seeks:** Uses indexed compound filters (`WHERE (created_at, id) < ($1, $2)`), guaranteeing constant-time pagination performance regardless of total table depth.
+2. **Index Seek (O(log n)) Instead of Offset Scan:** Uses indexed compound filters (`WHERE (created_at, id) < ($1, $2)`), executing an index seek instead of scanning and discarding preceding rows with OFFSET regardless of table depth.
 3. **URL Protocol & Credential Sanitization:** Parses input via native `URL`. Strictly rejects non-HTTP(S) schemes and asserts `!parsed.username && !parsed.password`. Authenticated URLs with embedded credentials are discarded rather than persisted.
 
 ```javascript

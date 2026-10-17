@@ -17,7 +17,7 @@ Single File Component (SFC) compilers must parse templates containing complex Ja
 
 ## 3. The Architecture & Algorithmic Invariants
 1. **Depth-Balanced Expression Scanner:** `findExpressionEnd()` maintains an integer depth counter (`depth += 1 / depth -= 1`) while tracking string quotation boundaries (`"`, `'`, `` ` ``). It returns only when `depth === 0` outside any string literal.
-2. **Sticky Attribute Scanning (`/gy`):** Uses the sticky `y` regex flag with explicit `lastIndex = cursor`. Matches advance contiguously across source characters in O(N) time with zero backtracking.
+2. **Sticky Attribute Scanning (`/gy`):** Uses the sticky `y` regex flag with explicit `lastIndex = cursor`. Matches advance contiguously across source characters in O(N) time without catastrophic regex backtracking.
 3. **Structured Directive Separation:** Automatically classifies attributes by prefix:
    * `@event` -> Event handlers (`@click="save"`).
    * `:binding` -> Reactive bindings (`:class="active"`).

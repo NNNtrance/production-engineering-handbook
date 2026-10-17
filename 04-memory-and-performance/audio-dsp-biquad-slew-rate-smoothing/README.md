@@ -12,7 +12,7 @@
 
 ## 3. The Architecture
 1. **Frame-Bounded Decimation (`128-Frame Block Rate`):** Coefficient interpolation runs strictly once every 128 audio frames (`44,100 / 128 ≈ 344 updates/s`, `~2.9ms` at 44.1kHz), reducing trigonometric calculation frequency by `1 - 1/128 ≈ 99.2%`.
-2. **Geometric Slew-Rate Smoothing (`12% Convergence`):** Gains interpolate geometrically toward user targets (`*current += (target - *current) * 0.12`), ensuring seamless analog-like transitions with zero audible pops.
+2. **Geometric Slew-Rate Smoothing (`12% Convergence`):** Gains interpolate geometrically toward user targets (`*current += (target - *current) * 0.12`), ensuring seamless analog-like transitions without audible pops.
 3. **Dynamic Preamp Compensation:** Computes peak negative gain offset (`eq_preamp`), automatically attenuating the input stage to preserve dynamic headroom and prevent clipping.
 
 ## 4. Behavior Comparison

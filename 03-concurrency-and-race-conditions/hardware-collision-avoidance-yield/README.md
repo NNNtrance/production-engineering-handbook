@@ -27,7 +27,7 @@ If the agent dispatches synthetic CDP mouse events (`Input.dispatchMouseEvent`) 
 
 ## 3. The Architecture
 
-We engineered a passive, zero-cost Hardware Yield Protocol:
+We engineered a passive Hardware Yield Protocol:
 
 1. **Passive Event Traps:** We register `{ passive: true }` listeners for `mousemove`, `mousedown`, `keydown`, and `wheel`. Passive listeners never block the main thread.
 2. **Intervention State:** When physical input is detected, `window.__humanIntervening` is asserted immediately.

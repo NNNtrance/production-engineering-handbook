@@ -32,7 +32,7 @@ Deploying microservices and background workers onto a single shared Docker bridg
    * `analysis-egress`: The *only* network with public internet access, attached exclusively to `analysis-worker`.
    * `ai-egress`: Isolated egress attached strictly to `ai-service`.
    * `email-egress`: Isolated egress attached strictly to `email-service`.
-2. **API Air-Gapping:** The core API backend has *zero* analysis egress access and cannot make unvetted outbound internet calls.
+2. **API Air-Gapping:** The core API backend has no analysis egress network attachment and cannot make unvetted outbound internet calls.
 3. **Microservice Token Isolation:** AI and email provider keys exist strictly inside `ai-service` and `email-service`; they are physically absent from the API and worker environments.
 
 ---

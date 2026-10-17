@@ -13,14 +13,14 @@
 ## 3. The Architecture
 1. **Non-Blocking Mutex Acquisition (`try_lock()`):** The audio thread attempts acquisition via `self.analyzer.try_lock()`. If the visualizer thread holds the lock, the audio thread drops the frame without waiting and continues rendering audio uninterrupted.
 2. **Zero-Copy Vector Swap (`std::mem::swap`):** Swapping buffer pointers via `std::mem::swap(&mut *target, &mut self.analysis_buffer)` transfers ownership in constant O(1) time without heap allocations.
-3. **Decoupled Atomic Flag (`AtomicBool`):** An atomic flag (`analysis_enabled`) checks whether visualizers are visible; if hidden, audio sample accumulation is completely disabled at zero cost.
+3. **Decoupled Atomic Flag (`AtomicBool`):** An atomic flag (`analysis_enabled`) checks whether visualizers are visible; if hidden, audio sample accumulation is disabled without locking.
 
 ## 4. Behavior Comparison
 | Audio Visualizer Pipeline | Audio Thread Lock Contention | Buffer Underrun Stutter | Memory Allocation in Audio Loop |
 |---|---|---|---|
 | Standard Blocking Mutex | Critical (Blocks for UI FFT) | Frequent Audio Dropouts | Heap Allocations per Frame |
 | Unbounded MPSC Channel | None | Memory Inflation Risk | Continuous Node Allocation |
-| **Non-Blocking try_lock() Swap** | **Drops frame on contention (Never blocks)** | **Eliminates lock-induced underruns** | **Zero heap allocation (In-place buffer swap)** |
+| **Non-Blocking try_lock() Swap** | **Drops frame on contention (Never blocks)** | **Eliminates lock-induced underruns** | **In-place buffer swap (No audio-thread allocations)** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
 

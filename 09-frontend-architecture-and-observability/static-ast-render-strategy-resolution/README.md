@@ -24,7 +24,7 @@ In modern full-stack web applications, developers must manually annotate which p
 3. **Deterministic Strategy Classification:**
    * If browser globals or event listeners exist -> Automatically assigns `CSR`.
    * If async calls, signals, or bindings exist -> Automatically assigns `SSR`.
-   * If zero signals, zero events, and zero side-effects exist -> Automatically promotes to `SSG` (Static Site Generation).
+   * If no signals, no events, and no side-effects exist -> Automatically promotes to `SSG` (Static Site Generation).
 4. **Metadata Code Generation:** Emits `export const __flowStrategy = 'SSG';` directly into the compiled output for build tool integration.
 
 ```typescript

@@ -27,4 +27,4 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 ---
 
 ## 5. Implementation
-See production-grade implementation in [`src/fork_permission_pipeline.yml`](./src/fork_permission_pipeline.yml).
+See Full implementation in [`src/fork_permission_pipeline.yml`](./src/fork_permission_pipeline.yml).

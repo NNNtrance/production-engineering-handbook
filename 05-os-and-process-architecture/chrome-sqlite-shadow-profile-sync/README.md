@@ -4,7 +4,7 @@
 > **Source Project:** `llm-conductor` (Desktop Native Core)  
 > **Language:** Rust  
 > **Dependencies:** `0` (Standard Library only)  
-> **Key Metric:** Atomic shadow profile clone of session SQLite databases, zero disruption to active browser
+> **Key Metric:** Atomic shadow profile clone of session SQLite databases without disrupting the active browser
 
 ---
 
@@ -32,7 +32,7 @@ We engineered an Atomic Shadow Profile Sync in Rust:
 1. **Lock-Free Read Streaming:** While SQLite locks writing, the OS allows non-exclusive read operations on underlying database files.
 2. **Master DPAPI Key Re-encryption:** We copy `Local State` which contains the DPAPI-encrypted master key used to decrypt cookies.
 3. **Surgical Cloning:** We surgically clone only `Preferences`, `Secure Preferences`, and `Network/Cookies` into a temporary shadow profile directory.
-4. **Isolated Launch:** The AI launches against the lightweight shadow profile, instantly running as the authenticated user with zero logins and zero CAPTCHAs.
+4. **Isolated Launch:** The AI launches against the lightweight shadow profile, instantly running with existing authenticated session cookies preserved.
 
 ---
 
@@ -42,6 +42,6 @@ We engineered an Atomic Shadow Profile Sync in Rust:
 |---|---|---|---|---|
 | Direct Profile Reuse | Crashes or blocks launch | Fatal lock contention | Shared | None |
 | Full Profile Copy (`cp -r`) | None | Fails on locked WAL journals | Copies master key | Multi-gigabyte cache copy |
-| **Surgical Shadow Profile Sync** | **Zero browser disturbance** | **Non-exclusive read copy** | **Preserves Local State & DPAPI key** | **Lightweight (Cookies & preferences only)** |
+| **Surgical Shadow Profile Sync** | **Leaves active browser untouched** | **Non-exclusive read copy** | **Preserves Local State & DPAPI key** | **Lightweight (Cookies & preferences only)** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._

@@ -17,7 +17,7 @@ In PostgreSQL-backed job queues (such as `pg-boss`), background idle connection 
 
 ## 3. The Architecture & Algorithmic Invariants
 1. **Explicit Error Boundary:** Binds a top-level `this.boss.on('error', ...)` listener. Logs the event cleanly with error codes and absorbs transient network drops so the container remains alive during planned DB maintenance.
-2. **Zero-Migration Runtime Invariant (`migrate: false`):** Disables auto-migration in application code. Queue schema creation is strictly isolated to dedicated deployment CI/CD migration scripts.
+2. **No-Migration Runtime Invariant (`migrate: false`):** Disables auto-migration in application code. Queue schema creation is strictly isolated to dedicated deployment CI/CD migration scripts.
 3. **Canonical Queue Validation (`ensureQueue`):**
    * Validates queue names against frozen `QUEUE_DEFINITIONS`. Unknown queues throw immediately.
    * Calls `await this.boss.getQueue(name)`. If a queue was not provisioned during release migration, it fails closed rather than failing silently.

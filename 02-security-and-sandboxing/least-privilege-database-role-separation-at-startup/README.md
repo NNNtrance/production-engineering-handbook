@@ -29,8 +29,8 @@ Most web backends connect to PostgreSQL using a single administrative or generic
 1. **5 Segregated PostgreSQL Roles:**
    * `wpa_owner` (NOLOGIN): Owns all platform tables.
    * `wpa_migrator`: Exclusive DDL permissions for schema migrations.
-   * `wpa_runtime`: API backend user (SELECT, INSERT, UPDATE on application tables; zero DDL).
-   * `wpa_worker`: Browser analysis workers (SELECT, INSERT, UPDATE on scan/source tables; **zero DELETE permissions** on event history, reports, or users).
+   * `wpa_runtime`: API backend user (SELECT, INSERT, UPDATE on application tables; no DDL privileges).
+   * `wpa_worker`: Browser analysis workers (SELECT, INSERT, UPDATE on scan/source tables; **no DELETE permissions** on event history, reports, or users).
    * `wpa_maintenance`: Exclusive narrowly-scoped DELETE authority for data retention and confirmed workspace purging.
 2. **Fail-Closed Startup Role Attestation:** On boot, workers query `SELECT current_user AS role` and crash immediately with `WORKER_DATABASE_ROLE_MISMATCH` if the active role does not match `DATABASE_EXPECTED_ROLE`.
 3. **Mandatory Connection String Timeouts:** URL strings strictly enforce 4 timeouts: `connect_timeout`, `statement_timeout`, `lock_timeout`, and `idle_in_transaction_session_timeout`.

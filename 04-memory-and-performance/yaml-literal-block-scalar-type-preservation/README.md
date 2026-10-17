@@ -13,7 +13,7 @@
 ## 3. The Architecture
 1. **Inversion to Plain-Scalar Filtering (`value.Style != ScalarStyle.Plain`):** In `ScalarNodeDeserializer.cs`, the condition was inverted. Type inference is strictly restricted to plain scalars. Any scalar with explicit formatting (quoted, folded, or literal block) is preserved directly as a string.
 2. **Comprehensive Theory Tests:** Validated via xUnit `[Theory]` test cases testing empty blocks (`Value: |-`), boolean-like blocks (`Value: |-\n  true`), null blocks, and numeric blocks.
-3. **Zero Overhead:** Eliminates multiple style equality checks, executing a single comparison instruction.
+3. **Single Comparison Instruction:** Eliminates multiple style equality checks by executing a single inequality comparison (`value.Style != ScalarStyle.Plain`).
 
 ## 4. Behavior Comparison
 | YAML Deserialization Strategy | Literal Block Scalar (`Value: |-\n true`) | Plain Scalar (`Value: true`) | Spec Conformance |

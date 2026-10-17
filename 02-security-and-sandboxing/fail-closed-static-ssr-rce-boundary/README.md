@@ -21,7 +21,7 @@ Server-Side Rendering (SSR) in component frameworks typically evaluates componen
 3. **Rigorous HTML & Attribute Escaping:**
    * `escapeHtml()`: Sanitizes `&`, `<`, `>`.
    * `escapeAttribute()`: Replaces `"` with `&quot;` and `'` with `&#39;`, blocking attribute breakout injection.
-4. **Zero RCE Exposure:** The server stringifier never invokes `new Function()` or `eval()`. It operates purely on static string AST representations.
+4. **No Server-Side Code Execution:** The server stringifier never invokes `new Function()` or `eval()`; templates are never evaluated on the server and operate purely on static string AST representations.
 
 ```typescript
 // 1. Strict AST validation rejecting dynamic expressions and event handlers

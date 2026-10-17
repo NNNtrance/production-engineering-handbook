@@ -40,7 +40,7 @@ Instead of parsing what the browser rendered, we intercept the authoritative API
 | Scraping Extraction Model | Prompt Token Cost | Execution Model | HTML Serialization Overhead |
 |---|---|---|---|
 | LLM DOM Stringification | High token consumption | LLM prompt serialization | Full DOM dump parse |
-| DOM QuerySelector Parsing | Zero tokens | Fragile client selectors | Vulnerable to DOM class obfuscation |
-| **CDP Network Body Extraction** | **Zero tokens** | **Direct RAM payload extraction** | **Zero DOM serialization** |
+| DOM QuerySelector Parsing | No LLM tokens | Fragile client selectors | Vulnerable to DOM class obfuscation |
+| **CDP Network Body Extraction** | **No LLM tokens** | **Direct RAM payload extraction** | **Bypasses DOM serialization** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._

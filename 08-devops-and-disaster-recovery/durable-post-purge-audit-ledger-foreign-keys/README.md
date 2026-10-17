@@ -1,7 +1,7 @@
 # Systems Engineering Case Study: Durable Post-Purge Audit Ledger via Foreign Key Decoupling for GDPR Compliance
 
 ## 1. The Production Constraint & Problem Statement
-Under GDPR "Right to be Forgotten" and SOC 2 data retention mandates, deleting a customer organization requires purging all customer-owned data (reports, scanned repositories, source inputs). If the deletion tracking ledger references the workspace with standard `ON DELETE CASCADE`, deleting the workspace wipes the deletion execution row itself! This leaves administrators and auditors with zero mathematical proof that the purge occurred, who authorized it, or how many artifacts were purged.
+Under GDPR "Right to be Forgotten" and SOC 2 data retention mandates, deleting a customer organization requires purging all customer-owned data (reports, scanned repositories, source inputs). If the deletion tracking ledger references the workspace with standard `ON DELETE CASCADE`, deleting the workspace wipes the deletion execution row itself! This leaves administrators and auditors with no audit proof that the purge occurred, who authorized it, or how many artifacts were purged.
 
 ---
 

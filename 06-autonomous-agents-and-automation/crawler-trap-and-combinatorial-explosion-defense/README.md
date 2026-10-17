@@ -9,7 +9,7 @@
 
 ## 1. The Constraint
 
-Automated website crawlers face adversarial website architectures: infinite calendar widgets (clicking "Next Year" into infinity), faceted eCommerce search filters generating factorial query permutations (`?color=red&size=m&sort=asc...`), and deep cyclic URL structures. Without mathematical boundaries, crawlers run out of memory or DDoS target hosts.
+Automated website crawlers face adversarial website architectures: infinite calendar widgets (clicking "Next Year" into infinity), faceted eCommerce search filters generating factorial query permutations (`?color=red&size=m&sort=asc...`), and deep cyclic URL structures. Without explicit boundaries, crawlers run out of memory or DDoS target hosts.
 
 ---
 

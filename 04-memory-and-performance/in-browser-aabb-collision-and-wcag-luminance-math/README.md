@@ -30,7 +30,7 @@ Auditing responsive web pages for visual interface bugs—such as overlapping mo
    `L = 0.2126 * R + 0.7152 * G + 0.0722 * B` (with sRGB gamma expansion).
 2. **Axis-Aligned Bounding Box (AABB) 2D Intersection:** Evaluates 2D rectangle overlaps across `fixed`, `sticky`, and `absolute` elements in Chrome memory.
 3. **Ancestry Exclusion Invariant:** Checks `!a.contains(b) && !b.contains(a)` to ensure parent containers housing child elements are never falsely flagged as collisions.
-4. **Zero-Token Latency:** Computes all calculations directly inside Chrome's V8 engine via `page.evaluate()` in sub-50ms.
+4. **Local DOM Evaluation:** Computes all calculations directly inside Chrome's V8 engine via `page.evaluate()` without sending screenshots or prompt tokens to external models.
 
 ---
 
@@ -46,6 +46,6 @@ See [`src/geometry_analyzer.js`](./src/geometry_analyzer.js) for the isolated im
 |---|---|---|---|---|
 | Vision Model Prompt | Multi-second model inference | API token cost | Non-Deterministic | Dependent on screenshot resolution |
 | Canvas Pixel Diffing | Rasterization overhead | High compute (CPU/GPU) | Pixel threshold fragile | Baseline required |
-| **In-Browser Geometry & Math** | **Single execution tick** | **Zero API calls (DOM-native)** | **Deterministic math** | **Desktop & Mobile** |
+| **In-Browser Geometry & Math** | **Single execution tick** | **No external API calls (DOM-native)** | **Deterministic math** | **Desktop & Mobile** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._

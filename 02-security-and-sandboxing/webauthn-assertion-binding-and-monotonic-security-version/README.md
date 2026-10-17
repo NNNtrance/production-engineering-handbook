@@ -22,7 +22,7 @@ In administrative dashboards, step-up authentication tokens (proving a user rece
 3. **Atomic Consumption:** The assertion marker is marked `consumed_at = now()` in the same database transaction that elevates the session.
 4. **Monotonic Security Versioning:** Every administrator account carries a `security_version bigint`. Any password reset, 2FA rotation, or role update increments `security_version`. The middleware strictly compares:
    `if (marker.securityVersion !== account.securityVersion) return false;`
-   Instantly invalidating all elevated sessions fleet-wide with zero Redis sweeping.
+   Instantly invalidating all elevated sessions fleet-wide without scanning or deleting distributed session keys.
 
 ```sql
 -- 1. Staged WebAuthn assertion bound cryptographically to session, IP, and User-Agent

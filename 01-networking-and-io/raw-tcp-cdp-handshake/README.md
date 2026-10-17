@@ -19,7 +19,7 @@ To circumvent this, the desktop host process (Rust / OS layer) must perform the 
 ## 2. Why Naive Workarounds Fail
 
 1. **Heavy HTTP Client Crates (`reqwest`, `hyper`, `surf`):**
-   * Pulling in `reqwest` introduces 30+ transitive crates (async runtimes, connection pools, TLS backends like `native-tls` or `rustls`).
+   * Pulling in `reqwest` pulls in an async runtime, connection pool, and TLS stack (such as `native-tls` or `rustls`).
    * Increases release binary size by adding HTTP client and async/TLS runtime dependencies.
    * Introduces non-trivial initialization latency for what is fundamentally an ephemeral localhost probe.
 2. **Local Proxy Daemons:**
@@ -31,7 +31,7 @@ To circumvent this, the desktop host process (Rust / OS layer) must perform the 
 
 ## 3. The Architecture
 
-We eliminated external HTTP dependencies entirely by implementing a zero-overhead raw TCP HTTP/1.1 handshake using Rust's `std::net::TcpStream`:
+We eliminated external HTTP dependencies entirely by implementing a handcrafted raw TCP HTTP/1.1 handshake using Rust's `std::net::TcpStream`:
 
 1. **Direct Socket Connection:** `TcpStream::connect_timeout` connects to `127.0.0.1:9222` with an explicit timeout.
 2. **Handcrafted Frame:** A statically formatted minimal HTTP/1.1 request is written directly to the stream:
@@ -49,7 +49,7 @@ We eliminated external HTTP dependencies entirely by implementing a zero-overhea
 See [`src/main.rs`](./src/main.rs) for the complete implementation.
 
 ```rust
-// Handcrafted HTTP/1.1 frame (zero allocations, no reqwest/hyper bloat)
+// Handcrafted HTTP/1.1 frame without external HTTP dependencies
 let req = format!("GET /json HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n\r\n", addr_str);
 stream.write_all(req.as_bytes())?;
 
@@ -73,7 +73,7 @@ if let Some(pos) = resp_str.find("\r\n\r\n") {
 |---|---|---|---|
 | `reqwest` (Blocking) | Multiple dependencies (async/TLS runtime) | Increases binary footprint | TLS/pool initialization overhead |
 | `ureq` (Minimal) | Multiple dependencies | Adds crate dependencies | Minimal HTTP parser |
-| **Raw TCP (Handcrafted)** | **0 (Standard library only)** | **Zero added dependencies** | **Immediate exit on Content-Length framing** |
+| **Raw TCP (Handcrafted)** | **0 (Standard library only)** | **No added dependencies** | **Immediate exit on Content-Length framing** |
 
 _Qualitative comparison. Numbers appear only where a script in this folder measures them._
 

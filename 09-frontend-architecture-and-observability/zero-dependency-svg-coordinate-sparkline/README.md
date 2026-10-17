@@ -16,13 +16,13 @@ Rendering simple six-week audit finding trends in web dashboards often tempts de
 ---
 
 ## 3. The Architecture & Algorithmic Invariants
-1. **Pure ViewBox Vector Projection:** Computes SVG coordinates mathematically in 13 lines of TypeScript:
+1. **Pure ViewBox Vector Projection:** Computes SVG coordinates directly in 13 lines of TypeScript:
    * Maps time intervals across the X-axis: `36 + index * (484 / (length - 1))`.
    * Scales quantitative values on the inverted Y-axis: `210 - (count / max) * 160`.
 2. **Inline Polyline & Closed-Area Path Generation:**
    * Joins line coordinates using SVG path syntax: `${index ? 'L' : 'M'}${x},${y}`.
    * Closes the area under the curve to create a sleek gradient backdrop: `${line} L${endX},220 L36,220 Z`.
-3. **Zero Layout Shift (CLS 0.00):** Native SVG `viewBox="0 0 560 260"` ensures the browser's layout engine reserves exact aspect ratio dimensions immediately during initial HTML parsing.
+3. **Fixed ViewBox Aspect Ratio:** Native SVG `viewBox="0 0 560 260"` ensures the browser's layout engine reserves exact aspect ratio dimensions immediately during initial HTML parsing without client-side measurement.
 4. **Built-in Semantic Accessibility:** Implements `role="img"` with an `aria-label` describing findings trends, making the chart fully screen-reader accessible.
 
 ```typescript

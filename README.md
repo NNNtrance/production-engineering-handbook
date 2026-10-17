@@ -72,9 +72,9 @@ Browse the complete index of 67 case studies below. Click any problem to jump di
 
 ### 🧠 [4. Memory & Performance](#4-memory--performance)
 
-* [**How to reverse-scrape structured API responses in <10ms with zero prompt tokens directly from browser RAM?**](#ram-level-network-reverse-scraping)
-* [**How to audit responsive UI collisions and WCAG contrast in <50ms without vision models or screenshots?**](#in-browser-aabb-collision-and-wcag-luminance-math)
-* [**How to extract third-party network weight in <15ms directly from browser memory without TLS interception proxies?**](#in-browser-resource-timing-memory-extractor)
+* [**How to reverse-scrape structured API responses directly from browser RAM?**](#ram-level-network-reverse-scraping)
+* [**How to audit responsive UI collisions and WCAG contrast without vision models or screenshots?**](#in-browser-aabb-collision-and-wcag-luminance-math)
+* [**How to extract third-party network weight directly from browser memory without TLS interception proxies?**](#in-browser-resource-timing-memory-extractor)
 * [**How to eliminate linear OFFSET query degradation and scrub URL credentials in support ticketing ledgers?**](#keyset-pagination-cursor-credential-scrubbing)
 * [**How to eliminate zombie computations and memory leaks in fine-grained signals via dynamic dependency pruning?**](#reactive-signal-dependency-pruning)
 * [**How to eliminate Proxy trap overhead in reactive stores using Object.defineProperty descriptors and auto-syncing storage?**](#proxyless-reactive-store-descriptors)
@@ -93,7 +93,7 @@ Browse the complete index of 67 case studies below. Click any problem to jump di
 
 ### 🤖 [6. Autonomous Agents & Automation](#6-autonomous-agents--automation)
 
-* [**How to reduce multi-turn agent latency by 90% using atomic deterministic intent macros instead of brute-force LLM loops?**](#deterministic-intent-macros-vs-llm-loops)
+* [**How to reduce LLM round-trips using atomic deterministic intent macros instead of brute-force loops?**](#deterministic-intent-macros-vs-llm-loops)
 * [**How to neutralize crawler traps, infinite calendars, and combinatorial query explosions with bounded limits?**](#crawler-trap-and-combinatorial-explosion-defense)
 * [**How to build a fail-closed synthetic browser journey sandbox with network route interception and click mutation guards?**](#browser-synthetic-journey-sandbox-route-interception)
 
@@ -107,7 +107,7 @@ Browse the complete index of 67 case studies below. Click any problem to jump di
 ### 🚀 [8. DevOps & Disaster Recovery](#8-devops--disaster-recovery)
 
 * [**How to guarantee disaster recovery readiness by automatically verifying encrypted database restores in disposable containers?**](#automated-ephemeral-database-restore-validation)
-* [**How to mathematically verify container runtime drift and database migration checksums using SHA-256 Merkle trees?**](#production-runtime-drift-merkle-tree-verification)
+* [**How to verify container runtime drift and database migration checksums using SHA-256 Merkle trees?**](#production-runtime-drift-merkle-tree-verification)
 * [**How to retain durable forensic proof of GDPR tenant deletions using ON DELETE SET NULL decoupling?**](#durable-post-purge-audit-ledger-foreign-keys)
 * [**How to decouple CI/CD sticky comment permissions to keep test pipelines green on external fork pull requests?**](#github-actions-fork-permission-decoupling)
 * [**How to eliminate '/bin/sh^M: bad interpreter' container crashes with pre-flight byte-level LF unit tests?**](#automated-shell-script-byte-level-lf-audit)
@@ -115,7 +115,7 @@ Browse the complete index of 67 case studies below. Click any problem to jump di
 ### 🎨 [9. Frontend Architecture & Observability](#9-frontend-architecture--observability)
 
 * [**How to eliminate out-of-order UI flickers in SSE streams using an event-sourced progress reduction state machine?**](#event-sourced-progress-reduction-state-machine)
-* [**How to render 6-week trend sparklines in 13 lines of native SVG coordinate math with zero charting dependencies?**](#zero-dependency-svg-coordinate-sparkline)
+* [**How to render 6-week trend sparklines in 13 lines of native SVG coordinate math with no charting dependencies?**](#zero-dependency-svg-coordinate-sparkline)
 * [**How to bypass Virtual DOM diffing overhead by compiling reactive templates directly into imperative DOM operations?**](#compiler-direct-dom-codegen)
 * [**How to automatically resolve SSG, SSR, and CSR rendering strategies using ahead-of-time static AST inspection?**](#static-ast-render-strategy-resolution)
 * [**How to preserve pseudo-class specificity and prevent CSS animation corruption during scoped component style compilation?**](#scoped-css-pseudo-class-splicing)
@@ -133,9 +133,9 @@ Click on any engineering challenge below to jump directly to the case study, arc
 ### 🌐 1. Networking & Low-Level I/O
 <a id="raw-tcp-cdp-handshake"></a>
 * ### [👉 How to query CDP endpoints over raw TCP bypassing Chromium Private Network Access (PNA) and CORS without HTTP client bloat?](./01-networking-and-io/raw-tcp-cdp-handshake)
-  * **The Challenge:** Embedded WebViews block `127.0.0.1:9222` due to Chromium Private Network Access (PNA) and CORS boundaries. Pulling `reqwest` adds 34+ transitive crates, TLS stacks, and ~4.1 MB to the binary.
+  * **The Challenge:** Embedded WebViews block `127.0.0.1:9222` due to Chromium Private Network Access (PNA) and CORS boundaries. Pulling `reqwest` pulls in an async runtime, connection pool, and TLS stack.
   * **The Engineering Fix:** Handcrafted HTTP/1.1 framing over raw `std::net::TcpStream` in Rust with in-flight `Content-Length` stream early exit.
-  * **Outcome:** Handcrafted HTTP/1.1 framing over raw TCP stream, zero external HTTP dependencies, early-exit on Content-Length completion.
+  * **Outcome:** Handcrafted HTTP/1.1 framing over raw TCP stream, no external HTTP dependencies, early-exit on Content-Length completion.
 
 <a id="client-disconnect-socket-abort-cascade"></a>
 * ### [👉 How to cascade client TCP disconnects to immediately splice queued tasks and abort long-running Chromium workers?](./01-networking-and-io/client-disconnect-socket-abort-cascade)
@@ -266,7 +266,7 @@ Click on any engineering challenge below to jump directly to the case study, arc
 <a id="hardware-collision-avoidance-yield"></a>
 * ### [👉 How to eliminate hardware mouse and keyboard race conditions between humans and autonomous web agents?](./03-concurrency-and-race-conditions/hardware-collision-avoidance-yield)
   * **The Challenge:** In co-pilot desktop automation, synthetic CDP clicks dispatched while a human simultaneously touches their physical mouse cause coordinate shifts, input focus loss, and state corruption.
-  * **The Engineering Fix:** Zero-overhead passive DOM event traps (`mousemove`, `keydown` with `{ passive: true }`) with an adaptive 1800ms debounce that dynamically yields the agent's execution loop until physical human interaction ceases.
+  * **The Engineering Fix:** Passive DOM event traps (`mousemove`, `keydown` with `{ passive: true }`) with an adaptive 1800ms debounce that dynamically yields the agent's execution loop until physical human interaction ceases.
   * **Outcome:** Monitors physical input timestamps and yields automation steps when physical user activity is detected.
 
 <a id="postgres-advisory-lock-last-super-admin-race"></a>
@@ -377,7 +377,7 @@ Click on any engineering challenge below to jump directly to the case study, arc
 <a id="audio-dsp-biquad-slew-rate-smoothing"></a>
 * ### [👉 How to eliminate digital popping and audio driver clicks in real-time 10-band equalizers via slew-rate smoothing?](./04-memory-and-performance/audio-dsp-biquad-slew-rate-smoothing)
   * **The Challenge:** Abruptly updating IIR biquad filter transfer functions mid-stream produces discontinuous waveform step changes that sound like loud digital clicks and can damage speakers.
-  * **The Engineering Fix:** Frame-bounded geometric coefficient slew interpolation: decamates updates to 128-frame blocks (~2.9ms at 44.1kHz), converging gains geometrically by 12% per step with dynamic preamp headroom compensation.
+  * **The Engineering Fix:** Frame-bounded geometric coefficient slew interpolation: decimates updates to 128-frame blocks (~2.9ms at 44.1kHz), converging gains geometrically by 12% per step with dynamic preamp headroom compensation.
   * **Outcome:** Interpolates biquad filter coefficients across 128-sample blocks (44,100 / 128 ≈ 344 updates/s) to eliminate audible audio clicks.
 
 <a id="semver-versionless-packagemanager-guard"></a>
@@ -429,7 +429,7 @@ Click on any engineering challenge below to jump directly to the case study, arc
 
 ### 🤖 6. Autonomous Agents & Automation
 <a id="deterministic-intent-macros-vs-llm-loops"></a>
-* ### [👉 How to compile multi-turn browser agent tasks into atomic intent macros instead of brute-force LLM loops?](./06-autonomous-agents-and-automation/deterministic-intent-macros-vs-llm-loops)
+* ### [👉 How to reduce LLM round-trips using atomic deterministic intent macros instead of brute-force loops?](./06-autonomous-agents-and-automation/deterministic-intent-macros-vs-llm-loops)
   * **The Challenge:** Brute-force N-turn agent loops take repeated LLM turns, incurring roundtrip latency and token overhead while failing on dynamic Single Page Applications.
   * **The Engineering Fix:** Client-side atomic intent macros (`searchAndSelect`) that detect platform target inputs and evaluate layout geometry (`getBoundingClientRect()` and `offsetParent !== null`) to execute search, centering, and click dispatch in a single evaluation tick.
   * **Outcome:** Compiles multi-step browser tasks into single-turn atomic intent macros executed deterministically in client-side DOM.
@@ -437,7 +437,7 @@ Click on any engineering challenge below to jump directly to the case study, arc
 <a id="crawler-trap-and-combinatorial-explosion-defense"></a>
 * ### [👉 How to neutralize crawler traps, infinite calendars, and combinatorial query explosions with bounded limits?](./06-autonomous-agents-and-automation/crawler-trap-and-combinatorial-explosion-defense)
   * **The Challenge:** Autonomous crawlers get trapped in adversarial website topologies: infinite forward-clicking calendar widgets (`/events/2099/12`), faceted search filter matrix explosions generating millions of permutations, and recursive sitemap bombs.
-  * **The Engineering Fix:** Mathematical boundary invariants: `maxCalendarYearDrift: 5` severs infinite date links, path depth clamped to 16, query parameter variants capped at 5 per unique path, and sitemap streams bounded to 8 MB and depth 3.
+  * **The Engineering Fix:** Hard boundary limits: `maxCalendarYearDrift: 5` severs infinite date links, path depth clamped to 16, query parameter variants capped at 5 per unique path, and sitemap streams bounded to 8 MB and depth 3.
   * **Outcome:** Clamps query parameter variants to 5, limits path depth to 16, and caps calendar year drift to 5 years.
 
 <a id="browser-synthetic-journey-sandbox-route-interception"></a>
@@ -483,7 +483,7 @@ Click on any engineering challenge below to jump directly to the case study, arc
   * **Outcome:** Validates backup checksums, decrypts into an ephemeral database, checks schema row counts, and cleans up temporary resources on exit.
 
 <a id="production-runtime-drift-merkle-tree-verification"></a>
-* ### [👉 How to mathematically verify container runtime drift and database migration checksums using SHA-256 Merkle trees?](./08-devops-and-disaster-recovery/production-runtime-drift-merkle-tree-verification)
+* ### [👉 How to verify container runtime drift and database migration checksums using SHA-256 Merkle trees?](./08-devops-and-disaster-recovery/production-runtime-drift-merkle-tree-verification)
   * **The Challenge:** Deploying Docker images without deterministic verification introduces silent container drift: hot-fixes applied via `docker exec`, omitted configuration files, or database migration files altered post-deployment.
   * **The Engineering Fix:** Recursive SHA-256 Merkle tree manifest audit comparing source vs container runtime directories, classified by `.dockerignore` rule buckets, paired with cryptographic verification of live PostgreSQL `wpa_schema_migrations` checksum ledgers.
   * **Outcome:** Computes SHA-256 Merkle directory trees to detect modified container files and compares SQL migration files against database checksums.
@@ -518,7 +518,7 @@ Click on any engineering challenge below to jump directly to the case study, arc
 <a id="zero-dependency-svg-coordinate-sparkline"></a>
 * ### [👉 How to render 6-week trend sparklines in 13 lines of native SVG coordinate math with no charting dependencies?](./09-frontend-architecture-and-observability/zero-dependency-svg-coordinate-sparkline)
   * **The Challenge:** Pulling heavy charting libraries (Recharts, Chart.js, D3) adds bundle size and causes hydration layout shift (CLS) as libraries asynchronously measure container dimensions.
-  * **The Engineering Fix:** 13-line zero-dependency SVG sparkline component. Computes viewBox coordinate projections mathematically in pure React JSX, generating smooth polyline paths and closed-area backdrops with native accessibility.
+  * **The Engineering Fix:** 13-line zero-dependency SVG sparkline component. Computes viewBox coordinate projections directly in pure React JSX, generating smooth polyline paths and closed-area backdrops with native accessibility.
   * **Outcome:** Renders trend lines using a 13-line SVG coordinate math component with fixed viewBox aspect ratios and no external charting packages.
 
 <a id="compiler-direct-dom-codegen"></a>

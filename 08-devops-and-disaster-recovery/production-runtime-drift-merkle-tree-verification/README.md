@@ -16,7 +16,7 @@ Deploying container images without deterministic verification introduces "runtim
 ## 2. Why Naive Workarounds Fail
 
 1. **Trusting Docker Image Tags (`:latest / :v1.0.0`):**
-   * Tags are mutable and provide zero cryptographic guarantee regarding what exact code is executing inside running containers.
+   * Tags are mutable and provide no cryptographic guarantee regarding what exact code is executing inside running containers.
 2. **Manual File Inspection (`docker exec diff`):**
    * Incomplete and error-prone; fails to account for `.dockerignore` exclusions, symlinks, or database schema migration ledgers.
 3. **Database Migration State Discrepancies:**

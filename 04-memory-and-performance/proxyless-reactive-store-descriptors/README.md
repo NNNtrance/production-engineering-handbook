@@ -20,7 +20,7 @@ Global state management libraries often rely on ES6 `Proxy` objects or Redux-sty
 2. **Dynamic Context Descriptors:** `Object.defineProperty(context, key, ...)` defines getters and setters on the action `this` context:
    * Reading `this.count` calls `get()`.
    * Mutating `this.count = 5` calls `store.setCount(5)`.
-3. **Zero Proxy Overhead:** Operations execute as direct function calls and native V8 property lookups without proxy trapping.
+3. **Direct Property Descriptors (No Proxy):** Operations execute as direct function calls and native V8 property lookups without proxy trapping.
 4. **Integrated Storage Persistence:** When `persist: 'local' | 'session'` is configured, setter invocations automatically serialize state snapshots to web storage.
 
 ```typescript

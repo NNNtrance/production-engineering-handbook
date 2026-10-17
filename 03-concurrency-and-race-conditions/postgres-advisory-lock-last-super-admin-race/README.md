@@ -29,7 +29,7 @@ A critical system invariant requires that at least one active `super_admin` must
 1. **Statement-Level Transaction Advisory Lock:** Migration 041 installs a statement-level trigger acquiring `pg_advisory_xact_lock(hashtext('wpa:privileged-role-management'))` BEFORE any UPDATE or DELETE statement executes.
 2. **Deterministic Serialization:** Concurrent mutations on the admin set are strictly serialized before row evaluation begins.
 3. **Fail-Closed Row Guard:** Migration 040's row trigger evaluates the active super admin count. The first transaction succeeds; the competing transaction evaluates the newly committed state, detects 0 remaining super admins, and raises SQLSTATE `23514` (`LAST_SUPER_ADMIN_REQUIRED`).
-4. **Automatic Lock Release:** Advisory transaction locks release automatically upon transaction commit or rollback, leaving zero orphaned lock state.
+4. **Automatic Lock Release:** Advisory transaction locks release automatically upon transaction commit or rollback, leaving no orphaned locks.
 
 ---
 

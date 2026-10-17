@@ -26,7 +26,7 @@ Headless Chromium executing arbitrary third-party JavaScript is a high-value RCE
 
 ## 3. The Architecture
 
-1. **Zero-Tolerance Sandbox Enforcer:** Worker entrypoint explicitly rejects boot if `CHROME_NO_SANDBOX` is set to any truthy value.
+1. **Fail-Closed Sandbox Enforcer:** Worker entrypoint explicitly rejects boot if `CHROME_NO_SANDBOX` is set to any truthy value.
 2. **Helper Binary Verification:** Validates that `/usr/lib/chromium/chrome-sandbox` is root-owned with the setuid bit active (`mode & 0o4000`), followed by a headless probe on `about:blank`.
 3. **Pinned Seccomp Profile:** Applies a SHA-256 verified Microsoft Playwright Seccomp profile with `SCMP_ACT_ERRNO` deny-by-default, dropping all capabilities (`cap_drop: ALL`), `read_only` root FS, and `no-new-privileges`.
 4. **Strict Secret Boundary:** `FORBIDDEN_WORKER_SECRETS` inspects environment variables on boot and immediately crashes if any auth, payment, or admin DB secrets are detected.

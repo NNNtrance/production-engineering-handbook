@@ -27,4 +27,4 @@ _Qualitative comparison. Numbers appear only where a script in this folder measu
 ---
 
 ## 5. Implementation
-See production-grade implementation in [`src/association_link_normalizer.java`](./src/association_link_normalizer.java).
+See Full implementation in [`src/association_link_normalizer.java`](./src/association_link_normalizer.java).

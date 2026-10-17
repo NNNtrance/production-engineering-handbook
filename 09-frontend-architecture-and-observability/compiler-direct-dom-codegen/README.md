@@ -19,7 +19,7 @@ Traditional Virtual DOM frameworks (like React) represent component templates as
 1. **Compiler-First Transformation:** FluxDOM's template transformer compiles `.flow` components directly into imperative browser DOM calls (`createElement`, `createText`, `insert`).
 2. **Fine-Grained Attribute Effects:** Compiles dynamic bindings (`:class="active ? 'on' : 'off'"`) into isolated `createEffect` closures. When `active` changes, only the single `setAttribute` call executes; no parent or child elements are touched.
 3. **Surgical Text Node Mutation:** Reactive text interpolations (`{count}`) compile into an initial `createText('')` and an effect updating `text.nodeValue`.
-4. **Zero-Diffing Runtime:** Eliminates Virtual DOM libraries entirely, yielding microscopic bundle sizes and instant update dispatch.
+4. **Diffing-Free Runtime:** Eliminates Virtual DOM tree diffing entirely, dispatching state changes directly to fine-grained DOM mutation effects.
 
 ```typescript
 // 1. Compiling static elements into direct DOM creation operations

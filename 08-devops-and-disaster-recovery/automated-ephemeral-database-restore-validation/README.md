@@ -30,7 +30,7 @@
 2. **Integrity & Decryption Pipeline:** Automatically validates `sha256sum --check` and decrypts `age` encrypted backups into temporary RAM dumps.
 3. **Disposable Database Provisioning:** Generates an isolated ephemeral PostgreSQL database (`wpa_restore_check_${timestamp}`) and restores with `--exit-on-error`.
 4. **Automated Schema & Entity Assertions:** Queries row counts across core tables (`wpa_schema_migrations`, `wpa_workspaces`, `wpa_reports`) to assert semantic integrity.
-5. **Trap-Based Guaranteed Cleanup:** POSIX shell `trap cleanup EXIT HUP INT TERM` ensures the temporary database and decrypted files are destroyed upon completion or failure, leaving zero disk residue.
+5. **Trap-Based Guaranteed Cleanup:** POSIX shell `trap cleanup EXIT HUP INT TERM` ensures the temporary database and decrypted files are destroyed upon completion or failure, leaving no residual temporary files.
 
 ---
 

@@ -26,7 +26,7 @@ Implementing sliding-window rate limiting across distributed containerized worke
 
 ## 3. The Architecture
 
-1. **Atomic Upsert Mathematical Invariant:** Executes an atomic `INSERT ... ON CONFLICT (namespace, key) DO UPDATE` in a single database roundtrip.
+1. **Atomic Upsert Invariant:** Executes an atomic `INSERT ... ON CONFLICT (namespace, key) DO UPDATE` in a single database roundtrip.
 2. **In-Database Window Evaluation:** Evaluates whether `window_started_at` has exceeded the sliding duration directly inside SQL `CASE` expressions:
    * If the window expired: Resets `window_started_at` to `now()` and sets `hits` to 1.
    * If the window is active: Retains `window_started_at` and increments `hits + 1`.
