@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to the **Production Engineering Handbook**! 
 
-This repository is a curated, domain-driven cookbook of real-world systems engineering solutions, non-trivial architectural decisions, and zero-slop implementations extracted from active production codebases.
+This repository is a curated, domain-driven cookbook of real-world systems engineering solutions, non-trivial architectural decisions, and zero-slop implementations extracted from real-world projects (including WebPageAnalyz, FluxDOM, and PlantUML).
 
 To maintain the highest engineering standards and ensure newly submitted problems blend seamlessly alongside the existing 67 case studies, all contributions must strictly follow this guide.
 
@@ -14,7 +14,7 @@ To maintain the highest engineering standards and ensure newly submitted problem
 1. **Hard Systems Constraints:** Edge cases in low-level runtimes, compiler ASTs, real-time audio DSP, socket-level security, database concurrency races, or distributed consensus.
 2. **Post-Mortem Root Cause Analysis:** Explaining *why* standard approaches failed (e.g. why DNS rebinding bypasses URL checks, why biquad filter swaps cause audio pops, why VDOM diffing allocates ephemeral VNodes).
 3. **Pragmatic, Zero-Slop Architecture:** Solutions implemented with minimal abstraction overhead, following the pragmatic principles of Andrej Karpathy and John Carmack.
-4. **Concrete Benchmarks:** Mathematical proofs, timing benchmarks, memory profiles, or test suites proving the fix.
+4. **Verified Invariants & Benchmarks:** Concrete behavioral comparisons, test suites, or reproducible benchmarks proving the fix.
 
 ### ❌ What Will Be Rejected
 * Generic tutorial code ("How to create a REST API", "How to use React hooks", "How to connect to PostgreSQL").
@@ -58,7 +58,7 @@ Your case study's `README.md` must adhere strictly to these 5 sections:
 # Case Study: <Concise Technical Problem Title>
 
 ## 1. The Engineering Constraint
-Explain the hard technical problem, edge cases, and real-world failure mode under production load. Use numbered lists.
+Explain the hard technical problem, edge cases, and real-world failure mode under load. Use numbered lists.
 
 ## 2. Why Naive Workarounds Fail
 Analyze why common high-level developer workarounds break (e.g. timeout races, memory leaks, unhandled exceptions, security vulnerabilities).
@@ -66,12 +66,13 @@ Analyze why common high-level developer workarounds break (e.g. timeout races, m
 ## 3. The Architecture
 Detail the low-level architectural fix with code snippets, algorithms, and invariant guarantees.
 
-## 4. Benchmarks & Validation
-Provide a comparative Markdown table comparing the naive approach vs your production architecture across latency, memory, reliability, and security metrics.
+## 4. Behavior Comparison & Validation
+Provide a Markdown table comparing the naive approach vs your architecture across verified behaviors and failure modes. Numbers appear only where accompanied by a reproducible script in `bench/` or `test/` (or an explicit mathematical derivation). Append the note:
+`_Qualitative comparison. Numbers appear only where a script in this folder measures them._`
 
 ## 5. Implementation
 Link directly to the runnable source code in `src/`:
-See production-grade implementation in [`src/<file-name>`](./src/<file-name>).
+See implementation in [`src/<file-name>`](./src/<file-name>).
 ```
 
 ---
@@ -97,10 +98,10 @@ Every case study must include a visual code snapshot in `assets/code-card.png`:
 2. **Build Your Directory:** Add your case under the appropriate domain category following the structure above.
 3. **Update Root Index:** Add your problem to:
    - The Quick Problem Index at the top of the root `README.md`.
-   - The detailed domain section in the root `README.md` with problem summary, fix, and metrics.
+   - The detailed domain section in the root `README.md` with problem summary, fix, and outcome.
 4. **Submit a Pull Request:**
    - PR Title format: `feat: add <problem-name> case study to <category>`
-   - In your PR description, explain the production environment where this problem occurred and why it is significant.
+   - In your PR description, explain the real-world constraint where this problem occurred and why it is significant.
 5. **Review & Revision:** We review every PR collaboratively. If revisions are requested, address feedback on your branch. Once approved, your case study will be merged into the handbook!
 
 Thank you for contributing to open engineering knowledge!
