@@ -51,12 +51,14 @@ FOR EACH ROW EXECUTE FUNCTION wpa_user_plan_changes_immutable();
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Commercial Audit Model | Historical Plan Provenance | Tampering Protection | Webhook Replay Defense |
 |---|---|---|---|
 | In-Place `UPDATE` | Lost (Overwritten) | None | Vulnerable |
 | Application-Layer Log | Partial | Bypassed via Direct SQL | Software Enforced |
-| **Engine-Level Immutable Ledger** | **100% Retained (Before/After)** | **Enforced (SQLSTATE 55000)** | **UNIQUE Idempotency Key** |
+| **Engine-Level Immutable Ledger** | **Preserved (Full Before/After history)** | **Engine-enforced (SQLSTATE 55000 aborts UPDATE/DELETE)** | **Unique constraint deduplication** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

@@ -38,10 +38,12 @@ See [`src/webhook_verifier.js`](./src/webhook_verifier.js) for the isolated impl
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Webhook Verification Model | Side-Channel Timing Leak | Replay Attack Window | Out-of-Order Safety |
 |---|---|---|---|
 | String Equality (`===`) | Vulnerable (Early Exit) | Indefinite | None |
 | Loose Timestamp Check | Vulnerable | Hours / Days | None |
-| **Timing-Safe + 5s Fence** | **Zero Leak (crypto.timingSafeEqual)** | **Strict 5 Seconds** | **Guaranteed Monotonic** |
+| **Timing-Safe + 5s Fence** | **Protected (crypto.timingSafeEqual)** | **Bounded (5-second timestamp window)** | **Monotonic event timestamp sequencing** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._

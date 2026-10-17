@@ -48,12 +48,14 @@ function assertStripeWebhookEnvironment(event, config) {
 
 ---
 
-## 4. Benchmark & Architectural Invariants
+## 4. Behavior Comparison
 | Stripe Webhook Validation | Signature Integrity | Test-Mode Event Replay | Cross-Account Connect Fencing |
 |---|---|---|---|
 | Naive `constructEvent()` | Validated | Vulnerable (Provisions Paid Plan) | Vulnerable |
 | Environment Variable Check | Partial | Vulnerable | Missing |
 | **Strict Environment & Account Fence** | **Validated** | **Rejected (HTTP 400 MISMATCH)** | **Enforced (HTTP 400 MISMATCH)** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
 
 ---
 

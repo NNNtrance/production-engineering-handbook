@@ -3,7 +3,7 @@
 > **Domain:** Fintech & Billing Invariants  
 > **Source Project:** `WebPageAnalyz (Billing Core)`  
 > **Language:** PostgreSQL / Node.js  
-> **Key Metric:** `0 duplicate checkout intents, atomic rollback on audit failure`  
+> **Key Metric:** Unique index deduplication of active checkout intents, atomic rollback on audit failure
 
 ---
 
@@ -38,10 +38,12 @@ See [`src/checkout_idempotency.sql`](./src/checkout_idempotency.sql) for the iso
 
 ---
 
-## 5. Benchmarks & Results
+## 5. Behavior Comparison
 
 | Billing Protection Model | Double-Click Protection | Multi-Tab Race Safety | Audit Guarantee |
 |---|---|---|---|
 | UI Button Disabled | Fragile (Network Bypass) | Vulnerable | None |
 | Full Unique Constraint | Protected | Blocks Future Renewals | None |
-| **Partial Unique Index + Lease** | **100% Deterministic** | **100% Deterministic** | **Strict Transactional Rollback** |
+| **Partial Unique Index + Lease** | **Database-enforced index deduplication** | **Serialized active intents via lease** | **Strict Transactional Rollback** |
+
+_Qualitative comparison. Numbers appear only where a script in this folder measures them._
