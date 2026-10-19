@@ -4,7 +4,7 @@
 
 A curated, domain-driven cookbook of low-level systems engineering solutions, non-trivial architectural decisions, and working implementations drawn from my own projects (such as WebPageAnalyz and FluxDOM) and open-source contributions (such as PlantUML, npm-check-updates, and YamlDotNet).
 
-📖 **Read it as a book:** [handbook.onuracar.dev](https://handbook.onuracar.dev) renders these same READMEs as nine books on a shelf. The site is built from this repo's markdown ([`site/`](./site)), so nothing is written twice.
+📖 **Read it as a book:** [handbook.onuracar.dev](https://handbook.onuracar.dev) renders these same READMEs as books on a shelf, one per domain. The site is built from this repo's markdown ([`site/`](./site)), so nothing is written twice.
 
 ---
 
@@ -585,7 +585,7 @@ Have you solved a hard, non-trivial systems engineering problem? We welcome cont
 
 ### 🎯 The Engineering Bar
 * **No Trivial Boilerplate:** Submissions must tackle genuine, hard systems constraints (memory leaks, race conditions, parser edge cases, kernel/socket invariants, cryptographically secure guarantees). Generic tutorials ("How to use useState", "How to connect to MongoDB") will be rejected.
-* **Domain-Driven Taxonomy:** Submissions must fit into one of the 9 defined domain categories (`01` to `09`).
+* **Domain-Driven Taxonomy:** Submissions must fit into one of the existing domain categories. Pull requests cannot add a new domain; propose one in an issue first.
 * **Strict Architecture Breakdown:** Every case study must include a comprehensive `README.md` following our uniform section specification.
 * **Runnable/Verifiable Code:** Every case must include isolated source code in `src/`.
 * **Standard Code Card:** Every case must include a 1000x750 raw VS Code editor crop in `assets/code-card.png`.

@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import Shelf from './Shelf.jsx';
 import Reader from './Reader.jsx';
 import { useBook } from './useBook.js';
-import { REPO, ROMAN } from './config.js';
+import { REPO, ROMAN, countWord } from './config.js';
 
 export default function App() {
   const [books, setBooks] = useState([]);
-  const [caption, setCaption] = useState('nine books, one per domain');
+  const [caption, setCaption] = useState(null);
   const [curBook, setCurBook] = useState(-1);
   const [theme, setTheme] = useState(() => {
     try {
@@ -83,8 +83,8 @@ export default function App() {
             The <em>Handbook</em>
           </h1>
           <p className="lede">
-            {totalCases || 67} problems I ran into while building my own projects and contributing
-            to open source, filed into nine books. Pull one off the shelf.
+            {totalCases || __CASE_COUNT__} problems I ran into while building my own projects and contributing
+            to open source, filed into {books.length ? countWord(books.length) : __BOOK_COUNT_WORD__} books. Pull one off the shelf.
           </p>
         </header>
 
@@ -96,7 +96,7 @@ export default function App() {
         />
 
         <p className="caption" id="caption" aria-live="polite">
-          {caption}
+          {caption ?? `${books.length ? countWord(books.length) : __BOOK_COUNT_WORD__} books, one per domain`}
         </p>
 
         <p className="foot">

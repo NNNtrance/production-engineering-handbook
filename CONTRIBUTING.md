@@ -26,11 +26,11 @@ To maintain the highest engineering standards and ensure newly submitted problem
 
 ## 📁 2. Directory & File Hierarchy Standard
 
-Every new case study must live inside one of the 9 domain directories and follow this exact layout:
+Every new case study must live inside one of the existing domain directories and follow this exact layout:
 
 ```
 <domain-category>/<kebab-case-slug>/
-├── README.md           # 5-section technical breakdown
+├── README.md           # Sectioned breakdown (see section 3)
 ├── src/                # Self-contained runnable or verifiable source code
 │   └── <source-file>   # e.g., buffer_swap.rs, jwt_engine.ts, route_compiler.ts
 └── assets/
@@ -47,6 +47,8 @@ Every new case study must live inside one of the 9 domain directories and follow
 * `07-fintech-and-billing-invariants/` — Partial unique indexes, timing-safe webhooks, append-only triggers
 * `08-devops-and-disaster-recovery/` — Automated DB restore verification, Merkle trees, CI/CD permission isolation
 * `09-frontend-architecture-and-observability/` — Compilers, reactive stores, AST transforms, time-travel history
+
+**Pull requests cannot add a new domain.** Pick the closest existing one. If your problem genuinely fits none of them, open an issue proposing the domain before sending the case study. New domains are added by the maintainer (see [Adding a domain](#-adding-a-domain-maintainers)).
 
 ---
 
@@ -112,5 +114,21 @@ Every case study must include a visual code snapshot in `assets/code-card.png`:
    - PR Title format: `feat: add <problem-name> case study to <category>`
    - In your PR description, explain the real-world constraint where this problem occurred and why it is significant.
 5. **Review & Revision:** We review every PR collaboratively. If revisions are requested, address feedback on your branch. Once approved, your case study will be merged into the handbook!
+
+The [handbook site](https://handbook.onuracar.dev) is rebuilt from the markdown on every merge, so your case appears there without extra work. Before opening the PR you can check that the site still builds: `cd site && npm install && npm run build`. The build stops with a message if a section, the `src/` file, or the Quick Index entry is missing.
+
+---
+
+## 🗂 Adding a domain (maintainers)
+
+New domains are a maintainer decision (see the rule above). The site build checks each step and fails with a message if one is missing:
+
+1. Create the folder `NN-kebab-case-name/` with the next number.
+2. Add it to the directory tree at the top of the root `README.md` with a `# short description` comment. The site uses that comment as the book's subtitle.
+3. Add a heading to the Quick Problem Index in the same format as the others, `### <emoji> [NN. Domain Name](#anchor)`, plus the matching detailed section and its `<a id>` anchor.
+4. Add one line to `SPINE` (spine label and colours) and one height to `HEIGHTS` in `site/src/config.js`.
+5. Add the folder to the domain list in this file.
+
+The shelf wraps onto extra rows by itself when the books no longer fit, and every count on the site comes from the data.
 
 Thank you for contributing to open engineering knowledge!

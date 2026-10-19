@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SPINE, HEIGHTS, ROMAN } from './config.js';
+import { SPINE, HEIGHTS, ROMAN, countWord } from './config.js';
 
 function ShelfDefs() {
   return (
@@ -203,6 +203,58 @@ function Spine({ i, book, x, base, w, h, lean, isPulled, onSelect, onHover, onFo
   );
 }
 
+// Shelf geometry per layout. A spine is `base + cases * perCase` wide (capped at maxW),
+// so books get thicker as case studies are added. A row may grow up to `stretch` times
+// the base width (the whole drawing scales down to fit) before books move to a new row.
+const GEOMETRY = {
+  desktop: { W: 1000, RH: 390, k: 1, base: 40, perCase: 5.4, maxW: 170, gap: 4, stretch: 1.7 },
+  phone: { W: 440, RH: 260, k: 0.72, base: 30, perCase: 3.6, maxW: 110, gap: 3, stretch: 1 },
+};
+// Room the planks need beyond the books (plank overhang plus a small margin).
+const frame = (g) => 86 * g.k + 24;
+const LEAN = 7;
+
+function spineWidth(g, book) {
+  return Math.min(g.maxW, Math.round(g.base + (book?.cases?.length || 0) * g.perCase));
+}
+
+// Width a row needs: bookend on the first row, leaning last book and plant on the last row.
+function rowWidth(g, books, row, first, last) {
+  const spines = row.reduce((sum, i) => sum + spineWidth(g, books[i]), 0) + g.gap * (row.length - 1);
+  const lastH = (HEIGHTS[row[row.length - 1]] || 260) * g.k;
+  const leanX = last ? lastH * Math.sin((LEAN * Math.PI) / 180) : 0;
+  return (first ? 12 * g.k : 0) + spines + (last ? leanX + 92 * g.k : 0);
+}
+
+// Splits books (in order) into the fewest rows that fit the shelf, balancing the
+// rows so the widest one is as narrow as possible.
+function layoutRows(g, books) {
+  const n = books.length;
+  const budget = g.W * g.stretch - frame(g);
+  for (let rows = 1; rows <= n; rows++) {
+    const memo = new Map();
+    const best = (start, left) => {
+      const key = start * 100 + left;
+      if (memo.has(key)) return memo.get(key);
+      let result = { cost: Infinity, rows: [] };
+      const first = start === 0, last = left === 1;
+      const maxEnd = last ? n : n - left + 1;
+      for (let end = last ? n : start + 1; end <= maxEnd; end++) {
+        const row = Array.from({ length: end - start }, (_, j) => start + j);
+        const own = rowWidth(g, books, row, first, last);
+        const rest = last ? { cost: 0, rows: [] } : best(end, left - 1);
+        const cost = Math.max(own, rest.cost);
+        if (cost < result.cost) result = { cost, rows: [row, ...rest.rows] };
+      }
+      memo.set(key, result);
+      return result;
+    };
+    const plan = best(0, rows);
+    if (plan.cost <= budget) return plan.rows;
+  }
+  return books.map((_, i) => [i]);
+}
+
 export default function Shelf({ books, onOpenBook, curBook = -1, onHoverBook }) {
   const [phone, setPhone] = useState(false);
 
@@ -216,38 +268,35 @@ export default function Shelf({ books, onOpenBook, curBook = -1, onHoverBook }) 
 
   if (!books || books.length === 0) return null;
 
-  const rows = phone ? [[0, 1, 2, 3, 4], [5, 6, 7, 8]] : [[0, 1, 2, 3, 4, 5, 6, 7, 8]];
-  const W = phone ? 440 : 1000;
-  const RH = phone ? 260 : 390;
-  const k = phone ? 0.72 : 1;
+  const g = phone ? GEOMETRY.phone : GEOMETRY.desktop;
+  const { RH, k, gap } = g;
+  const rows = layoutRows(g, books);
   const H = rows.length * RH + (phone ? 60 : 70);
+  // With several rows every plank spans the widest row, so it reads as one bookcase.
+  const widest = Math.max(...rows.map((row, r) => rowWidth(g, books, row, r === 0, r === rows.length - 1)));
+  // The drawing widens with the shelf; the SVG keeps its page width, so it scales down.
+  const W = Math.max(g.W, Math.ceil(widest + frame(g)));
 
   return (
     <div id="shelf" className="shelf">
       <svg
         viewBox={`0 0 ${W} ${H}`}
         role="group"
-        aria-label="Bookshelf with nine books"
+        aria-label={`Bookshelf with ${countWord(books.length)} books`}
       >
         <ShelfDefs />
         {rows.map((row, r) => {
           const base = (r + 1) * RH;
-          const widths = row.map((i) =>
-            Math.round((phone ? 30 : 40) + (books[i]?.cases?.length || 0) * (phone ? 3.6 : 5.4))
-          );
-          const gap = phone ? 3 : 4;
+          const widths = row.map((i) => spineWidth(g, books[i]));
           const first = r === 0;
           const last = r === rows.length - 1;
-          const lastH = (HEIGHTS[row[row.length - 1]] || 260) * k;
-          const leanX = last ? lastH * Math.sin((7 * Math.PI) / 180) : 0;
           const endW = first ? 12 * k : 0;
-          const plantW = last ? 92 * k : 0;
-          const total =
-            endW + widths.reduce((a, b) => a + b, 0) + gap * (row.length - 1) + leanX + plantW;
-          let currentX = (W - total) / 2;
+          // Books start at the left of the bookcase; the plant stays at the far right.
+          const x0 = (W - widest) / 2;
+          let currentX = x0;
 
-          const plankX1 = Math.max(10, currentX - 46 * k);
-          const plankX2 = Math.min(W - 10, currentX + total + 40 * k);
+          const plankX1 = Math.max(10, x0 - 46 * k);
+          const plankX2 = Math.min(W - 10, x0 + widest + 40 * k);
 
           const bookendX = currentX;
           if (first) {
@@ -260,7 +309,7 @@ export default function Shelf({ books, onOpenBook, curBook = -1, onHoverBook }) 
             return pos;
           });
 
-          const plantX = currentX + leanX + 36 * k;
+          const plantX = x0 + widest - 56 * k;
 
           return (
             <React.Fragment key={`row-${r}`}>
@@ -268,7 +317,7 @@ export default function Shelf({ books, onOpenBook, curBook = -1, onHoverBook }) 
               {first && <Bookend x={bookendX} y={base} k={k} />}
               <g filter="url(#drop)">
                 {bookPositions.map(({ bi, x, w }, j) => {
-                  const lean = last && j === row.length - 1 ? 7 : 0;
+                  const lean = last && j === row.length - 1 ? LEAN : 0;
                   const h = Math.round((HEIGHTS[bi] || 260) * k);
                   return (
                     <Spine
